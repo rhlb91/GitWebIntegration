@@ -27,6 +27,12 @@ public class Constants {
 	public static final String baseFolder = "baseFolder";
 	public static final String baseFolder$ = "${" + baseFolder + "}";
 
+	public static final String CONFIG_GITBLIT = "gitblit";
+	
+	public static final String ISO8601 = "yyyy-MM-dd'T'HH:mm:ssZ";
+	
+	public static final String CONFIG_CUSTOM_FIELDS = "customFields";
+	
 	public static String getVersion() {
 		String v = Constants.class.getPackage().getImplementationVersion();
 		if (v == null) {
