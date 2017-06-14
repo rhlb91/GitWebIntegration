@@ -116,7 +116,8 @@ public class JGitUtils {
 	 * @param pattern
 	 * @param objects
 	 */
-	private static void error(Throwable t, Repository repository, String pattern, Object... objects) {
+	private static void error(Throwable t, Repository repository,
+			String pattern, Object... objects) {
 		List<Object> parameters = new ArrayList<Object>();
 		if (objects != null && objects.length > 0) {
 			for (Object o : objects) {
@@ -168,8 +169,8 @@ public class JGitUtils {
 	 * @return CloneResult
 	 * @throws Exception
 	 */
-	public static CloneResult cloneRepository(File repositoriesFolder, String name, String fromUrl)
-			throws Exception {
+	public static CloneResult cloneRepository(File repositoriesFolder,
+			String name, String fromUrl) throws Exception {
 		return cloneRepository(repositoriesFolder, name, fromUrl, true, null);
 	}
 
@@ -186,8 +187,9 @@ public class JGitUtils {
 	 * @return CloneResult
 	 * @throws Exception
 	 */
-	public static CloneResult cloneRepository(File repositoriesFolder, String name, String fromUrl,
-			boolean bare, CredentialsProvider credentialsProvider) throws Exception {
+	public static CloneResult cloneRepository(File repositoriesFolder,
+			String name, String fromUrl, boolean bare,
+			CredentialsProvider credentialsProvider) throws Exception {
 		CloneResult result = new CloneResult();
 		if (bare) {
 			// bare repository, ensure .git suffix
@@ -204,9 +206,12 @@ public class JGitUtils {
 
 		File folder = new File(repositoriesFolder, name);
 		if (folder.exists()) {
-			File gitDir = FileKey.resolve(new File(repositoriesFolder, name), FS.DETECTED);
-			Repository repository = new FileRepositoryBuilder().setGitDir(gitDir).build();
-			result.fetchResult = fetchRepository(credentialsProvider, repository);
+			File gitDir = FileKey.resolve(new File(repositoriesFolder, name),
+					FS.DETECTED);
+			Repository repository = new FileRepositoryBuilder().setGitDir(
+					gitDir).build();
+			result.fetchResult = fetchRepository(credentialsProvider,
+					repository);
 			repository.close();
 		} else {
 			CloneCommand clone = new CloneCommand();
@@ -222,7 +227,8 @@ public class JGitUtils {
 			// Now we have to fetch because CloneCommand doesn't fetch
 			// refs/notes nor does it allow manual RefSpec.
 			result.createdRepository = true;
-			result.fetchResult = fetchRepository(credentialsProvider, repository);
+			result.fetchResult = fetchRepository(credentialsProvider,
+					repository);
 			repository.close();
 		}
 		return result;
@@ -238,8 +244,9 @@ public class JGitUtils {
 	 * @return FetchResult
 	 * @throws Exception
 	 */
-	public static FetchResult fetchRepository(CredentialsProvider credentialsProvider,
-			Repository repository, RefSpec... refSpecs) throws Exception {
+	public static FetchResult fetchRepository(
+			CredentialsProvider credentialsProvider, Repository repository,
+			RefSpec... refSpecs) throws Exception {
 		Git git = new Git(repository);
 		FetchCommand fetch = git.fetch();
 		List<RefSpec> specs = new ArrayList<RefSpec>();
@@ -265,7 +272,8 @@ public class JGitUtils {
 	 * @param name
 	 * @return Repository
 	 */
-	public static Repository createRepository(File repositoriesFolder, String name) {
+	public static Repository createRepository(File repositoriesFolder,
+			String name) {
 		return createRepository(repositoriesFolder, name, "FALSE");
 	}
 
@@ -275,30 +283,37 @@ public class JGitUtils {
 	 * @param repositoriesFolder
 	 * @param name
 	 * @param shared
-	 *          the setting for the --shared option of "git init".
+	 *            the setting for the --shared option of "git init".
 	 * @return Repository
 	 */
-	public static Repository createRepository(File repositoriesFolder, String name, String shared) {
+	public static Repository createRepository(File repositoriesFolder,
+			String name, String shared) {
 		try {
 			Repository repo = null;
 			try {
-				Git git = Git.init().setDirectory(new File(repositoriesFolder, name)).setBare(true).call();
+				Git git = Git.init()
+						.setDirectory(new File(repositoriesFolder, name))
+						.setBare(true).call();
 				repo = git.getRepository();
 			} catch (GitAPIException e) {
 				throw new RuntimeException(e);
 			}
 
-			GitConfigSharedRepository sharedRepository = new GitConfigSharedRepository(shared);
+			GitConfigSharedRepository sharedRepository = new GitConfigSharedRepository(
+					shared);
 			if (sharedRepository.isShared()) {
 				StoredConfig config = repo.getConfig();
-				config.setString("core", null, "sharedRepository", sharedRepository.getValue());
+				config.setString("core", null, "sharedRepository",
+						sharedRepository.getValue());
 				config.setBoolean("receive", null, "denyNonFastforwards", true);
 				config.save();
 
-				if (! JnaUtils.isWindows()) {
+				if (!JnaUtils.isWindows()) {
 					@SuppressWarnings("unchecked")
-					Iterator<File> iter = org.apache.commons.io.FileUtils.iterateFiles(repo.getDirectory(),
-							TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+					Iterator<File> iter = org.apache.commons.io.FileUtils
+							.iterateFiles(repo.getDirectory(),
+									TrueFileFilter.INSTANCE,
+									TrueFileFilter.INSTANCE);
 					// Adjust permissions on file/directory
 					while (iter.hasNext()) {
 						adjustSharedPerm(iter.next(), sharedRepository);
@@ -312,62 +327,74 @@ public class JGitUtils {
 		}
 	}
 
-	private enum GitConfigSharedRepositoryValue
-	{
-		UMASK("0", 0), FALSE("0", 0), OFF("0", 0), NO("0", 0),
-		GROUP("1", 0660), TRUE("1", 0660), ON("1", 0660), YES("1", 0660),
-		ALL("2", 0664), WORLD("2", 0664), EVERYBODY("2", 0664),
-		Oxxx(null, -1);
+	private enum GitConfigSharedRepositoryValue {
+		UMASK("0", 0), FALSE("0", 0), OFF("0", 0), NO("0", 0), GROUP("1", 0660), TRUE(
+				"1", 0660), ON("1", 0660), YES("1", 0660), ALL("2", 0664), WORLD(
+				"2", 0664), EVERYBODY("2", 0664), Oxxx(null, -1);
 
 		private String configValue;
 		private int permValue;
-		private GitConfigSharedRepositoryValue(String config, int perm) { configValue = config; permValue = perm; };
 
-		public String getConfigValue() { return configValue; };
-		public int getPerm() { return permValue; };
+		private GitConfigSharedRepositoryValue(String config, int perm) {
+			configValue = config;
+			permValue = perm;
+		};
+
+		public String getConfigValue() {
+			return configValue;
+		};
+
+		public int getPerm() {
+			return permValue;
+		};
 
 	}
 
-	private static class GitConfigSharedRepository
-	{
+	private static class GitConfigSharedRepository {
 		private int intValue;
 		private GitConfigSharedRepositoryValue enumValue;
 
 		GitConfigSharedRepository(String s) {
-			if ( s == null || s.trim().isEmpty() ) {
+			if (s == null || s.trim().isEmpty()) {
 				enumValue = GitConfigSharedRepositoryValue.GROUP;
-			}
-			else {
+			} else {
 				try {
 					// Try one of the string values
-					enumValue = GitConfigSharedRepositoryValue.valueOf(s.trim().toUpperCase());
-				} catch (IllegalArgumentException  iae) {
+					enumValue = GitConfigSharedRepositoryValue.valueOf(s.trim()
+							.toUpperCase());
+				} catch (IllegalArgumentException iae) {
 					try {
 						// Try if this is an octal number
 						int i = Integer.parseInt(s, 8);
-						if ( (i & 0600) != 0600 ) {
-							String msg = String.format("Problem with core.sharedRepository filemode value (0%03o).\nThe owner of files must always have read and write permissions.", i);
+						if ((i & 0600) != 0600) {
+							String msg = String
+									.format("Problem with core.sharedRepository filemode value (0%03o).\nThe owner of files must always have read and write permissions.",
+											i);
 							throw new IllegalArgumentException(msg);
 						}
 						intValue = i & 0666;
 						enumValue = GitConfigSharedRepositoryValue.Oxxx;
 					} catch (NumberFormatException nfe) {
-						throw new IllegalArgumentException("Bad configuration value for 'shared': '" + s + "'");
+						throw new IllegalArgumentException(
+								"Bad configuration value for 'shared': '" + s
+										+ "'");
 					}
 				}
 			}
 		}
 
 		String getValue() {
-			if ( enumValue == GitConfigSharedRepositoryValue.Oxxx ) {
-				if (intValue == 0) return "0";
+			if (enumValue == GitConfigSharedRepositoryValue.Oxxx) {
+				if (intValue == 0)
+					return "0";
 				return String.format("0%o", intValue);
 			}
 			return enumValue.getConfigValue();
 		}
 
 		int getPerm() {
-			if ( enumValue == GitConfigSharedRepositoryValue.Oxxx ) return intValue;
+			if (enumValue == GitConfigSharedRepositoryValue.Oxxx)
+				return intValue;
 			return enumValue.getPerm();
 		}
 
@@ -376,66 +403,81 @@ public class JGitUtils {
 		}
 
 		boolean isShared() {
-			return (enumValue.getPerm() > 0) || enumValue == GitConfigSharedRepositoryValue.Oxxx;
+			return (enumValue.getPerm() > 0)
+					|| enumValue == GitConfigSharedRepositoryValue.Oxxx;
 		}
 	}
 
-
 	/**
 	 * Adjust file permissions of a file/directory for shared repositories
 	 *
 	 * @param path
-	 * 			File that should get its permissions changed.
+	 *            File that should get its permissions changed.
 	 * @param configShared
-	 * 			Configuration string value for the shared mode.
-	 * @return Upon successful completion, a value of 0 is returned. Otherwise, a value of -1 is returned.
+	 *            Configuration string value for the shared mode.
+	 * @return Upon successful completion, a value of 0 is returned. Otherwise,
+	 *         a value of -1 is returned.
 	 */
 	public static int adjustSharedPerm(File path, String configShared) {
-		return adjustSharedPerm(path, new GitConfigSharedRepository(configShared));
+		return adjustSharedPerm(path, new GitConfigSharedRepository(
+				configShared));
 	}
-
 
 	/**
 	 * Adjust file permissions of a file/directory for shared repositories
 	 *
 	 * @param path
-	 * 			File that should get its permissions changed.
+	 *            File that should get its permissions changed.
 	 * @param configShared
-	 * 			Configuration setting for the shared mode.
-	 * @return Upon successful completion, a value of 0 is returned. Otherwise, a value of -1 is returned.
+	 *            Configuration setting for the shared mode.
+	 * @return Upon successful completion, a value of 0 is returned. Otherwise,
+	 *         a value of -1 is returned.
 	 */
-	public static int adjustSharedPerm(File path, GitConfigSharedRepository configShared) {
-		if (! configShared.isShared()) return 0;
-		if (! path.exists()) return -1;
+	public static int adjustSharedPerm(File path,
+			GitConfigSharedRepository configShared) {
+		if (!configShared.isShared())
+			return 0;
+		if (!path.exists())
+			return -1;
 
 		int perm = configShared.getPerm();
 		JnaUtils.Filestat stat = JnaUtils.getFilestat(path);
-		if (stat == null) return -1;
+		if (stat == null)
+			return -1;
 		int mode = stat.mode;
-		if (mode < 0) return -1;
+		if (mode < 0)
+			return -1;
 
-		// Now, here is the kicker: Under Linux, chmod'ing a sgid file whose guid is different from the process'
-		// effective guid will reset the sgid flag of the file. Since there is no way to get the sgid flag back in
-		// that case, we decide to rather not touch is and getting the right permissions will have to be achieved
-		// in a different way, e.g. by using an appropriate umask for the Gitblit process.
+		// Now, here is the kicker: Under Linux, chmod'ing a sgid file whose
+		// guid is different from the process'
+		// effective guid will reset the sgid flag of the file. Since there is
+		// no way to get the sgid flag back in
+		// that case, we decide to rather not touch is and getting the right
+		// permissions will have to be achieved
+		// in a different way, e.g. by using an appropriate umask for the
+		// Gitblit process.
 		if (System.getProperty("os.name").toLowerCase().startsWith("linux")) {
-			if ( ((mode & (JnaUtils.S_ISGID | JnaUtils.S_ISUID)) != 0)
-				&& stat.gid != JnaUtils.getegid() ) {
-				LOGGER.debug("Not adjusting permissions to prevent clearing suid/sgid bits for '" + path + "'" );
+			if (((mode & (JnaUtils.S_ISGID | JnaUtils.S_ISUID)) != 0)
+					&& stat.gid != JnaUtils.getegid()) {
+				LOGGER.debug("Not adjusting permissions to prevent clearing suid/sgid bits for '"
+						+ path + "'");
 				return 0;
 			}
 		}
 
-		// If the owner has no write access, delete it from group and other, too.
-		if ((mode & JnaUtils.S_IWUSR) == 0) perm &= ~0222;
-		// If the owner has execute access, set it for all blocks that have read access.
-		if ((mode & JnaUtils.S_IXUSR) == JnaUtils.S_IXUSR) perm |= (perm & 0444) >> 2;
+		// If the owner has no write access, delete it from group and other,
+		// too.
+		if ((mode & JnaUtils.S_IWUSR) == 0)
+			perm &= ~0222;
+		// If the owner has execute access, set it for all blocks that have read
+		// access.
+		if ((mode & JnaUtils.S_IXUSR) == JnaUtils.S_IXUSR)
+			perm |= (perm & 0444) >> 2;
 
 		if (configShared.isCustom()) {
 			// Use the custom value for access permissions.
 			mode = (mode & ~0777) | perm;
-		}
-		else {
+		} else {
 			// Just add necessary bits to existing permissions.
 			mode |= perm;
 		}
@@ -447,7 +489,6 @@ public class JGitUtils {
 
 		return JnaUtils.setFilemode(path, mode);
 	}
-
 
 	/**
 	 * Returns a list of repository names in the specified folder.
@@ -464,8 +505,9 @@ public class JGitUtils {
 	 *            list of regex exclusions for matching to folder names
 	 * @return list of repository names
 	 */
-	public static List<String> getRepositoryList(File repositoriesFolder, boolean onlyBare,
-			boolean searchSubfolders, int depth, List<String> exclusions) {
+	public static List<String> getRepositoryList(File repositoriesFolder,
+			boolean onlyBare, boolean searchSubfolders, int depth,
+			List<String> exclusions) {
 		List<String> list = new ArrayList<String>();
 		if (repositoriesFolder == null || !repositoriesFolder.exists()) {
 			return list;
@@ -476,8 +518,8 @@ public class JGitUtils {
 				patterns.add(Pattern.compile(regex));
 			}
 		}
-		list.addAll(getRepositoryList(repositoriesFolder.getAbsolutePath(), repositoriesFolder,
-				onlyBare, searchSubfolders, depth, patterns));
+		list.addAll(getRepositoryList(repositoriesFolder.getAbsolutePath(),
+				repositoriesFolder, onlyBare, searchSubfolders, depth, patterns));
 		StringUtils.sortRepositorynames(list);
 		list.remove(".git"); // issue-256
 		return list;
@@ -501,8 +543,9 @@ public class JGitUtils {
 	 *            list of regex patterns for matching to folder names
 	 * @return
 	 */
-	private static List<String> getRepositoryList(String basePath, File searchFolder,
-			boolean onlyBare, boolean searchSubfolders, int depth, List<Pattern> patterns) {
+	private static List<String> getRepositoryList(String basePath,
+			File searchFolder, boolean onlyBare, boolean searchSubfolders,
+			int depth, List<Pattern> patterns) {
 		File baseFile = new File(basePath);
 		List<String> list = new ArrayList<String>();
 		if (depth == 0) {
@@ -514,9 +557,12 @@ public class JGitUtils {
 			if (file.isDirectory()) {
 				boolean exclude = false;
 				for (Pattern pattern : patterns) {
-					String path = FileUtils.getRelativePath(baseFile, file).replace('\\',  '/');
+					String path = FileUtils.getRelativePath(baseFile, file)
+							.replace('\\', '/');
 					if (pattern.matcher(path).matches()) {
-						LOGGER.debug(MessageFormat.format("excluding {0} because of rule {1}", path, pattern.pattern()));
+						LOGGER.debug(MessageFormat.format(
+								"excluding {0} because of rule {1}", path,
+								pattern.pattern()));
 						exclude = true;
 						break;
 					}
@@ -526,24 +572,27 @@ public class JGitUtils {
 					continue;
 				}
 
-				File gitDir = FileKey.resolve(new File(searchFolder, file.getName()), FS.DETECTED);
+				File gitDir = FileKey.resolve(
+						new File(searchFolder, file.getName()), FS.DETECTED);
 				if (gitDir != null) {
 					if (onlyBare && gitDir.getName().equals(".git")) {
 						continue;
 					}
-					if (gitDir.equals(file) || gitDir.getParentFile().equals(file)) {
+					if (gitDir.equals(file)
+							|| gitDir.getParentFile().equals(file)) {
 						// determine repository name relative to base path
-						String repository = FileUtils.getRelativePath(baseFile, file);
+						String repository = FileUtils.getRelativePath(baseFile,
+								file);
 						list.add(repository);
 					} else if (searchSubfolders && file.canRead()) {
 						// look for repositories in subfolders
-						list.addAll(getRepositoryList(basePath, file, onlyBare, searchSubfolders,
-								nextDepth, patterns));
+						list.addAll(getRepositoryList(basePath, file, onlyBare,
+								searchSubfolders, nextDepth, patterns));
 					}
 				} else if (searchSubfolders && file.canRead()) {
 					// look for repositories in subfolders
-					list.addAll(getRepositoryList(basePath, file, onlyBare, searchSubfolders,
-							nextDepth, patterns));
+					list.addAll(getRepositoryList(basePath, file, onlyBare,
+							searchSubfolders, nextDepth, patterns));
 				}
 			}
 		}
@@ -617,7 +666,8 @@ public class JGitUtils {
 	public static boolean hasCommits(Repository repository) {
 		if (repository != null && repository.getDirectory().exists()) {
 			return (new File(repository.getDirectory(), "objects").list().length > 2)
-					|| (new File(repository.getDirectory(), "objects/pack").list().length > 0);
+					|| (new File(repository.getDirectory(), "objects/pack")
+							.list().length > 0);
 		}
 		return false;
 	}
@@ -720,12 +770,15 @@ public class JGitUtils {
 		try {
 			// resolve object id
 			ObjectId branchObject;
-			if (StringUtils.isEmpty(objectId) || "HEAD".equalsIgnoreCase(objectId)) {
+			if (StringUtils.isEmpty(objectId)
+					|| "HEAD".equalsIgnoreCase(objectId)) {
 				branchObject = getDefaultBranch(repository);
-				System.out.println("ObjectId:"+objectId + ", Default branch:"+branchObject);
+				System.out.println("ObjectId:" + objectId + ", Default branch:"
+						+ branchObject);
 			} else {
 				branchObject = repository.resolve(objectId);
-				System.out.println("ObjectId:"+objectId +", Provided branch: "+branchObject);
+				System.out.println("ObjectId:" + objectId
+						+ ", Provided branch: " + branchObject);
 			}
 			if (branchObject == null) {
 				return null;
@@ -752,10 +805,12 @@ public class JGitUtils {
 	 * @param path
 	 * @return content as a byte []
 	 */
-	public static byte[] getByteContent(Repository repository, RevTree tree, final String path, boolean throwError) {
+	public static byte[] getByteContent(Repository repository, RevTree tree,
+			final String path, boolean throwError) {
 		RevWalk rw = new RevWalk(repository);
 		TreeWalk tw = new TreeWalk(repository);
-		tw.setFilter(PathFilterGroup.createFromStrings(Collections.singleton(path)));
+		tw.setFilter(PathFilterGroup.createFromStrings(Collections
+				.singleton(path)));
 		byte[] content = null;
 		try {
 			if (tree == null) {
@@ -774,13 +829,15 @@ public class JGitUtils {
 				ObjectId entid = tw.getObjectId(0);
 				FileMode entmode = tw.getFileMode(0);
 				if (entmode != FileMode.GITLINK) {
-					ObjectLoader ldr = repository.open(entid, Constants.OBJ_BLOB);
+					ObjectLoader ldr = repository.open(entid,
+							Constants.OBJ_BLOB);
 					content = ldr.getCachedBytes();
 				}
 			}
 		} catch (Throwable t) {
 			if (throwError) {
-				error(t, repository, "{0} can't find {1} in tree {2}", path, tree.name());
+				error(t, repository, "{0} can't find {1} in tree {2}", path,
+						tree.name());
 			}
 		} finally {
 			rw.dispose();
@@ -796,10 +853,12 @@ public class JGitUtils {
 	 * @param tree
 	 *            if null, the RevTree from HEAD is assumed.
 	 * @param blobPath
-	 * @param charsets optional
+	 * @param charsets
+	 *            optional
 	 * @return UTF-8 string content
 	 */
-	public static String getStringContent(Repository repository, RevTree tree, String blobPath, String... charsets) {
+	public static String getStringContent(Repository repository, RevTree tree,
+			String blobPath, String... charsets) {
 		byte[] content = getByteContent(repository, tree, blobPath, true);
 		if (content == null) {
 			return null;
@@ -819,7 +878,8 @@ public class JGitUtils {
 		byte[] content = null;
 		try {
 			RevBlob blob = rw.lookupBlob(ObjectId.fromString(objectId));
-			ObjectLoader ldr = repository.open(blob.getId(), Constants.OBJ_BLOB);
+			ObjectLoader ldr = repository
+					.open(blob.getId(), Constants.OBJ_BLOB);
 			content = ldr.getCachedBytes();
 		} catch (Throwable t) {
 			error(t, repository, "{0} can't find blob {1}", objectId);
@@ -834,10 +894,12 @@ public class JGitUtils {
 	 *
 	 * @param repository
 	 * @param objectId
-	 * @param charsets optional
+	 * @param charsets
+	 *            optional
 	 * @return UTF-8 string content
 	 */
-	public static String getStringContent(Repository repository, String objectId, String... charsets) {
+	public static String getStringContent(Repository repository,
+			String objectId, String... charsets) {
 		byte[] content = getByteContent(repository, objectId);
 		if (content == null) {
 			return null;
@@ -857,8 +919,8 @@ public class JGitUtils {
 	 *            if null, HEAD is assumed.
 	 * @return list of files in specified path
 	 */
-	public static List<PathModel> getFilesInPath(Repository repository, String path,
-			RevCommit commit) {
+	public static List<PathModel> getFilesInPath(Repository repository,
+			String path, RevCommit commit) {
 		List<PathModel> list = new ArrayList<PathModel>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -893,7 +955,8 @@ public class JGitUtils {
 				}
 			}
 		} catch (IOException e) {
-			error(e, repository, "{0} failed to get files for commit {1}", commit.getName());
+			error(e, repository, "{0} failed to get files for commit {1}",
+					commit.getName());
 		} finally {
 			tw.close();
 		}
@@ -915,7 +978,8 @@ public class JGitUtils {
 	 *            if null, HEAD is assumed.
 	 * @return list of files in specified path
 	 */
-	public static List<PathModel> getFilesInPath2(Repository repository, String path, RevCommit commit) {
+	public static List<PathModel> getFilesInPath2(Repository repository,
+			String path, RevCommit commit) {
 
 		List<PathModel> list = new ArrayList<PathModel>();
 		if (!hasCommits(repository)) {
@@ -939,18 +1003,21 @@ public class JGitUtils {
 			List<String> paths = new ArrayList<>();
 
 			while (tw.next()) {
-					String child = isPathEmpty ? tw.getPathString()
-							: tw.getPathString().replaceFirst(String.format("%s/", path), "");
-					paths.add(child);
+				String child = isPathEmpty ? tw.getPathString() : tw
+						.getPathString().replaceFirst(
+								String.format("%s/", path), "");
+				paths.add(child);
 			}
 
-			for(String p: PathUtils.compressPaths(paths)) {
-				String pathString = isPathEmpty ? p : String.format("%s/%s", path, p);
+			for (String p : PathUtils.compressPaths(paths)) {
+				String pathString = isPathEmpty ? p : String.format("%s/%s",
+						path, p);
 				list.add(getPathModel(repository, pathString, path, commit));
 			}
 
 		} catch (IOException e) {
-			error(e, repository, "{0} failed to get files for commit {1}", commit.getName());
+			error(e, repository, "{0} failed to get files for commit {1}",
+					commit.getName());
 		} finally {
 			tw.close();
 		}
@@ -967,7 +1034,8 @@ public class JGitUtils {
 	 *            if null, HEAD is assumed.
 	 * @return list of files changed in a commit
 	 */
-	public static List<PathChangeModel> getFilesInCommit(Repository repository, RevCommit commit) {
+	public static List<PathChangeModel> getFilesInCommit(Repository repository,
+			RevCommit commit) {
 		return getFilesInCommit(repository, commit, true);
 	}
 
@@ -982,7 +1050,8 @@ public class JGitUtils {
 	 *            if true, each PathChangeModel will have insertions/deletions
 	 * @return list of files changed in a commit
 	 */
-	public static List<PathChangeModel> getFilesInCommit(Repository repository, RevCommit commit, boolean calculateDiffStat) {
+	public static List<PathChangeModel> getFilesInCommit(Repository repository,
+			RevCommit commit, boolean calculateDiffStat) {
 		List<PathChangeModel> list = new ArrayList<PathChangeModel>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1003,40 +1072,51 @@ public class JGitUtils {
 					long size = 0;
 					FilestoreModel filestoreItem = null;
 					ObjectId objectId = tw.getObjectId(0);
-					
-					try {
-						if (!tw.isSubtree() && (tw.getFileMode(0) != FileMode.GITLINK)) {
 
-							size = tw.getObjectReader().getObjectSize(objectId, Constants.OBJ_BLOB);
+					try {
+						if (!tw.isSubtree()
+								&& (tw.getFileMode(0) != FileMode.GITLINK)) {
+
+							size = tw.getObjectReader().getObjectSize(objectId,
+									Constants.OBJ_BLOB);
 
 							if (isPossibleFilestoreItem(size)) {
-								filestoreItem = getFilestoreItem(tw.getObjectReader().open(objectId));
+								filestoreItem = getFilestoreItem(tw
+										.getObjectReader().open(objectId));
 							}
 						}
 					} catch (Throwable t) {
-						error(t, null, "failed to retrieve blob size for " + tw.getPathString());
+						error(t,
+								null,
+								"failed to retrieve blob size for "
+										+ tw.getPathString());
 					}
-					
-					list.add(new PathChangeModel(tw.getPathString(), tw.getPathString(),filestoreItem, size, tw
-							.getRawMode(0), objectId.getName(), commit.getId().getName(),
-							ChangeType.ADD));
+
+					list.add(new PathChangeModel(tw.getPathString(), tw
+							.getPathString(), filestoreItem, size, tw
+							.getRawMode(0), objectId.getName(), commit.getId()
+							.getName(), ChangeType.ADD));
 				}
 				tw.close();
 			} else {
 				RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
-				DiffStatFormatter df = new DiffStatFormatter(commit.getName(), repository);
+				DiffStatFormatter df = new DiffStatFormatter(commit.getName(),
+						repository);
 				df.setRepository(repository);
 				df.setDiffComparator(RawTextComparator.DEFAULT);
 				df.setDetectRenames(true);
-				List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
+				List<DiffEntry> diffs = df.scan(parent.getTree(),
+						commit.getTree());
 				for (DiffEntry diff : diffs) {
 					// create the path change model
-					PathChangeModel pcm = PathChangeModel.from(diff, commit.getName(), repository);
-						
-						if (calculateDiffStat) {
+					PathChangeModel pcm = PathChangeModel.from(diff,
+							commit.getName(), repository);
+
+					if (calculateDiffStat) {
 						// update file diffstats
 						df.format(diff);
-						PathChangeModel pathStat = df.getDiffStat().getPath(pcm.path);
+						PathChangeModel pathStat = df.getDiffStat().getPath(
+								pcm.path);
 						if (pathStat != null) {
 							pcm.insertions = pathStat.insertions;
 							pcm.deletions = pathStat.deletions;
@@ -1064,7 +1144,8 @@ public class JGitUtils {
 	 *            most recent commit. if null, HEAD is assumed.
 	 * @return list of files changed in a commit range
 	 */
-	public static List<PathChangeModel> getFilesInRange(Repository repository, String startCommit, String endCommit) {
+	public static List<PathChangeModel> getFilesInRange(Repository repository,
+			String startCommit, String endCommit) {
 		List<PathChangeModel> list = new ArrayList<PathChangeModel>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1078,7 +1159,9 @@ public class JGitUtils {
 			list.addAll(getFilesInRange(repository, start, end));
 			rw.close();
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to determine files in range {1}..{2}!", startCommit, endCommit);
+			error(t, repository,
+					"{0} failed to determine files in range {1}..{2}!",
+					startCommit, endCommit);
 		}
 		return list;
 	}
@@ -1094,7 +1177,8 @@ public class JGitUtils {
 	 *            most recent commit. if null, HEAD is assumed.
 	 * @return list of files changed in a commit range
 	 */
-	public static List<PathChangeModel> getFilesInRange(Repository repository, RevCommit startCommit, RevCommit endCommit) {
+	public static List<PathChangeModel> getFilesInRange(Repository repository,
+			RevCommit startCommit, RevCommit endCommit) {
 		List<PathChangeModel> list = new ArrayList<PathChangeModel>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1105,17 +1189,22 @@ public class JGitUtils {
 			df.setDiffComparator(RawTextComparator.DEFAULT);
 			df.setDetectRenames(true);
 
-			List<DiffEntry> diffEntries = df.scan(startCommit.getTree(), endCommit.getTree());
+			List<DiffEntry> diffEntries = df.scan(startCommit.getTree(),
+					endCommit.getTree());
 			for (DiffEntry diff : diffEntries) {
-				PathChangeModel pcm = PathChangeModel.from(diff,  endCommit.getName(), repository);
+				PathChangeModel pcm = PathChangeModel.from(diff,
+						endCommit.getName(), repository);
 				list.add(pcm);
 			}
 			Collections.sort(list);
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to determine files in range {1}..{2}!", startCommit, endCommit);
+			error(t, repository,
+					"{0} failed to determine files in range {1}..{2}!",
+					startCommit, endCommit);
 		}
 		return list;
 	}
+
 	/**
 	 * Returns the list of files in the repository on the default branch that
 	 * match one of the specified extensions. This is a CASE-SENSITIVE search.
@@ -1125,7 +1214,8 @@ public class JGitUtils {
 	 * @param extensions
 	 * @return list of files in repository with a matching extension
 	 */
-	public static List<PathModel> getDocuments(Repository repository, List<String> extensions) {
+	public static List<PathModel> getDocuments(Repository repository,
+			List<String> extensions) {
 		return getDocuments(repository, extensions, null);
 	}
 
@@ -1139,8 +1229,8 @@ public class JGitUtils {
 	 * @param objectId
 	 * @return list of files in repository with a matching extension
 	 */
-	public static List<PathModel> getDocuments(Repository repository, List<String> extensions,
-			String objectId) {
+	public static List<PathModel> getDocuments(Repository repository,
+			List<String> extensions, String objectId) {
 		List<PathModel> list = new ArrayList<PathModel>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1156,7 +1246,8 @@ public class JGitUtils {
 						suffixFilters.add(PathSuffixFilter.create(extension));
 					} else {
 						// escape the . since this is a regexp filter
-						suffixFilters.add(PathSuffixFilter.create("." + extension));
+						suffixFilters.add(PathSuffixFilter.create("."
+								+ extension));
 					}
 				}
 				TreeFilter filter;
@@ -1172,7 +1263,8 @@ public class JGitUtils {
 				list.add(getPathModel(tw, null, commit));
 			}
 		} catch (IOException e) {
-			error(e, repository, "{0} failed to get documents for commit {1}", commit.getName());
+			error(e, repository, "{0} failed to get documents for commit {1}",
+					commit.getName());
 		} finally {
 			tw.close();
 		}
@@ -1188,10 +1280,11 @@ public class JGitUtils {
 	 * @param commit
 	 * @return a path model of the current file in the treewalk
 	 */
-	private static PathModel getPathModel(TreeWalk tw, String basePath, RevCommit commit) {
+	private static PathModel getPathModel(TreeWalk tw, String basePath,
+			RevCommit commit) {
 		String name;
 		long size = 0;
-		
+
 		if (StringUtils.isEmpty(basePath)) {
 			name = tw.getPathString();
 		} else {
@@ -1199,45 +1292,48 @@ public class JGitUtils {
 		}
 		ObjectId objectId = tw.getObjectId(0);
 		FilestoreModel filestoreItem = null;
-		
+
 		try {
 			if (!tw.isSubtree() && (tw.getFileMode(0) != FileMode.GITLINK)) {
 
-				size = tw.getObjectReader().getObjectSize(objectId, Constants.OBJ_BLOB);
+				size = tw.getObjectReader().getObjectSize(objectId,
+						Constants.OBJ_BLOB);
 
 				if (isPossibleFilestoreItem(size)) {
-					filestoreItem = getFilestoreItem(tw.getObjectReader().open(objectId));
+					filestoreItem = getFilestoreItem(tw.getObjectReader().open(
+							objectId));
 				}
 			}
 		} catch (Throwable t) {
-			error(t, null, "failed to retrieve blob size for " + tw.getPathString());
+			error(t, null,
+					"failed to retrieve blob size for " + tw.getPathString());
 		}
-		return new PathModel(name, tw.getPathString(), filestoreItem, size, tw.getFileMode(0).getBits(),
-				objectId.getName(), commit.getName());
+		return new PathModel(name, tw.getPathString(), filestoreItem, size, tw
+				.getFileMode(0).getBits(), objectId.getName(), commit.getName());
 	}
-	
+
 	public static boolean isPossibleFilestoreItem(long size) {
-		return (   (size >= com.teammerge.Constants.LEN_FILESTORE_META_MIN) 
-				&& (size <= com.teammerge.Constants.LEN_FILESTORE_META_MAX));
+		return ((size >= com.teammerge.Constants.LEN_FILESTORE_META_MIN) && (size <= com.teammerge.Constants.LEN_FILESTORE_META_MAX));
 	}
-	
+
 	/**
 	 * 
 	 * @return Representative FilestoreModel if valid, otherwise null
 	 */
-	public static FilestoreModel getFilestoreItem(ObjectLoader obj){
+	public static FilestoreModel getFilestoreItem(ObjectLoader obj) {
 		try {
-			final byte[] blob = obj.getCachedBytes(com.teammerge.Constants.LEN_FILESTORE_META_MAX);
+			final byte[] blob = obj
+					.getCachedBytes(com.teammerge.Constants.LEN_FILESTORE_META_MAX);
 			final String meta = new String(blob, "UTF-8");
-		
+
 			return FilestoreModel.fromMetaString(meta);
 
 		} catch (LargeObjectException e) {
-			//Intentionally failing silent
+			// Intentionally failing silent
 		} catch (Exception e) {
 			error(e, null, "failed to retrieve filestoreItem " + obj.toString());
 		}
-		
+
 		return null;
 	}
 
@@ -1250,8 +1346,8 @@ public class JGitUtils {
 	 * @param commit
 	 * @return a path model of the specified object
 	 */
-	private static PathModel getPathModel(Repository repo, String path, String filter, RevCommit commit)
-			throws IOException {
+	private static PathModel getPathModel(Repository repo, String path,
+			String filter, RevCommit commit) throws IOException {
 
 		long size = 0;
 		FilestoreModel filestoreItem = null;
@@ -1261,11 +1357,13 @@ public class JGitUtils {
 		if (!tw.isSubtree() && (tw.getFileMode(0) != FileMode.GITLINK)) {
 
 			pathString = PathUtils.getLastPathComponent(pathString);
-			
-			size = tw.getObjectReader().getObjectSize(tw.getObjectId(0), Constants.OBJ_BLOB);
-			
+
+			size = tw.getObjectReader().getObjectSize(tw.getObjectId(0),
+					Constants.OBJ_BLOB);
+
 			if (isPossibleFilestoreItem(size)) {
-				filestoreItem = getFilestoreItem(tw.getObjectReader().open(tw.getObjectId(0)));
+				filestoreItem = getFilestoreItem(tw.getObjectReader().open(
+						tw.getObjectId(0)));
 			}
 		} else if (tw.isSubtree()) {
 
@@ -1275,16 +1373,17 @@ public class JGitUtils {
 			}
 
 			// remove the last slash from path in displayed link
-			if (pathString != null && pathString.charAt(pathString.length()-1) == '/') {
-				pathString = pathString.substring(0, pathString.length()-1);
+			if (pathString != null
+					&& pathString.charAt(pathString.length() - 1) == '/') {
+				pathString = pathString.substring(0, pathString.length() - 1);
 			}
 		}
 
-		return new PathModel(pathString, tw.getPathString(), filestoreItem, size, tw.getFileMode(0).getBits(),
-				tw.getObjectId(0).getName(), commit.getName());
+		return new PathModel(pathString, tw.getPathString(), filestoreItem,
+				size, tw.getFileMode(0).getBits(), tw.getObjectId(0).getName(),
+				commit.getName());
 
 	}
-
 
 	/**
 	 * Returns a permissions representation of the mode bits.
@@ -1317,7 +1416,8 @@ public class JGitUtils {
 	 * @param minimumDate
 	 * @return list of commits
 	 */
-	public static List<RevCommit> getRevLog(Repository repository, String objectId, Date minimumDate) {
+	public static List<RevCommit> getRevLog(Repository repository,
+			String objectId, Date minimumDate) {
 		List<RevCommit> list = new ArrayList<RevCommit>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1327,10 +1427,12 @@ public class JGitUtils {
 			ObjectId branchObject;
 			if (StringUtils.isEmpty(objectId)) {
 				branchObject = getDefaultBranch(repository);
-				System.out.println("\ndefault branch Object Id:"+branchObject+"\n");
+				System.out.println("\ndefault objectId : " + objectId
+						+ ", branch Object Id:" + branchObject + "\n");
 			} else {
 				branchObject = repository.resolve(objectId);
-				System.out.println("\nProvided branch object Id:"+branchObject+"\n");
+				System.out.println("\n provided objectId: " + objectId
+						+ ", branch object Id:" + branchObject + "\n");
 			}
 
 			RevWalk rw = new RevWalk(repository);
@@ -1342,8 +1444,9 @@ public class JGitUtils {
 			}
 			rw.dispose();
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to get {1} revlog for minimum date {2}", objectId,
-					minimumDate);
+			error(t, repository,
+					"{0} failed to get {1} revlog for minimum date {2}",
+					objectId, minimumDate);
 		}
 		return list;
 	}
@@ -1374,8 +1477,8 @@ public class JGitUtils {
 	 *            if < 0, all commits are returned.
 	 * @return a paged list of commits
 	 */
-	public static List<RevCommit> getRevLog(Repository repository, String objectId, int offset,
-			int maxCount) {
+	public static List<RevCommit> getRevLog(Repository repository,
+			String objectId, int offset, int maxCount) {
 		return getRevLog(repository, objectId, null, offset, maxCount);
 	}
 
@@ -1396,8 +1499,8 @@ public class JGitUtils {
 	 *            if < 0, all commits are returned.
 	 * @return a paged list of commits
 	 */
-	public static List<RevCommit> getRevLog(Repository repository, String objectId, String path,
-			int offset, int maxCount) {
+	public static List<RevCommit> getRevLog(Repository repository,
+			String objectId, String path, int offset, int maxCount) {
 		List<RevCommit> list = new ArrayList<RevCommit>();
 		if (maxCount == 0) {
 			return list;
@@ -1412,14 +1515,14 @@ public class JGitUtils {
 			if (StringUtils.isEmpty(objectId)) {
 				endRange = getDefaultBranch(repository);
 			} else {
-				if( objectId.contains("..") ) {
+				if (objectId.contains("..")) {
 					// range expression
 					String[] parts = objectId.split("\\.\\.");
 					startRange = repository.resolve(parts[0]);
 					endRange = repository.resolve(parts[1]);
 				} else {
 					// objectid
-					endRange= repository.resolve(objectId);
+					endRange = repository.resolve(objectId);
 				}
 			}
 			if (endRange == null) {
@@ -1432,8 +1535,8 @@ public class JGitUtils {
 				rw.markUninteresting(rw.parseCommit(startRange));
 			}
 			if (!StringUtils.isEmpty(path)) {
-				TreeFilter filter = AndTreeFilter.create(
-						PathFilterGroup.createFromStrings(Collections.singleton(path)),
+				TreeFilter filter = AndTreeFilter.create(PathFilterGroup
+						.createFromStrings(Collections.singleton(path)),
 						TreeFilter.ANY_DIFF);
 				rw.setTreeFilter(filter);
 			}
@@ -1459,7 +1562,8 @@ public class JGitUtils {
 			}
 			rw.dispose();
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to get {1} revlog for path {2}", objectId, path);
+			error(t, repository, "{0} failed to get {1} revlog for path {2}",
+					objectId, path);
 		}
 		return list;
 	}
@@ -1476,8 +1580,8 @@ public class JGitUtils {
 	 *            the end commit (included in results)
 	 * @return a list of commits
 	 */
-	public static List<RevCommit> getRevLog(Repository repository, String startRangeId,
-			String endRangeId) {
+	public static List<RevCommit> getRevLog(Repository repository,
+			String startRangeId, String endRangeId) {
 		List<RevCommit> list = new ArrayList<RevCommit>();
 		if (!hasCommits(repository)) {
 			return list;
@@ -1503,7 +1607,8 @@ public class JGitUtils {
 			}
 			rw.dispose();
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to get revlog for {1}..{2}", startRangeId, endRangeId);
+			error(t, repository, "{0} failed to get revlog for {1}..{2}",
+					startRangeId, endRangeId);
 		}
 		return list;
 	}
@@ -1525,8 +1630,10 @@ public class JGitUtils {
 	 *            if < 0, all matches are returned
 	 * @return matching list of commits
 	 */
-	public static List<RevCommit> searchRevlogs(Repository repository, String objectId,
-			String value, final com.teammerge.Constants.SearchType type, int offset, int maxCount) {
+	public static List<RevCommit> searchRevlogs(Repository repository,
+			String objectId, String value,
+			final com.teammerge.Constants.SearchType type, int offset,
+			int maxCount) {
 		List<RevCommit> list = new ArrayList<RevCommit>();
 		if (StringUtils.isEmpty(value)) {
 			return list;
@@ -1558,23 +1665,27 @@ public class JGitUtils {
 				}
 
 				@Override
-				public boolean include(RevWalk walker, RevCommit commit) throws StopWalkException,
-						MissingObjectException, IncorrectObjectTypeException, IOException {
+				public boolean include(RevWalk walker, RevCommit commit)
+						throws StopWalkException, MissingObjectException,
+						IncorrectObjectTypeException, IOException {
 					boolean include = false;
 					switch (type) {
 					case AUTHOR:
-						include = (commit.getAuthorIdent().getName().toLowerCase().indexOf(lcValue) > -1)
-								|| (commit.getAuthorIdent().getEmailAddress().toLowerCase()
-										.indexOf(lcValue) > -1);
+						include = (commit.getAuthorIdent().getName()
+								.toLowerCase().indexOf(lcValue) > -1)
+								|| (commit.getAuthorIdent().getEmailAddress()
+										.toLowerCase().indexOf(lcValue) > -1);
 						break;
 					case COMMITTER:
-						include = (commit.getCommitterIdent().getName().toLowerCase()
-								.indexOf(lcValue) > -1)
-								|| (commit.getCommitterIdent().getEmailAddress().toLowerCase()
+						include = (commit.getCommitterIdent().getName()
+								.toLowerCase().indexOf(lcValue) > -1)
+								|| (commit.getCommitterIdent()
+										.getEmailAddress().toLowerCase()
 										.indexOf(lcValue) > -1);
 						break;
 					case COMMIT:
-						include = commit.getFullMessage().toLowerCase().indexOf(lcValue) > -1;
+						include = commit.getFullMessage().toLowerCase()
+								.indexOf(lcValue) > -1;
 						break;
 					}
 					return include;
@@ -1604,7 +1715,8 @@ public class JGitUtils {
 			}
 			rw.dispose();
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to {1} search revlogs for {2}", type.name(), value);
+			error(t, repository, "{0} failed to {1} search revlogs for {2}",
+					type.name(), value);
 		}
 		return list;
 	}
@@ -1618,7 +1730,8 @@ public class JGitUtils {
 	 * @return the objectid of a branch
 	 * @throws Exception
 	 */
-	public static ObjectId getDefaultBranch(Repository repository) throws Exception {
+	public static ObjectId getDefaultBranch(Repository repository)
+			throws Exception {
 		ObjectId object = repository.resolve(Constants.HEAD);
 		if (object == null) {
 			// no HEAD
@@ -1642,10 +1755,10 @@ public class JGitUtils {
 
 	/**
 	 * Returns the target of the symbolic HEAD reference for a repository.
-	 * Normally returns a branch reference name, but when HEAD is detached,
-	 * the commit is matched against the known tags. The most recent matching
-	 * tag ref name will be returned if it references the HEAD commit. If
-	 * no match is found, the SHA1 is returned.
+	 * Normally returns a branch reference name, but when HEAD is detached, the
+	 * commit is matched against the known tags. The most recent matching tag
+	 * ref name will be returned if it references the HEAD commit. If no match
+	 * is found, the SHA1 is returned.
 	 *
 	 * @param repository
 	 * @return the ref name or the SHA1 for a detached HEAD
@@ -1661,8 +1774,8 @@ public class JGitUtils {
 	}
 
 	/**
-	 * Sets the symbolic ref HEAD to the specified target ref. The
-	 * HEAD will be detached if the target ref is not a branch.
+	 * Sets the symbolic ref HEAD to the specified target ref. The HEAD will be
+	 * detached if the target ref is not a branch.
 	 *
 	 * @param repository
 	 * @param targetRef
@@ -1670,7 +1783,7 @@ public class JGitUtils {
 	 */
 	public static boolean setHEADtoRef(Repository repository, String targetRef) {
 		try {
-			 // detach HEAD if target ref is not a branch
+			// detach HEAD if target ref is not a branch
 			boolean detach = !targetRef.startsWith(Constants.R_HEADS);
 			RefUpdate.Result result;
 			RefUpdate head = repository.updateRef(Constants.HEAD, detach);
@@ -1688,8 +1801,10 @@ public class JGitUtils {
 			case FAST_FORWARD:
 				return true;
 			default:
-				LOGGER.error(MessageFormat.format("{0} HEAD update to {1} returned result {2}",
-						repository.getDirectory().getAbsolutePath(), targetRef, result));
+				LOGGER.error(MessageFormat.format(
+						"{0} HEAD update to {1} returned result {2}",
+						repository.getDirectory().getAbsolutePath(), targetRef,
+						result));
 			}
 		} catch (Throwable t) {
 			error(t, repository, "{0} failed to set HEAD to {1}", targetRef);
@@ -1705,7 +1820,8 @@ public class JGitUtils {
 	 * @param commitId
 	 * @return true if successful
 	 */
-	public static boolean setBranchRef(Repository repository, String branch, String commitId) {
+	public static boolean setBranchRef(Repository repository, String branch,
+			String commitId) {
 		String branchName = branch;
 		if (!branchName.startsWith(Constants.R_REFS)) {
 			branchName = Constants.R_HEADS + branch;
@@ -1723,11 +1839,14 @@ public class JGitUtils {
 			case FAST_FORWARD:
 				return true;
 			default:
-				LOGGER.error(MessageFormat.format("{0} {1} update to {2} returned result {3}",
-						repository.getDirectory().getAbsolutePath(), branchName, commitId, result));
+				LOGGER.error(MessageFormat.format(
+						"{0} {1} update to {2} returned result {3}", repository
+								.getDirectory().getAbsolutePath(), branchName,
+						commitId, result));
 			}
 		} catch (Throwable t) {
-			error(t, repository, "{0} failed to set {1} to {2}", branchName, commitId);
+			error(t, repository, "{0} failed to set {1} to {2}", branchName,
+					commitId);
 		}
 		return false;
 	}
@@ -1752,8 +1871,10 @@ public class JGitUtils {
 			case FAST_FORWARD:
 				return true;
 			default:
-				LOGGER.error(MessageFormat.format("{0} failed to delete to {1} returned result {2}",
-						repository.getDirectory().getAbsolutePath(), branch, result));
+				LOGGER.error(MessageFormat.format(
+						"{0} failed to delete to {1} returned result {2}",
+						repository.getDirectory().getAbsolutePath(), branch,
+						result));
 			}
 		} catch (Throwable t) {
 			error(t, repository, "{0} failed to delete {1}", branch);
@@ -1769,7 +1890,8 @@ public class JGitUtils {
 	 */
 	public static List<String> getAvailableHeadTargets(Repository repository) {
 		List<String> targets = new ArrayList<String>();
-		for (RefModel branchModel : JGitUtils.getLocalBranches(repository, true, -1)) {
+		for (RefModel branchModel : JGitUtils.getLocalBranches(repository,
+				true, -1)) {
 			targets.add(branchModel.getName());
 		}
 
@@ -1796,11 +1918,14 @@ public class JGitUtils {
 	 * @param includeRemoteRefs
 	 * @return all refs grouped by their referenced object id
 	 */
-	public static Map<ObjectId, List<RefModel>> getAllRefs(Repository repository, boolean includeRemoteRefs) {
-		List<RefModel> list = getRefs(repository, org.eclipse.jgit.lib.RefDatabase.ALL, true, -1);
+	public static Map<ObjectId, List<RefModel>> getAllRefs(
+			Repository repository, boolean includeRemoteRefs) {
+		List<RefModel> list = getRefs(repository,
+				org.eclipse.jgit.lib.RefDatabase.ALL, true, -1);
 		Map<ObjectId, List<RefModel>> refs = new HashMap<ObjectId, List<RefModel>>();
 		for (RefModel ref : list) {
-			if (!includeRemoteRefs && ref.getName().startsWith(Constants.R_REMOTES)) {
+			if (!includeRemoteRefs
+					&& ref.getName().startsWith(Constants.R_REMOTES)) {
 				continue;
 			}
 			ObjectId objectid = ref.getReferencedObjectId();
@@ -1824,7 +1949,8 @@ public class JGitUtils {
 	 *            if < 0, all tags are returned
 	 * @return list of tags
 	 */
-	public static List<RefModel> getTags(Repository repository, boolean fullName, int maxCount) {
+	public static List<RefModel> getTags(Repository repository,
+			boolean fullName, int maxCount) {
 		return getRefs(repository, Constants.R_TAGS, fullName, maxCount);
 	}
 
@@ -1839,10 +1965,12 @@ public class JGitUtils {
 	 * @param maxCount
 	 *            if < 0, all tags are returned
 	 * @param offset
-	 *            if maxCount provided sets the starting point of the records to return
+	 *            if maxCount provided sets the starting point of the records to
+	 *            return
 	 * @return list of tags
 	 */
-	public static List<RefModel> getTags(Repository repository, boolean fullName, int maxCount, int offset) {
+	public static List<RefModel> getTags(Repository repository,
+			boolean fullName, int maxCount, int offset) {
 		return getRefs(repository, Constants.R_TAGS, fullName, maxCount, offset);
 	}
 
@@ -1858,8 +1986,8 @@ public class JGitUtils {
 	 *            if < 0, all local branches are returned
 	 * @return list of local branches
 	 */
-	public static List<RefModel> getLocalBranches(Repository repository, boolean fullName,
-			int maxCount) {
+	public static List<RefModel> getLocalBranches(Repository repository,
+			boolean fullName, int maxCount) {
 		return getRefs(repository, Constants.R_HEADS, fullName, maxCount);
 	}
 
@@ -1875,8 +2003,8 @@ public class JGitUtils {
 	 *            if < 0, all remote branches are returned
 	 * @return list of remote branches
 	 */
-	public static List<RefModel> getRemoteBranches(Repository repository, boolean fullName,
-			int maxCount) {
+	public static List<RefModel> getRemoteBranches(Repository repository,
+			boolean fullName, int maxCount) {
 		return getRefs(repository, Constants.R_REMOTES, fullName, maxCount);
 	}
 
@@ -1892,8 +2020,8 @@ public class JGitUtils {
 	 *            if < 0, all note branches are returned
 	 * @return list of note branches
 	 */
-	public static List<RefModel> getNoteBranches(Repository repository, boolean fullName,
-			int maxCount) {
+	public static List<RefModel> getNoteBranches(Repository repository,
+			boolean fullName, int maxCount) {
 		return getRefs(repository, Constants.R_NOTES, fullName, maxCount);
 	}
 
@@ -1925,8 +2053,8 @@ public class JGitUtils {
 	 *            if < 0, all references are returned
 	 * @return list of references
 	 */
-	private static List<RefModel> getRefs(Repository repository, String refs, boolean fullName,
-			int maxCount) {
+	private static List<RefModel> getRefs(Repository repository, String refs,
+			boolean fullName, int maxCount) {
 		return getRefs(repository, refs, fullName, maxCount, 0);
 	}
 
@@ -1943,11 +2071,12 @@ public class JGitUtils {
 	 * @param maxCount
 	 *            if < 0, all references are returned
 	 * @param offset
-	 *            if maxCount provided sets the starting point of the records to return
+	 *            if maxCount provided sets the starting point of the records to
+	 *            return
 	 * @return list of references
 	 */
-	private static List<RefModel> getRefs(Repository repository, String refs, boolean fullName,
-			int maxCount, int offset) {
+	private static List<RefModel> getRefs(Repository repository, String refs,
+			boolean fullName, int maxCount, int offset) {
 		List<RefModel> list = new ArrayList<RefModel>();
 		if (maxCount == 0) {
 			return list;
@@ -2008,7 +2137,8 @@ public class JGitUtils {
 		RefModel branch = null;
 		try {
 			// search for the branch in local heads
-			for (RefModel ref : JGitUtils.getLocalBranches(repository, false, -1)) {
+			for (RefModel ref : JGitUtils.getLocalBranches(repository, false,
+					-1)) {
 				if (ref.reference.getName().endsWith(name)) {
 					branch = ref;
 					break;
@@ -2017,7 +2147,8 @@ public class JGitUtils {
 
 			// search for the branch in remote heads
 			if (branch == null) {
-				for (RefModel ref : JGitUtils.getRemoteBranches(repository, false, -1)) {
+				for (RefModel ref : JGitUtils.getRemoteBranches(repository,
+						false, -1)) {
 					if (ref.reference.getName().endsWith(name)) {
 						branch = ref;
 						break;
@@ -2025,7 +2156,8 @@ public class JGitUtils {
 				}
 			}
 		} catch (Throwable t) {
-			LOGGER.error(MessageFormat.format("Failed to find {0} branch!", name), t);
+			LOGGER.error(
+					MessageFormat.format("Failed to find {0} branch!", name), t);
 		}
 		return branch;
 	}
@@ -2037,7 +2169,8 @@ public class JGitUtils {
 	 * @param commit
 	 * @return list of submodules
 	 */
-	public static List<SubmoduleModel> getSubmodules(Repository repository, String commitId) {
+	public static List<SubmoduleModel> getSubmodules(Repository repository,
+			String commitId) {
 		RevCommit commit = getCommit(repository, commitId);
 		return getSubmodules(repository, commit.getTree());
 	}
@@ -2049,35 +2182,40 @@ public class JGitUtils {
 	 * @param commit
 	 * @return list of submodules
 	 */
-	public static List<SubmoduleModel> getSubmodules(Repository repository, RevTree tree) {
+	public static List<SubmoduleModel> getSubmodules(Repository repository,
+			RevTree tree) {
 		List<SubmoduleModel> list = new ArrayList<SubmoduleModel>();
-		byte [] blob = getByteContent(repository, tree, ".gitmodules", false);
+		byte[] blob = getByteContent(repository, tree, ".gitmodules", false);
 		if (blob == null) {
 			return list;
 		}
 		try {
-			BlobBasedConfig config = new BlobBasedConfig(repository.getConfig(), blob);
+			BlobBasedConfig config = new BlobBasedConfig(
+					repository.getConfig(), blob);
 			for (String module : config.getSubsections("submodule")) {
 				String path = config.getString("submodule", module, "path");
 				String url = config.getString("submodule", module, "url");
 				list.add(new SubmoduleModel(module, path, url));
 			}
 		} catch (ConfigInvalidException e) {
-			LOGGER.error("Failed to load .gitmodules file for " + repository.getDirectory(), e);
+			LOGGER.error(
+					"Failed to load .gitmodules file for "
+							+ repository.getDirectory(), e);
 		}
 		return list;
 	}
 
 	/**
 	 * Returns the submodule definition for the specified path at the specified
-	 * commit.  If no module is defined for the path, null is returned.
+	 * commit. If no module is defined for the path, null is returned.
 	 *
 	 * @param repository
 	 * @param commit
 	 * @param path
 	 * @return a submodule definition or null if there is no submodule
 	 */
-	public static SubmoduleModel getSubmoduleModel(Repository repository, String commitId, String path) {
+	public static SubmoduleModel getSubmoduleModel(Repository repository,
+			String commitId, String path) {
 		for (SubmoduleModel model : getSubmodules(repository, commitId)) {
 			if (model.path.equals(path)) {
 				return model;
@@ -2086,11 +2224,13 @@ public class JGitUtils {
 		return null;
 	}
 
-	public static String getSubmoduleCommitId(Repository repository, String path, RevCommit commit) {
+	public static String getSubmoduleCommitId(Repository repository,
+			String path, RevCommit commit) {
 		String commitId = null;
 		RevWalk rw = new RevWalk(repository);
 		TreeWalk tw = new TreeWalk(repository);
-		tw.setFilter(PathFilterGroup.createFromStrings(Collections.singleton(path)));
+		tw.setFilter(PathFilterGroup.createFromStrings(Collections
+				.singleton(path)));
 		try {
 			tw.reset(commit.getTree());
 			while (tw.next()) {
@@ -2104,7 +2244,8 @@ public class JGitUtils {
 				}
 			}
 		} catch (Throwable t) {
-			error(t, repository, "{0} can't find {1} in commit {2}", path, commit.name());
+			error(t, repository, "{0} can't find {1} in commit {2}", path,
+					commit.name());
 		} finally {
 			rw.dispose();
 			tw.close();
@@ -2121,21 +2262,24 @@ public class JGitUtils {
 	 * @param commit
 	 * @return list of notes
 	 */
-	public static List<GitNote> getNotesOnCommit(Repository repository, RevCommit commit) {
+	public static List<GitNote> getNotesOnCommit(Repository repository,
+			RevCommit commit) {
 		List<GitNote> list = new ArrayList<GitNote>();
 		if (!hasCommits(repository)) {
 			return list;
 		}
 		List<RefModel> noteBranches = getNoteBranches(repository, true, -1);
 		for (RefModel notesRef : noteBranches) {
-			RevTree notesTree = JGitUtils.getCommit(repository, notesRef.getName()).getTree();
+			RevTree notesTree = JGitUtils.getCommit(repository,
+					notesRef.getName()).getTree();
 			// flat notes list
 			String notePath = commit.getName();
 			String text = getStringContent(repository, notesTree, notePath);
 			if (!StringUtils.isEmpty(text)) {
-				List<RevCommit> history = getRevLog(repository, notesRef.getName(), notePath, 0, -1);
-				RefModel noteRef = new RefModel(notesRef.displayName, null, history.get(history
-						.size() - 1));
+				List<RevCommit> history = getRevLog(repository,
+						notesRef.getName(), notePath, 0, -1);
+				RefModel noteRef = new RefModel(notesRef.displayName, null,
+						history.get(history.size() - 1));
 				GitNote gitNote = new GitNote(noteRef, text);
 				list.add(gitNote);
 				continue;
@@ -2147,9 +2291,10 @@ public class JGitUtils {
 			notePath = sb.toString();
 			text = getStringContent(repository, notesTree, notePath);
 			if (!StringUtils.isEmpty(text)) {
-				List<RevCommit> history = getRevLog(repository, notesRef.getName(), notePath, 0, -1);
-				RefModel noteRef = new RefModel(notesRef.displayName, null, history.get(history
-						.size() - 1));
+				List<RevCommit> history = getRevLog(repository,
+						notesRef.getName(), notePath, 0, -1);
+				RefModel noteRef = new RefModel(notesRef.displayName, null,
+						history.get(history.size() - 1));
 				GitNote gitNote = new GitNote(noteRef, text);
 				list.add(gitNote);
 			}
@@ -2170,15 +2315,18 @@ public class JGitUtils {
 	 * @return true if operation was successful, otherwise false
 	 */
 	public static boolean createIncrementalRevisionTag(Repository repository,
-			String objectId, PersonIdent tagger, String prefix, String intPattern, String message) {
+			String objectId, PersonIdent tagger, String prefix,
+			String intPattern, String message) {
 		boolean result = false;
-		Iterator<Entry<String, Ref>> iterator = repository.getTags().entrySet().iterator();
+		Iterator<Entry<String, Ref>> iterator = repository.getTags().entrySet()
+				.iterator();
 		long lastRev = 0;
 		while (iterator.hasNext()) {
 			Entry<String, Ref> entry = iterator.next();
 			if (entry.getKey().startsWith(prefix)) {
 				try {
-					long val = Long.parseLong(entry.getKey().substring(prefix.length()));
+					long val = Long.parseLong(entry.getKey().substring(
+							prefix.length()));
 					if (val > lastRev) {
 						lastRev = val;
 					}
@@ -2188,7 +2336,8 @@ public class JGitUtils {
 			}
 		}
 		DecimalFormat df = new DecimalFormat(intPattern);
-		result = createTag(repository, objectId, tagger, prefix + df.format((lastRev + 1)), message);
+		result = createTag(repository, objectId, tagger,
+				prefix + df.format((lastRev + 1)), message);
 		return result;
 	}
 
@@ -2196,13 +2345,18 @@ public class JGitUtils {
 	 * creates a tag in a repository
 	 *
 	 * @param repository
-	 * @param objectId, the ref the tag points towards
-	 * @param tagger, the person tagging the object
-	 * @param tag, the string label
-	 * @param message, the string message
+	 * @param objectId
+	 *            , the ref the tag points towards
+	 * @param tagger
+	 *            , the person tagging the object
+	 * @param tag
+	 *            , the string label
+	 * @param message
+	 *            , the string message
 	 * @return boolean, true if operation was successful, otherwise false
 	 */
-	public static boolean createTag(Repository repository, String objectId, PersonIdent tagger, String tag, String message) {
+	public static boolean createTag(Repository repository, String objectId,
+			PersonIdent tagger, String tag, String message) {
 		try {
 			Git gitClient = Git.open(repository.getDirectory());
 			TagCommand tagCommand = gitClient.tag();
@@ -2216,7 +2370,8 @@ public class JGitUtils {
 			Ref call = tagCommand.call();
 			return call != null ? true : false;
 		} catch (Exception e) {
-			error(e, repository, "Failed to create tag {1} in repository {0}", objectId, tag);
+			error(e, repository, "Failed to create tag {1} in repository {0}",
+					objectId, tag);
 		}
 		return false;
 	}
@@ -2230,8 +2385,8 @@ public class JGitUtils {
 	 *            if unspecified, Gitblit will be the author of this new branch
 	 * @return true if successful
 	 */
-	public static boolean createOrphanBranch(Repository repository, String branchName,
-			PersonIdent author) {
+	public static boolean createOrphanBranch(Repository repository,
+			String branchName, PersonIdent author) {
 		boolean success = false;
 		String message = "Created branch " + branchName;
 		if (author == null) {
@@ -2269,7 +2424,8 @@ public class JGitUtils {
 					}
 					RefUpdate ru = repository.updateRef(branchName);
 					ru.setNewObjectId(commitId);
-					ru.setRefLogMessage("commit: " + revCommit.getShortMessage(), false);
+					ru.setRefLogMessage(
+							"commit: " + revCommit.getShortMessage(), false);
 					Result rc = ru.forceUpdate();
 					switch (rc) {
 					case NEW:
@@ -2287,7 +2443,9 @@ public class JGitUtils {
 				odi.close();
 			}
 		} catch (Throwable t) {
-			error(t, repository, "Failed to create orphan branch {1} in repository {0}", branchName);
+			error(t, repository,
+					"Failed to create orphan branch {1} in repository {0}",
+					branchName);
 		}
 		return success;
 	}
@@ -2299,7 +2457,8 @@ public class JGitUtils {
 	 * @return an id or null
 	 */
 	public static String getSparkleshareId(Repository repository) {
-		byte[] content = getByteContent(repository, null, ".sparkleshare", false);
+		byte[] content = getByteContent(repository, null, ".sparkleshare",
+				false);
 		if (content == null) {
 			return null;
 		}
@@ -2307,8 +2466,8 @@ public class JGitUtils {
 	}
 
 	/**
-	 * Automatic repair of (some) invalid refspecs.  These are the result of a
-	 * bug in JGit cloning where a double forward-slash was injected.  :(
+	 * Automatic repair of (some) invalid refspecs. These are the result of a
+	 * bug in JGit cloning where a double forward-slash was injected. :(
 	 *
 	 * @param repository
 	 * @return true, if the refspecs were repaired
@@ -2344,13 +2503,16 @@ public class JGitUtils {
 				try {
 					rc.save();
 					rc.load();
-					LOGGER.debug("repaired {} invalid fetch refspecs for {}", repairedSpecs, repository.getDirectory());
+					LOGGER.debug("repaired {} invalid fetch refspecs for {}",
+							repairedSpecs, repository.getDirectory());
 					return true;
 				} catch (Exception e) {
 					LOGGER.error(null, e);
 				}
 			} else if (invalidSpecs > 0) {
-				LOGGER.error("mirror executor found {} invalid fetch refspecs for {}", invalidSpecs, repository.getDirectory());
+				LOGGER.error(
+						"mirror executor found {} invalid fetch refspecs for {}",
+						invalidSpecs, repository.getDirectory());
 			}
 		}
 		return false;
@@ -2365,9 +2527,11 @@ public class JGitUtils {
 	 * @param tipId
 	 * @return true if there is the commit is an ancestor of the tip
 	 */
-	public static boolean isMergedInto(Repository repository, String commitId, String tipId) {
+	public static boolean isMergedInto(Repository repository, String commitId,
+			String tipId) {
 		try {
-			return isMergedInto(repository, repository.resolve(commitId), repository.resolve(tipId));
+			return isMergedInto(repository, repository.resolve(commitId),
+					repository.resolve(tipId));
 		} catch (Exception e) {
 			LOGGER.error("Failed to determine isMergedInto", e);
 		}
@@ -2383,7 +2547,8 @@ public class JGitUtils {
 	 * @param tipId
 	 * @return true if there is the commit is an ancestor of the tip
 	 */
-	public static boolean isMergedInto(Repository repository, ObjectId commitId, ObjectId tipCommitId) {
+	public static boolean isMergedInto(Repository repository,
+			ObjectId commitId, ObjectId tipCommitId) {
 		// traverse the revlog looking for a commit chain between the endpoints
 		RevWalk rw = new RevWalk(repository);
 		try {
@@ -2406,9 +2571,11 @@ public class JGitUtils {
 	 * @param repository
 	 * @param commitIdA
 	 * @param commitIdB
-	 * @return the commit id of the merge base or null if there is no common base
+	 * @return the commit id of the merge base or null if there is no common
+	 *         base
 	 */
-	public static String getMergeBase(Repository repository, ObjectId commitIdA, ObjectId commitIdB) {
+	public static String getMergeBase(Repository repository,
+			ObjectId commitIdA, ObjectId commitIdB) {
 		RevWalk rw = new RevWalk(repository);
 		try {
 			RevCommit a = rw.lookupCommit(commitIdA);
@@ -2435,7 +2602,7 @@ public class JGitUtils {
 	}
 
 	/**
-	 * Determines if we can cleanly merge one branch into another.  Returns true
+	 * Determines if we can cleanly merge one branch into another. Returns true
 	 * if we can merge without conflict, otherwise returns false.
 	 *
 	 * @param repository
@@ -2445,11 +2612,12 @@ public class JGitUtils {
 	 *            Defines the integration strategy to use for merging.
 	 * @return true if we can merge without conflict
 	 */
-	public static MergeStatus canMerge(Repository repository, String src, String toBranch, MergeType mergeType) {
-		IntegrationStrategy strategy = IntegrationStrategyFactory.create(mergeType, repository, src, toBranch);
+	public static MergeStatus canMerge(Repository repository, String src,
+			String toBranch, MergeType mergeType) {
+		IntegrationStrategy strategy = IntegrationStrategyFactory.create(
+				mergeType, repository, src, toBranch);
 		return strategy.canMerge();
 	}
-
 
 	public static class MergeResult {
 		public final MergeStatus status;
@@ -2462,7 +2630,7 @@ public class JGitUtils {
 	}
 
 	/**
-	 * Tries to merge a commit into a branch.  If there are conflicts, the merge
+	 * Tries to merge a commit into a branch. If there are conflicts, the merge
 	 * will fail.
 	 *
 	 * @param repository
@@ -2474,15 +2642,17 @@ public class JGitUtils {
 	 * @param message
 	 * @return the merge result
 	 */
-	public static MergeResult merge(Repository repository, String src, String toBranch, MergeType mergeType,
-			PersonIdent committer, String message) {
+	public static MergeResult merge(Repository repository, String src,
+			String toBranch, MergeType mergeType, PersonIdent committer,
+			String message) {
 
 		if (!toBranch.startsWith(Constants.R_REFS)) {
 			// branch ref doesn't start with ref, assume this is a branch head
 			toBranch = Constants.R_HEADS + toBranch;
 		}
 
-		IntegrationStrategy strategy = IntegrationStrategyFactory.create(mergeType, repository, src, toBranch);
+		IntegrationStrategy strategy = IntegrationStrategyFactory.create(
+				mergeType, repository, src, toBranch);
 		MergeResult mergeResult = strategy.merge(committer, message);
 
 		if (mergeResult.status != MergeStatus.MERGED) {
@@ -2502,8 +2672,10 @@ public class JGitUtils {
 				break;
 			default:
 				mergeResult = new MergeResult(MergeStatus.FAILED, null);
-				throw new GitBlitException(MessageFormat.format("Unexpected result \"{0}\" when {1} in {2}",
-						rc.name(), strategy.getOperationMessage(), repository.getDirectory()));
+				throw new GitBlitException(MessageFormat.format(
+						"Unexpected result \"{0}\" when {1} in {2}", rc.name(),
+						strategy.getOperationMessage(),
+						repository.getDirectory()));
 			}
 		} catch (IOException e) {
 			LOGGER.error("Failed to merge", e);
@@ -2511,7 +2683,6 @@ public class JGitUtils {
 
 		return mergeResult;
 	}
-
 
 	private static abstract class IntegrationStrategy {
 		Repository repository;
@@ -2545,7 +2716,8 @@ public class JGitUtils {
 		}
 
 		void prepare() throws IOException {
-			if (revWalk == null) revWalk = new RevWalk(repository);
+			if (revWalk == null)
+				revWalk = new RevWalk(repository);
 			ObjectId branchId = repository.resolve(toBranch);
 			if (branchId != null) {
 				branchTip = revWalk.lookupCommit(branchId);
@@ -2556,9 +2728,7 @@ public class JGitUtils {
 			}
 		}
 
-
 		abstract MergeStatus _canMerge() throws IOException;
-
 
 		MergeStatus canMerge() {
 			try {
@@ -2589,9 +2759,8 @@ public class JGitUtils {
 			return MergeStatus.NOT_MERGEABLE;
 		}
 
-
-		abstract MergeResult _merge(PersonIdent committer, String message) throws IOException;
-
+		abstract MergeResult _merge(PersonIdent committer, String message)
+				throws IOException;
 
 		MergeResult merge(PersonIdent committer, String message) {
 			try {
@@ -2615,7 +2784,6 @@ public class JGitUtils {
 		}
 	}
 
-
 	private static class FastForwardOnly extends IntegrationStrategy {
 		FastForwardOnly(Repository repository, String src, String toBranch) {
 			super(repository, src, toBranch);
@@ -2632,15 +2800,18 @@ public class JGitUtils {
 		}
 
 		@Override
-		MergeResult _merge(PersonIdent committer, String message) throws IOException {
-			if (! revWalk.isMergedInto(branchTip, srcTip)) {
+		MergeResult _merge(PersonIdent committer, String message)
+				throws IOException {
+			if (!revWalk.isMergedInto(branchTip, srcTip)) {
 				// is not fast-forward
 				return new MergeResult(MergeStatus.FAILED, null);
 			}
 
 			mergeCommit = srcTip;
 			refLogMessage = "merge " + src + ": Fast-forward";
-			operationMessage = MessageFormat.format("fast-forwarding {0} to commit {1}", srcTip.getName(), branchTip.getName());
+			operationMessage = MessageFormat.format(
+					"fast-forwarding {0} to commit {1}", srcTip.getName(),
+					branchTip.getName());
 
 			return new MergeResult(MergeStatus.MERGED, srcTip.getName());
 		}
@@ -2658,7 +2829,8 @@ public class JGitUtils {
 				return MergeStatus.MERGEABLE;
 			}
 
-			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE
+					.newMerger(repository, true);
 			boolean canMerge = merger.merge(branchTip, srcTip);
 			if (canMerge) {
 				return MergeStatus.MERGEABLE;
@@ -2668,20 +2840,25 @@ public class JGitUtils {
 		}
 
 		@Override
-		MergeResult _merge(PersonIdent committer, String message) throws IOException {
+		MergeResult _merge(PersonIdent committer, String message)
+				throws IOException {
 			if (revWalk.isMergedInto(branchTip, srcTip)) {
 				// fast-forward
 				mergeCommit = srcTip;
 				refLogMessage = "merge " + src + ": Fast-forward";
-				operationMessage = MessageFormat.format("fast-forwarding {0} to commit {1}", branchTip.getName(), srcTip.getName());
+				operationMessage = MessageFormat.format(
+						"fast-forwarding {0} to commit {1}",
+						branchTip.getName(), srcTip.getName());
 
 				return new MergeResult(MergeStatus.MERGED, srcTip.getName());
 			}
 
-			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE
+					.newMerger(repository, true);
 			boolean merged = merger.merge(branchTip, srcTip);
 			if (merged) {
-				// create a merge commit and a reference to track the merge commit
+				// create a merge commit and a reference to track the merge
+				// commit
 				ObjectId treeId = merger.getResultTreeId();
 				ObjectInserter odi = repository.newObjectInserter();
 				try {
@@ -2691,10 +2868,12 @@ public class JGitUtils {
 					commitBuilder.setAuthor(committer);
 					commitBuilder.setEncoding(Constants.CHARSET);
 					if (StringUtils.isEmpty(message)) {
-						message = MessageFormat.format("merge {0} into {1}", srcTip.getName(), branchTip.getName());
+						message = MessageFormat.format("merge {0} into {1}",
+								srcTip.getName(), branchTip.getName());
 					}
 					commitBuilder.setMessage(message);
-					commitBuilder.setParentIds(branchTip.getId(), srcTip.getId());
+					commitBuilder.setParentIds(branchTip.getId(),
+							srcTip.getId());
 					commitBuilder.setTreeId(treeId);
 
 					// Insert the merge commit into the repository
@@ -2703,10 +2882,13 @@ public class JGitUtils {
 
 					mergeCommit = revWalk.parseCommit(mergeCommitId);
 					refLogMessage = "commit: " + mergeCommit.getShortMessage();
-					operationMessage = MessageFormat.format("merging commit {0} into {1}", srcTip.getName(), branchTip.getName());
+					operationMessage = MessageFormat.format(
+							"merging commit {0} into {1}", srcTip.getName(),
+							branchTip.getName());
 
 					// return the merge commit id
-					return new MergeResult(MergeStatus.MERGED, mergeCommitId.getName());
+					return new MergeResult(MergeStatus.MERGED,
+							mergeCommitId.getName());
 				} finally {
 					odi.close();
 				}
@@ -2722,7 +2904,8 @@ public class JGitUtils {
 
 		@Override
 		MergeStatus _canMerge() throws IOException {
-			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE
+					.newMerger(repository, true);
 			boolean canMerge = merger.merge(branchTip, srcTip);
 			if (canMerge) {
 				return MergeStatus.MERGEABLE;
@@ -2732,11 +2915,14 @@ public class JGitUtils {
 		}
 
 		@Override
-		MergeResult _merge(PersonIdent committer, String message) throws IOException {
-			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+		MergeResult _merge(PersonIdent committer, String message)
+				throws IOException {
+			RecursiveMerger merger = (RecursiveMerger) MergeStrategy.RECURSIVE
+					.newMerger(repository, true);
 			boolean merged = merger.merge(branchTip, srcTip);
 			if (merged) {
-				// create a merge commit and a reference to track the merge commit
+				// create a merge commit and a reference to track the merge
+				// commit
 				ObjectId treeId = merger.getResultTreeId();
 				ObjectInserter odi = repository.newObjectInserter();
 				try {
@@ -2746,10 +2932,12 @@ public class JGitUtils {
 					commitBuilder.setAuthor(committer);
 					commitBuilder.setEncoding(Constants.CHARSET);
 					if (StringUtils.isEmpty(message)) {
-						message = MessageFormat.format("merge {0} into {1}", srcTip.getName(), branchTip.getName());
+						message = MessageFormat.format("merge {0} into {1}",
+								srcTip.getName(), branchTip.getName());
 					}
 					commitBuilder.setMessage(message);
-					commitBuilder.setParentIds(branchTip.getId(), srcTip.getId());
+					commitBuilder.setParentIds(branchTip.getId(),
+							srcTip.getId());
 					commitBuilder.setTreeId(treeId);
 
 					// Insert the merge commit into the repository
@@ -2758,10 +2946,13 @@ public class JGitUtils {
 
 					mergeCommit = revWalk.parseCommit(mergeCommitId);
 					refLogMessage = "commit: " + mergeCommit.getShortMessage();
-					operationMessage = MessageFormat.format("merging commit {0} into {1}", srcTip.getName(), branchTip.getName());
+					operationMessage = MessageFormat.format(
+							"merging commit {0} into {1}", srcTip.getName(),
+							branchTip.getName());
 
 					// return the merge commit id
-					return new MergeResult(MergeStatus.MERGED, mergeCommitId.getName());
+					return new MergeResult(MergeStatus.MERGED,
+							mergeCommitId.getName());
 				} finally {
 					odi.close();
 				}
@@ -2771,10 +2962,10 @@ public class JGitUtils {
 		}
 	}
 
-
 	private static class IntegrationStrategyFactory {
-		static IntegrationStrategy create(MergeType mergeType, Repository repository, String src, String toBranch) {
-			switch(mergeType) {
+		static IntegrationStrategy create(MergeType mergeType,
+				Repository repository, String src, String toBranch) {
+			switch (mergeType) {
 			case FAST_FORWARD_ONLY:
 				return new FastForwardOnly(repository, src, toBranch);
 			case MERGE_IF_NECESSARY:
@@ -2786,29 +2977,29 @@ public class JGitUtils {
 		}
 	}
 
-
 	/**
-	 * Returns the LFS URL for the given oid 
-	 * Currently assumes that the Gitblit Filestore is used 
+	 * Returns the LFS URL for the given oid Currently assumes that the Gitblit
+	 * Filestore is used
 	 *
 	 * @param baseURL
-	 * @param repository name
-	 * @param oid of lfs item
+	 * @param repository
+	 *            name
+	 * @param oid
+	 *            of lfs item
 	 * @return the lfs item URL
 	 */
-	public static String getLfsRepositoryUrl(String baseURL, String repositoryName, String oid) {
-		
+	public static String getLfsRepositoryUrl(String baseURL,
+			String repositoryName, String oid) {
+
 		if (baseURL.length() > 0 && baseURL.charAt(baseURL.length() - 1) == '/') {
 			baseURL = baseURL.substring(0, baseURL.length() - 1);
 		}
-		
-		return baseURL + com.teammerge.Constants.R_PATH 
-					   + repositoryName + "/" 
-					   + com.teammerge.Constants.R_LFS 
-					   + "objects/" + oid;
-		
+
+		return baseURL + com.teammerge.Constants.R_PATH + repositoryName + "/"
+				+ com.teammerge.Constants.R_LFS + "objects/" + oid;
+
 	}
-	
+
 	/**
 	 * Returns all tree entries that do not match the ignore paths.
 	 *
@@ -2817,7 +3008,8 @@ public class JGitUtils {
 	 * @param dcBuilder
 	 * @throws IOException
 	 */
-	public static List<DirCacheEntry> getTreeEntries(Repository db, String branch, Collection<String> ignorePaths) throws IOException {
+	public static List<DirCacheEntry> getTreeEntries(Repository db,
+			String branch, Collection<String> ignorePaths) throws IOException {
 		List<DirCacheEntry> list = new ArrayList<DirCacheEntry>();
 		TreeWalk tw = null;
 		try {
@@ -2853,16 +3045,19 @@ public class JGitUtils {
 		}
 		return list;
 	}
-	
-	public static boolean commitIndex(Repository db, String branch, DirCache index,
-									  ObjectId parentId, boolean forceCommit,
-									  String author, String authorEmail, String message) throws IOException, ConcurrentRefUpdateException {
+
+	public static boolean commitIndex(Repository db, String branch,
+			DirCache index, ObjectId parentId, boolean forceCommit,
+			String author, String authorEmail, String message)
+			throws IOException, ConcurrentRefUpdateException {
 		boolean success = false;
 
 		ObjectId headId = db.resolve(branch + "^{commit}");
 		ObjectId baseId = parentId;
-		if (baseId == null || headId == null) { return false; }
-		
+		if (baseId == null || headId == null) {
+			return false;
+		}
+
 		ObjectInserter odi = db.newObjectInserter();
 		try {
 			// Create the in-memory index of the new/updated ticket
@@ -2870,21 +3065,22 @@ public class JGitUtils {
 
 			// Create a commit object
 			PersonIdent ident = new PersonIdent(author, authorEmail);
-			
+
 			if (forceCommit == false) {
-				ThreeWayMerger merger = MergeStrategy.RECURSIVE.newMerger(db, true);
+				ThreeWayMerger merger = MergeStrategy.RECURSIVE.newMerger(db,
+						true);
 				merger.setObjectInserter(odi);
 				merger.setBase(baseId);
 				boolean mergeSuccess = merger.merge(indexTreeId, headId);
-				
+
 				if (mergeSuccess) {
 					indexTreeId = merger.getResultTreeId();
-				 } else {
-					//Manual merge required
-					return false; 
-				 }
+				} else {
+					// Manual merge required
+					return false;
+				}
 			}
-			
+
 			CommitBuilder commit = new CommitBuilder();
 			commit.setAuthor(ident);
 			commit.setCommitter(ident);
@@ -2904,7 +3100,8 @@ public class JGitUtils {
 				ru.setForceUpdate(forceCommit);
 				ru.setNewObjectId(commitId);
 				ru.setExpectedOldObjectId(headId);
-				ru.setRefLogMessage("commit: " + revCommit.getShortMessage(), false);
+				ru.setRefLogMessage("commit: " + revCommit.getShortMessage(),
+						false);
 				Result rc = ru.update();
 
 				switch (rc) {
@@ -2915,12 +3112,12 @@ public class JGitUtils {
 					break;
 				case REJECTED:
 				case LOCK_FAILURE:
-					throw new ConcurrentRefUpdateException(JGitText.get().couldNotLockHEAD,
-							ru.getRef(), rc);
+					throw new ConcurrentRefUpdateException(
+							JGitText.get().couldNotLockHEAD, ru.getRef(), rc);
 				default:
 					throw new JGitInternalException(MessageFormat.format(
-							JGitText.get().updatingRefFailed, branch, commitId.toString(),
-							rc));
+							JGitText.get().updatingRefFailed, branch,
+							commitId.toString(), rc));
 				}
 			} finally {
 				revWalk.close();
@@ -2930,9 +3127,10 @@ public class JGitUtils {
 		}
 		return success;
 	}
-	
+
 	/**
-	 * Returns true if the commit identified by commitId is at the tip of it's branch.
+	 * Returns true if the commit identified by commitId is at the tip of it's
+	 * branch.
 	 *
 	 * @param repository
 	 * @param commitId
@@ -2941,38 +3139,41 @@ public class JGitUtils {
 	public static boolean isTip(Repository repository, String commitId) {
 		try {
 			RefModel tip = getBranch(repository, commitId);
-			return (tip != null);	
+			return (tip != null);
 		} catch (Exception e) {
 			LOGGER.error("Failed to determine isTip", e);
 		}
 		return false;
 	}
-	
+
 	/*
 	 * Identify ticket by considering the branch the commit is on
 	 * 
 	 * @param repository
-	 * @param commit 
+	 * 
+	 * @param commit
+	 * 
 	 * @return ticket number, or 0 if no ticket
 	 */
-	public static long getTicketNumberFromCommitBranch(Repository repository, RevCommit commit) {
+	public static long getTicketNumberFromCommitBranch(Repository repository,
+			RevCommit commit) {
 		// try lookup by change ref
-		Map<AnyObjectId, Set<Ref>> map = repository.getAllRefsByPeeledObjectId();
+		Map<AnyObjectId, Set<Ref>> map = repository
+				.getAllRefsByPeeledObjectId();
 		Set<Ref> refs = map.get(commit.getId());
 		if (!ArrayUtils.isEmpty(refs)) {
 			for (Ref ref : refs) {
 				long number = PatchsetCommand.getTicketNumber(ref.getName());
-				
+
 				if (number > 0) {
 					return number;
 				}
 			}
 		}
-		
+
 		return 0;
 	}
-	
-	
+
 	/**
 	 * Try to identify all referenced tickets from the commit.
 	 *
@@ -2980,14 +3181,15 @@ public class JGitUtils {
 	 * @return a collection of TicketLinks
 	 */
 	@NotNull
-	public static List<TicketLink> identifyTicketsFromCommitMessage(Repository repository, IStoredSettings settings,
-			RevCommit commit) {
+	public static List<TicketLink> identifyTicketsFromCommitMessage(
+			Repository repository, IStoredSettings settings, RevCommit commit) {
 		List<TicketLink> ticketLinks = new ArrayList<TicketLink>();
 		List<Long> linkedTickets = new ArrayList<Long>();
 
 		// parse commit message looking for fixes/closes #n
 		final String xFixDefault = "(?:fixes|closes)[\\s-]+#?(\\d+)";
-		String xFix = settings.getString(Keys.tickets.closeOnPushCommitMessageRegex, xFixDefault);
+		String xFix = settings.getString(
+				Keys.tickets.closeOnPushCommitMessageRegex, xFixDefault);
 		if (StringUtils.isEmpty(xFix)) {
 			xFix = xFixDefault;
 		}
@@ -2996,20 +3198,22 @@ public class JGitUtils {
 			Matcher m = p.matcher(commit.getFullMessage());
 			while (m.find()) {
 				String val = m.group(1);
-				long number = Long.parseLong(val); 
-				
+				long number = Long.parseLong(val);
+
 				if (number > 0) {
 					ticketLinks.add(new TicketLink(number, TicketAction.Close));
 					linkedTickets.add(number);
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(String.format("Failed to parse \"%s\" in commit %s", xFix, commit.getName()), e);
+			LOGGER.error(String.format("Failed to parse \"%s\" in commit %s",
+					xFix, commit.getName()), e);
 		}
-		
+
 		// parse commit message looking for ref #n
 		final String xRefDefault = "(?:ref|task|issue|bug)?[\\s-]*#(\\d+)";
-		String xRef = settings.getString(Keys.tickets.linkOnPushCommitMessageRegex, xRefDefault);
+		String xRef = settings.getString(
+				Keys.tickets.linkOnPushCommitMessageRegex, xRefDefault);
 		if (StringUtils.isEmpty(xRef)) {
 			xRef = xRefDefault;
 		}
@@ -3018,33 +3222,40 @@ public class JGitUtils {
 			Matcher m = p.matcher(commit.getFullMessage());
 			while (m.find()) {
 				String val = m.group(1);
-				long number = Long.parseLong(val); 
-				//Most generic case so don't included tickets more precisely linked
+				long number = Long.parseLong(val);
+				// Most generic case so don't included tickets more precisely
+				// linked
 				if ((number > 0) && (!linkedTickets.contains(number))) {
-					ticketLinks.add( new TicketLink(number, TicketAction.Commit, commit.getName()));
+					ticketLinks.add(new TicketLink(number, TicketAction.Commit,
+							commit.getName()));
 					linkedTickets.add(number);
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(String.format("Failed to parse \"%s\" in commit %s", xRef, commit.getName()), e);
+			LOGGER.error(String.format("Failed to parse \"%s\" in commit %s",
+					xRef, commit.getName()), e);
 		}
 
 		return ticketLinks;
 	}
-	
+
 	/**
 	 * Try to identify all referenced tickets between two commits
 	 *
 	 * @param commit
 	 * @param parseMessage
-	 * @param currentTicketId, or 0 if not on a ticket branch
+	 * @param currentTicketId
+	 *            , or 0 if not on a ticket branch
 	 * @return a collection of TicketLink, or null if commit is already linked
 	 */
-	public static List<TicketLink> identifyTicketsBetweenCommits(Repository repository, IStoredSettings settings,
-			String baseSha, String tipSha) {
+	public static List<TicketLink> identifyTicketsBetweenCommits(
+			Repository repository, IStoredSettings settings, String baseSha,
+			String tipSha) {
 		List<TicketLink> links = new ArrayList<TicketLink>();
-		if (repository == null) { return links; }
-		
+		if (repository == null) {
+			return links;
+		}
+
 		RevWalk walk = new RevWalk(repository);
 		walk.sort(RevSort.TOPO);
 		walk.sort(RevSort.REVERSE, true);
@@ -3058,18 +3269,20 @@ public class JGitUtils {
 				if (commit == null) {
 					break;
 				}
-				links.addAll(JGitUtils.identifyTicketsFromCommitMessage(repository, settings, commit));
+				links.addAll(JGitUtils.identifyTicketsFromCommitMessage(
+						repository, settings, commit));
 			}
 		} catch (IOException e) {
 			LOGGER.error("failed to identify tickets between commits.", e);
 		} finally {
 			walk.dispose();
 		}
-		
+
 		return links;
 	}
-	
-	public static int countCommits(Repository repository, RevWalk walk, ObjectId baseId, ObjectId tipId) {
+
+	public static int countCommits(Repository repository, RevWalk walk,
+			ObjectId baseId, ObjectId tipId) {
 		int count = 0;
 		walk.reset();
 		walk.sort(RevSort.TOPO);
@@ -3097,14 +3310,15 @@ public class JGitUtils {
 		return count;
 	}
 
-	public static int countCommits(Repository repository, RevWalk walk, String baseId, String tipId) {
+	public static int countCommits(Repository repository, RevWalk walk,
+			String baseId, String tipId) {
 		int count = 0;
 		try {
-			count = countCommits(repository, walk, repository.resolve(baseId),repository.resolve(tipId));
+			count = countCommits(repository, walk, repository.resolve(baseId),
+					repository.resolve(tipId));
 		} catch (IOException e) {
 			LOGGER.error("failed to get commit count", e);
 		}
 		return count;
 	}
 }
-
