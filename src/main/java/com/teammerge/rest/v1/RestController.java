@@ -1,6 +1,7 @@
 package com.teammerge.rest.v1;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -33,10 +34,11 @@ public class RestController {
 	public Response getRepositories() {
 		File baseFolder = new File(System.getProperty("user.dir"));
 		String path = "/home/rahul/Downloads/git/";
-		
-		File regFile = com.teammerge.utils.FileUtils.resolveParameter(Constants.baseFolder$, baseFolder, path);
+
+		File regFile = com.teammerge.utils.FileUtils.resolveParameter(
+				Constants.baseFolder$, baseFolder, path);
 		FileSettings settings = new FileSettings(regFile.getAbsolutePath());
-		
+
 		// configure the Gitblit singleton for minimal, non-server operation
 		XssFilter xssFilter = new AllowXssFilter();
 
@@ -44,10 +46,13 @@ public class RestController {
 				baseFolder).start();
 
 		RepositoryManager manager = new RepositoryManager(runtime, null);
-		
-		List<String> list =manager.getRepositoryList();
-		
+
+		List<String> list = manager.getRepositoryList();
+		System.out.println("\n\n " + list.size() + "\n\n");
+		for (String list1 : list) {
+			System.out.println("\n\n " + list1 + "\n\n");
+		}
 		String output = "hello";
-		return Response.status(200).entity(list.toArray()).build();
+		return Response.status(200).entity(output).build();
 	}
 }
