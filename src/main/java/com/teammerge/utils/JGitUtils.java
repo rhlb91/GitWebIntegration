@@ -722,8 +722,10 @@ public class JGitUtils {
 			ObjectId branchObject;
 			if (StringUtils.isEmpty(objectId) || "HEAD".equalsIgnoreCase(objectId)) {
 				branchObject = getDefaultBranch(repository);
+				System.out.println("ObjectId:"+objectId + ", Default branch:"+branchObject);
 			} else {
 				branchObject = repository.resolve(objectId);
+				System.out.println("ObjectId:"+objectId +", Provided branch: "+branchObject);
 			}
 			if (branchObject == null) {
 				return null;
@@ -1325,8 +1327,10 @@ public class JGitUtils {
 			ObjectId branchObject;
 			if (StringUtils.isEmpty(objectId)) {
 				branchObject = getDefaultBranch(repository);
+				System.out.println("\ndefault branch Object Id:"+branchObject+"\n");
 			} else {
 				branchObject = repository.resolve(objectId);
+				System.out.println("\nProvided branch object Id:"+branchObject+"\n");
 			}
 
 			RevWalk rw = new RevWalk(repository);

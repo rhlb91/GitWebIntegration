@@ -9,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -84,8 +85,12 @@ public class RestController {
 
 		List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, new Date());
 		String output = null;
-		for (RevCommit commit : commits) {
-			output += commit.getFullMessage() + "<br>";
+		if (CollectionUtils.isNotEmpty(commits)) {
+			for (RevCommit commit : commits) {
+				output += commit.getFullMessage() + "<br>";
+			}
+		} else {
+			output = "No commits found for the branch: " + branch;
 		}
 		return Response.status(200).entity(output).build();
 	}
@@ -97,8 +102,8 @@ public class RestController {
 		String output = null;
 
 		Repository repo = getRepository();
-		List<RefModel> branchModels = JGitUtils
-				.getRemoteBranches(repo, true, -1);
+		List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true,
+				-1);
 		if (branchModels.size() > 0) {
 
 			for (RefModel branch : branchModels) {
