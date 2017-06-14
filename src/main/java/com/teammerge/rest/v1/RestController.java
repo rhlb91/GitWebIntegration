@@ -9,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -17,6 +18,7 @@ import com.teammerge.FileSettings;
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.manager.RepositoryManager;
 import com.teammerge.manager.RuntimeManager;
+import com.teammerge.model.RefModel;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.XssFilter;
 import com.teammerge.utils.XssFilter.AllowXssFilter;
@@ -68,11 +70,45 @@ public class RestController {
 
 		RevCommit commit = JGitUtils.getCommit(repo, null);
 		Date commitDate = JGitUtils.getCommitDate(commit);
-		System.out.println("Commit: "+commit);
-		System.out.println("Message: "+commit.getFullMessage());
-		System.out.println("Name:"+commit.getName());
+		System.out.println("Commit: " + commit);
+		System.out.println("Message: " + commit.getFullMessage());
+		System.out.println("Name:" + commit.getName());
 		output = "Commit Date: " + commitDate;
 		return Response.status(200).entity(output).build();
+	}
+
+	@GET
+	@Path("/repository/commit/{branch}")
+	public Response getAllCommits(@PathParam("branch") String branch) {
+		Repository repo = getRepository();
+
+		List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, new Date());
+		String output = null;
+		for (RevCommit commit : commits) {
+			output += commit.getFullMessage() + "<br>";
+		}
+		return Response.status(200).entity(output).build();
+	}
+
+	@GET
+	@Path("/repository/branches")
+	public Response getAllBranches() {
+		ObjectId object = null;
+		String output = null;
+
+		Repository repo = getRepository();
+		List<RefModel> branchModels = JGitUtils
+				.getRemoteBranches(repo, true, -1);
+		if (branchModels.size() > 0) {
+
+			for (RefModel branch : branchModels) {
+				object = branch.getReferencedObjectId();
+				output += branch.getName() + "--" + object + "<br>";
+			}
+		}
+
+		return Response.status(200).entity(output).build();
+
 	}
 
 	protected Repository getRepository() {
