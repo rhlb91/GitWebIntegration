@@ -1,6 +1,7 @@
 package com.teammerge.rest.v1;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -92,8 +93,13 @@ public class RestController {
 			@PathParam("branch") String branch) {
 		Repository repo = getRepository(repoName);
 
-		List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, new Date());
-		String output = null;
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -2);
+		System.out.println("Date = " + cal.getTime());
+
+		List<RevCommit> commits = JGitUtils.getRevLog(repo, branch,
+				cal.getTime());
+		String output = "";
 		if (CollectionUtils.isNotEmpty(commits)) {
 			for (RevCommit commit : commits) {
 				output += commit.getFullMessage() + "<br>";
