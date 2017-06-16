@@ -28,11 +28,16 @@ public class Constants {
 	public static final String baseFolder$ = "${" + baseFolder + "}";
 
 	public static final String CONFIG_GITBLIT = "gitblit";
-	
+
 	public static final String ISO8601 = "yyyy-MM-dd'T'HH:mm:ssZ";
-	
+
 	public static final String CONFIG_CUSTOM_FIELDS = "customFields";
-	
+	public static final String R_HEADS = "refs/heads/";
+	public static final String R_TAGS = "refs/tags/";
+	public static final String R_PULL = "refs/pull/";
+	public static final int LEN_SHORTLOG_REFS = 60;
+	public static final int LEN_SHORTLOG = 78;
+
 	public static String getVersion() {
 		String v = Constants.class.getPackage().getImplementationVersion();
 		if (v == null) {
