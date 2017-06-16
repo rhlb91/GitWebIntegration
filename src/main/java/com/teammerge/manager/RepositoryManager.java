@@ -35,8 +35,10 @@ import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
 import com.teammerge.utils.ArrayUtils;
+import com.teammerge.utils.ByteFormat;
 import com.teammerge.utils.DeepCopier;
 import com.teammerge.utils.JGitUtils;
+import com.teammerge.utils.JGitUtils.LastChange;
 import com.teammerge.utils.StringUtils;
 
 public class RepositoryManager implements IRepositoryManager {
@@ -228,8 +230,8 @@ public class RepositoryManager implements IRepositoryManager {
 
 	@Override
 	public File getRepositoriesFolder() {
-		// TODO Auto-generated method stub
-		return null;
+		return runtimeManager.getFileOrFolder(
+				Keys.git.repositoriesFolder, "${baseFolder}/git");
 	}
 
 	@Override
@@ -411,8 +413,25 @@ public class RepositoryManager implements IRepositoryManager {
 
 	@Override
 	public long updateLastChangeFields(Repository r, RepositoryModel model) {
-		// TODO Auto-generated method stub
-		return 0;
+		LastChange lc = JGitUtils.getLastChange(r);
+		model.lastChange = lc.when;
+		model.lastChangeAuthor = lc.who;
+
+		if (!settings.getBoolean(Keys.web.showRepositorySizes, true)
+				|| model.skipSizeCalculation) {
+			model.size = null;
+			return 0L;
+		}
+		/*if (!repositorySizeCache.hasCurrent(model.name, model.lastChange)) {*/
+			File gitDir = r.getDirectory();
+			long sz = com.teammerge.utils.FileUtils.folderSize(gitDir);
+			/*repositorySizeCache.updateObject(model.name, model.lastChange, sz);*/
+		/*}*/
+		/*long size = repositorySizeCache.getObject(model.name);*/
+			long size =sz;
+		ByteFormat byteFormat = new ByteFormat();
+		model.size = byteFormat.format(size);
+		return size;
 	}
 
 	@Override
@@ -583,8 +602,10 @@ public class RepositoryManager implements IRepositoryManager {
 					.fromName(getConfig(config, "commitMessageRenderer",
 							settings.getString(Keys.web.commitMessageRenderer,
 									null)));
-		/*	model.federationStrategy = FederationStrategy.fromName(getConfig(
-					config, "federationStrategy", null));*/
+			/*
+			 * model.federationStrategy = FederationStrategy.fromName(getConfig(
+			 * config, "federationStrategy", null));
+			 */
 			model.federationSets = new ArrayList<String>(Arrays.asList(config
 					.getStringList(Constants.CONFIG_GITBLIT, null,
 							"federationSets")));

@@ -1,6 +1,5 @@
 package com.teammerge.rest.v1;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,18 +14,26 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import com.teammerge.Constants;
-import com.teammerge.FileSettings;
 import com.teammerge.manager.IRepositoryManager;
-import com.teammerge.manager.RepositoryManager;
-import com.teammerge.manager.RuntimeManager;
+import com.teammerge.model.ActivityModel;
 import com.teammerge.model.RefModel;
+import com.teammerge.services.DashBoardService;
+import com.teammerge.services.RepositoryService;
+import com.teammerge.services.impl.DashboardServiceImpl;
+import com.teammerge.services.impl.RepositoryServiceImpl;
 import com.teammerge.utils.JGitUtils;
-import com.teammerge.utils.XssFilter;
-import com.teammerge.utils.XssFilter.AllowXssFilter;
+import com.teammerge.utils.JacksonUtils;
 
 @Path("/v1")
 public class RestController {
+
+	private RepositoryService repositoryService;
+	private DashBoardService dashBoardService;
+
+	private IRepositoryManager getRepositoryManager() {
+		repositoryService = new RepositoryServiceImpl();
+		return repositoryService.getRepositoryManager();
+	}
 
 	@GET
 	@Path("/hello/{param}")
@@ -135,6 +142,29 @@ public class RestController {
 
 	}
 
+	@GET
+	@Path("/activities")
+	public Response getActivities() {
+		dashBoardService = new DashboardServiceImpl();
+
+		List<ActivityModel> activities = dashBoardService.populateActivities();
+		return Response.status(200)
+				.entity(activities.toString()).build();
+	}
+
+	@GET
+	@Path("/activitiesInJson")
+	public Response getActivitiesInJson() {
+		dashBoardService = new DashboardServiceImpl();
+
+		List<ActivityModel> activities = dashBoardService.populateActivities();
+
+		String jsonOutput = JacksonUtils.toJson(activities);
+		
+		return Response.status(200)
+				.entity(jsonOutput).build();
+	}
+	
 	protected Repository getRepository(String repositoryName) {
 		/*
 		 * String repositoryName =
@@ -149,20 +179,4 @@ public class RestController {
 		return r;
 	}
 
-	protected IRepositoryManager getRepositoryManager() {
-		File baseFolder = new File(System.getProperty("user.dir"));
-		String path = "/home/rahul/Downloads/git/";
-
-		File regFile = com.teammerge.utils.FileUtils.resolveParameter(
-				Constants.baseFolder$, baseFolder, path);
-		FileSettings settings = new FileSettings(regFile.getAbsolutePath());
-
-		// configure the Gitblit singleton for minimal, non-server operation
-		XssFilter xssFilter = new AllowXssFilter();
-		RuntimeManager runtime = new RuntimeManager(settings, xssFilter,
-				baseFolder).start();
-		RepositoryManager manager = new RepositoryManager(runtime, null);
-
-		return manager;
-	}
 }
