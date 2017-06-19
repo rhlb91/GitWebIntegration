@@ -7,17 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teammerge.model.ActivityModel;
 
 public class JacksonUtils {
-	public static String toJson(List<ActivityModel> activities) {
+  public static String toJson(List<ActivityModel> activities) {
 
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonInString = null;
-		try {
-			jsonInString = mapper.writerWithDefaultPrettyPrinter()
-					.writeValueAsString(activities);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(activities);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
 
-		return jsonInString;
-	}
+    return jsonInString;
+  }
 }

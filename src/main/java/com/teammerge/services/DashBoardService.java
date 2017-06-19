@@ -8,10 +8,9 @@ import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.RepositoryCommit;
 
 public interface DashBoardService {
-	public List<DailyLogEntry> getRawActivities();
+  public List<DailyLogEntry> getRawActivities();
 
-	public List<ActivityModel> populateActivities();
+  public List<ActivityModel> populateActivities();
 
-	public List<CommitModel> populateCommits(List<RepositoryCommit> commits,
-			DailyLogEntry change);
+  public List<CommitModel> populateCommits(List<RepositoryCommit> commits, DailyLogEntry change);
 }
