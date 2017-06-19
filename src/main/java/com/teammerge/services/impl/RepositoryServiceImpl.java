@@ -6,25 +6,23 @@ import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.manager.RepositoryManager;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.services.RuntimeService;
 
 public class RepositoryServiceImpl implements RepositoryService {
 
-	private static IRepositoryManager repositoryManager = null;
-	private RuntimeService runtimeService = new RuntimeService();
+  private static IRepositoryManager repositoryManager = null;
+  private RuntimeServiceImpl        runtimeService    = new RuntimeServiceImpl();
 
-	public IRepositoryManager getRepositoryManager() {
+  public IRepositoryManager getRepositoryManager() {
 
-		if (repositoryManager == null) {
-			repositoryManager = new RepositoryManager(
-					runtimeService.getRuntimeManager(), null);
-		}
+    if (repositoryManager == null) {
+      repositoryManager = new RepositoryManager(runtimeService.getRuntimeManager(), null);
+    }
 
-		return repositoryManager;
-	}
+    return repositoryManager;
+  }
 
-	public List<RepositoryModel> getRepositoryModels() {
-		return getRepositoryManager().getRepositoryModels();
-	}
+  public List<RepositoryModel> getRepositoryModels() {
+    return getRepositoryManager().getRepositoryModels();
+  }
 
 }
