@@ -26,7 +26,7 @@ public class ForkModel implements Serializable {
   }
 
   public boolean isRoot() {
-    return StringUtils.isEmpty(repository.originRepository);
+    return StringUtils.isEmpty(repository.getOriginRepository());
   }
 
   public boolean isNode() {

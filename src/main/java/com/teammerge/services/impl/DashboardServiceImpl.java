@@ -42,21 +42,21 @@ public class DashboardServiceImpl implements DashBoardService {
       if (model.isCollectingGarbage) {
         continue;
       }
-      if (model.hasCommits && model.lastChange.after(minimumDate)) {
-        Repository repository = repositoryService.getRepositoryManager().getRepository(model.name);
+      if (model.isHasCommits() && model.getLastChange().after(minimumDate)) {
+        Repository repository = repositoryService.getRepositoryManager().getRepository(model.getName());
 
         if (repository != null) {
           List<DailyLogEntry> entries =
-              RefLogUtils.getDailyLogByRef(model.name, repository, minimumDate, timezone);
+              RefLogUtils.getDailyLogByRef(model.getName(), repository, minimumDate, timezone);
           digests.addAll(entries);
 
           repository.close();
         } else {
-          System.out.println("Repository " + model.name + " is null!!");
+          System.out.println("Repository " + model.getName() + " is null!!");
         }
       } else {
-        System.out.println("Either repository " + model.name
-            + " not has commits or there are no new changes after !!" + model.lastChange);
+        System.out.println("Either repository " + model.getName()
+            + " not has commits or there are no new changes after !!" + model.getLastChange());
       }
     }
     return digests;

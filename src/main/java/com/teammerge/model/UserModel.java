@@ -230,10 +230,10 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
 
     // determine maximum permission for the repository
     final AccessPermission maxPermission =
-        (repository.isFrozen || !repository.isBare || repository.isMirror) ? AccessPermission.CLONE
+        (repository.isFrozen() || !repository.isBare() || repository.isMirror()) ? AccessPermission.CLONE
             : AccessPermission.REWIND;
 
-    if (AccessRestrictionType.NONE.equals(repository.accessRestriction)) {
+    if (AccessRestrictionType.NONE.equals(repository.getAccessRestriction())) {
       // anonymous rewind
       ap.permissionType = PermissionType.ANONYMOUS;
       if (AccessPermission.REWIND.atMost(maxPermission)) {
@@ -275,7 +275,7 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
       return ap;
     }
 
-    if (AuthorizationControl.AUTHENTICATED.equals(repository.authorizationControl)
+    if (AuthorizationControl.AUTHENTICATED.equals(repository.getAuthorizationControl())
         && isAuthenticated) {
       // AUTHENTICATED is a shortcut for authorizing all logged-in users RW+ access
       if (AccessPermission.REWIND.atMost(maxPermission)) {
@@ -288,10 +288,10 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
 
     // explicit user permission OR user regex match is used
     // if that fails, then the best team permission is used
-    if (permissions.containsKey(repository.name.toLowerCase())) {
+    if (permissions.containsKey(repository.getName().toLowerCase())) {
       // exact repository permission specified, use it
-      AccessPermission p = permissions.get(repository.name.toLowerCase());
-      if (p != null && repository.accessRestriction.isValidPermission(p)) {
+      AccessPermission p = permissions.get(repository.getName().toLowerCase());
+      if (p != null && repository.getAccessRestriction().isValidPermission(p)) {
         ap.permissionType = PermissionType.EXPLICIT;
         if (p.atMost(maxPermission)) {
           ap.permission = p;
@@ -304,9 +304,9 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
     } else {
       // search for case-insensitive regex permission match
       for (String key : permissions.keySet()) {
-        if (StringUtils.matchesIgnoreCase(repository.name, key)) {
+        if (StringUtils.matchesIgnoreCase(repository.getName(), key)) {
           AccessPermission p = permissions.get(key);
-          if (p != null && repository.accessRestriction.isValidPermission(p)) {
+          if (p != null && repository.getAccessRestriction().isValidPermission(p)) {
             // take first match
             ap.permissionType = PermissionType.REGEX;
             if (p.atMost(maxPermission)) {
@@ -335,7 +335,7 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
 
     // still no explicit, regex, or team match, check for implicit permissions
     if (AccessPermission.NONE == ap.permission) {
-      switch (repository.accessRestriction) {
+      switch (repository.getAccessRestriction()) {
         case VIEW:
           // no implicit permissions possible
           break;
@@ -362,7 +362,7 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
 
   protected boolean canAccess(RepositoryModel repository, AccessRestrictionType ifRestriction,
       AccessPermission requirePermission) {
-    if (repository.accessRestriction.atLeast(ifRestriction)) {
+    if (repository.getAccessRestriction().atLeast(ifRestriction)) {
       RegistrantAccessPermission ap = getRepositoryPermission(repository);
       return ap.permission.atLeast(requirePermission);
     }
@@ -384,28 +384,28 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
   }
 
   public boolean canPush(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.PUSH);
   }
 
   public boolean canCreateRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.CREATE);
   }
 
   public boolean canDeleteRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.DELETE);
   }
 
   public boolean canRewindRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.REWIND);
@@ -419,7 +419,7 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
     if (canAdmin() || repository.isOwner(username)) {
       return true;
     }
-    if (!repository.allowForks) {
+    if (!repository.isAllowForks()) {
       return false;
     }
     if (!isAuthenticated || !canFork()) {
@@ -547,7 +547,7 @@ public class UserModel implements Principal, Serializable, Comparable<UserModel>
    * @return true if the user can administer the repository
    */
   public boolean canAdmin(RepositoryModel repo) {
-    return canAdmin() || repo.isOwner(username) || isMyPersonalRepository(repo.name);
+    return canAdmin() || repo.isOwner(username) || isMyPersonalRepository(repo.getName());
   }
 
   public boolean isAuthenticated() {

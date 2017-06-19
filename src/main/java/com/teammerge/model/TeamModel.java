@@ -163,10 +163,10 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
 
     // determine maximum permission for the repository
     final AccessPermission maxPermission =
-        (repository.isFrozen || !repository.isBare || repository.isMirror) ? AccessPermission.CLONE
+        (repository.isFrozen() || !repository.isBare() || repository.isMirror()) ? AccessPermission.CLONE
             : AccessPermission.REWIND;
 
-    if (AccessRestrictionType.NONE.equals(repository.accessRestriction)) {
+    if (AccessRestrictionType.NONE.equals(repository.getAccessRestriction())) {
       // anonymous rewind
       ap.permissionType = PermissionType.ANONYMOUS;
       if (AccessPermission.REWIND.atMost(maxPermission)) {
@@ -187,10 +187,10 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
       return ap;
     }
 
-    if (permissions.containsKey(repository.name.toLowerCase())) {
+    if (permissions.containsKey(repository.getName().toLowerCase())) {
       // exact repository permission specified
-      AccessPermission p = permissions.get(repository.name.toLowerCase());
-      if (p != null && repository.accessRestriction.isValidPermission(p)) {
+      AccessPermission p = permissions.get(repository.getName().toLowerCase());
+      if (p != null && repository.getAccessRestriction().isValidPermission(p)) {
         ap.permissionType = PermissionType.EXPLICIT;
         if (p.atMost(maxPermission)) {
           ap.permission = p;
@@ -203,9 +203,9 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
     } else {
       // search for case-insensitive regex permission match
       for (String key : permissions.keySet()) {
-        if (StringUtils.matchesIgnoreCase(repository.name, key)) {
+        if (StringUtils.matchesIgnoreCase(repository.getName(), key)) {
           AccessPermission p = permissions.get(key);
-          if (p != null && repository.accessRestriction.isValidPermission(p)) {
+          if (p != null && repository.getAccessRestriction().isValidPermission(p)) {
             // take first match
             ap.permissionType = PermissionType.REGEX;
             if (p.atMost(maxPermission)) {
@@ -222,7 +222,7 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
 
     // still no explicit or regex, check for implicit permissions
     if (AccessPermission.NONE == ap.permission) {
-      switch (repository.accessRestriction) {
+      switch (repository.getAccessRestriction()) {
         case VIEW:
           // no implicit permissions possible
           break;
@@ -249,7 +249,7 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
 
   protected boolean canAccess(RepositoryModel repository, AccessRestrictionType ifRestriction,
       AccessPermission requirePermission) {
-    if (repository.accessRestriction.atLeast(ifRestriction)) {
+    if (repository.getAccessRestriction().atLeast(ifRestriction)) {
       RegistrantAccessPermission ap = getRepositoryPermission(repository);
       return ap.permission.atLeast(requirePermission);
     }
@@ -265,28 +265,28 @@ public class TeamModel implements Serializable, Comparable<TeamModel> {
   }
 
   public boolean canPush(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.PUSH);
   }
 
   public boolean canCreateRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.CREATE);
   }
 
   public boolean canDeleteRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.DELETE);
   }
 
   public boolean canRewindRef(RepositoryModel repository) {
-    if (repository.isFrozen) {
+    if (repository.isFrozen()) {
       return false;
     }
     return canAccess(repository, AccessRestrictionType.PUSH, AccessPermission.REWIND);
