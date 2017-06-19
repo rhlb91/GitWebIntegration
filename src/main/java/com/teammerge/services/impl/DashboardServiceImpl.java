@@ -39,7 +39,7 @@ public class DashboardServiceImpl implements DashBoardService {
     // create daily commit digest feed
     List<DailyLogEntry> digests = new ArrayList<DailyLogEntry>();
     for (RepositoryModel model : repositories) {
-      if (model.isCollectingGarbage) {
+      if (model.isCollectingGarbage()) {
         continue;
       }
       if (model.isHasCommits() && model.getLastChange().after(minimumDate)) {
