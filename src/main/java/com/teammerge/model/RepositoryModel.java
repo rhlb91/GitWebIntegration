@@ -74,9 +74,9 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private String                mergeTo;
   private MergeType             mergeType;
 
-  public transient boolean      isCollectingGarbage;
-  public Date                   lastGC;
-  public String                 sparkleshareId;
+  private transient boolean     isCollectingGarbage;
+  private Date                  lastGC;
+  private String                sparkleshareId;
 
   public RepositoryModel() {
     this("", "", "", new Date(0));
