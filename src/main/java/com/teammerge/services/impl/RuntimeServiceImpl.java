@@ -2,6 +2,8 @@ package com.teammerge.services.impl;
 
 import java.io.File;
 
+import org.springframework.stereotype.Service;
+
 import com.teammerge.Constants;
 import com.teammerge.FileSettings;
 import com.teammerge.manager.RuntimeManager;
@@ -9,6 +11,7 @@ import com.teammerge.services.RuntimeService;
 import com.teammerge.utils.XssFilter;
 import com.teammerge.utils.XssFilter.AllowXssFilter;
 
+@Service("runtimeService")
 public class RuntimeServiceImpl implements RuntimeService {
 
   private static RuntimeManager runtimeManager = null;
