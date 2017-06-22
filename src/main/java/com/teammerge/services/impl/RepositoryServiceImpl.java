@@ -2,11 +2,15 @@ package com.teammerge.services.impl;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.manager.RepositoryManager;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.RepositoryService;
 
+@Service("repositoryService")
 public class RepositoryServiceImpl implements RepositoryService {
 
   private static IRepositoryManager repositoryManager = null;

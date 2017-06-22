@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
 import com.teammerge.model.ActivityModel;
@@ -25,15 +28,19 @@ import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.RefLogUtils;
 import com.teammerge.utils.StringUtils;
 
+@Service("dashBoardService")
 public class DashboardServiceImpl implements DashBoardService {
-  RepositoryService                               repositoryService   = new RepositoryServiceImpl();
-  RuntimeServiceImpl                              runtimeService      = new RuntimeServiceImpl();
 
-  private static final ObjectCache<ActivityModel> activityCache       =
-                                                                          new ObjectCache<ActivityModel>();
+  @Resource(name = "repositoryService")
+  RepositoryService repositoryService;
 
-  private static Date                             lastActivityUpdated = new Date(0);
-  private Map<RepositoryModel, Date>              lastActivityPerRepo = new HashMap<>();
+  @Resource(name = "runtimeService")
+  RuntimeServiceImpl runtimeService;
+
+  private static final ObjectCache<ActivityModel> activityCache = new ObjectCache<ActivityModel>();
+
+  private static Date lastActivityUpdated = new Date(0);
+  private Map<RepositoryModel, Date> lastActivityPerRepo = new HashMap<>();
 
   public List<DailyLogEntry> getRawActivities() {
 
