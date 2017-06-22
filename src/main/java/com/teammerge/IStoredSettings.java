@@ -21,11 +21,11 @@ import com.teammerge.utils.StringUtils;
  */
 public abstract class IStoredSettings {
 
-  protected final Logger      logger;
+  protected final Logger logger;
 
-  protected final Properties  overrides = new Properties();
+  protected final Properties overrides = new Properties();
 
-  protected final Set<String> removals  = new TreeSet<String>();
+  protected final Set<String> removals = new TreeSet<String>();
 
   public IStoredSettings(Class<? extends IStoredSettings> clazz) {
     logger = LoggerFactory.getLogger(clazz);

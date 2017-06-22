@@ -19,7 +19,7 @@ import com.teammerge.utils.DiffUtils.DiffStat;
  */
 public class DiffStatFormatter extends DiffFormatter {
 
-  private final DiffStat  diffStat;
+  private final DiffStat diffStat;
 
   private PathChangeModel path;
 

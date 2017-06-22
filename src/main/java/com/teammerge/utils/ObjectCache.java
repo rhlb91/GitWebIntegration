@@ -14,18 +14,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ObjectCache<X> implements Serializable {
 
-  private static final long                  serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  private final Map<String, CachedObject<X>> cache            =
-                                                                  new ConcurrentHashMap<String, CachedObject<X>>();
+  private final Map<String, CachedObject<X>> cache =
+      new ConcurrentHashMap<String, CachedObject<X>>();
 
   private class CachedObject<Y> {
 
-    public final String   name;
+    public final String name;
 
     private volatile Date date;
 
-    private volatile Y    object;
+    private volatile Y object;
 
     CachedObject(String name) {
       this.name = name;

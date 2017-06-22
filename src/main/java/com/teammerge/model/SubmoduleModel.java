@@ -11,12 +11,12 @@ public class SubmoduleModel implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public final String       name;
-  public final String       path;
-  public final String       url;
+  public final String name;
+  public final String path;
+  public final String url;
 
-  public boolean            hasSubmodule;
-  public String             gitblitPath;
+  public boolean hasSubmodule;
+  public String gitblitPath;
 
   public SubmoduleModel(String name, String path, String url) {
     this.name = name;

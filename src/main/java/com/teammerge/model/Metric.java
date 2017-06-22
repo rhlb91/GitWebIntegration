@@ -11,10 +11,10 @@ public class Metric implements Serializable, Comparable<Metric> {
 
   private static final long serialVersionUID = 1L;
 
-  public final String       name;
-  public double             count;
-  public double             tag;
-  public int                duration;
+  public final String name;
+  public double count;
+  public double tag;
+  public int duration;
 
   public Metric(String name) {
     this.name = name;

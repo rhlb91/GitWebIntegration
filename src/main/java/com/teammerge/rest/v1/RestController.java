@@ -28,7 +28,7 @@ import com.teammerge.utils.JacksonUtils;
 public class RestController {
 
   private RepositoryService repositoryService;
-  private DashBoardService  dashBoardService;
+  private DashBoardService dashBoardService;
 
   private IRepositoryManager getRepositoryManager() {
     repositoryService = new RepositoryServiceImpl();

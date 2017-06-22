@@ -6,19 +6,19 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 public class ActivityModel {
-  private Date              pushDate;
-  private String            color;
-  private boolean           isTag;
-  private boolean           isTicket;
-  private String            fullRefName;
-  private String            shortRefName;
-  private String            whoChanged;
-  private String            byAuthor;
-  private String            whatChanged;
-  private String            preposition;
-  private String            ticketId;
+  private Date pushDate;
+  private String color;
+  private boolean isTag;
+  private boolean isTicket;
+  private String fullRefName;
+  private String shortRefName;
+  private String whoChanged;
+  private String byAuthor;
+  private String whatChanged;
+  private String preposition;
+  private String ticketId;
   private List<CommitModel> commits;
-  private String            repositoryName;
+  private String repositoryName;
 
   @Override
   public String toString() {

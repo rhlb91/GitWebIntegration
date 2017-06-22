@@ -36,39 +36,39 @@ import com.teammerge.utils.DiffUtils.DiffStat;
 public class GitBlitDiffFormatter extends DiffFormatter {
 
   /** Regex pattern identifying trailing whitespace. */
-  private static final Pattern   trailingWhitespace      = Pattern.compile("(\\s+?)\r?\n?$");
+  private static final Pattern trailingWhitespace = Pattern.compile("(\\s+?)\r?\n?$");
 
   /**
    * gitblit.properties key for the per-file limit on the number of diff lines.
    */
-  private static final String    DIFF_LIMIT_PER_FILE_KEY = "web.maxDiffLinesPerFile";
+  private static final String DIFF_LIMIT_PER_FILE_KEY = "web.maxDiffLinesPerFile";
 
   /**
    * gitblit.properties key for the global limit on the number of diff lines in a commitdiff.
    */
-  private static final String    GLOBAL_DIFF_LIMIT_KEY   = "web.maxDiffLines";
+  private static final String GLOBAL_DIFF_LIMIT_KEY = "web.maxDiffLines";
 
   /**
    * Diffs with more lines are not shown in commitdiffs. (Similar to what GitHub does.) Can be
    * reduced (but not increased) through gitblit.properties key {@link #DIFF_LIMIT_PER_FILE_KEY}.
    */
-  private static final int       DIFF_LIMIT_PER_FILE     = 4000;
+  private static final int DIFF_LIMIT_PER_FILE = 4000;
 
   /**
    * Global diff limit. Commitdiffs with more lines are truncated. Can be reduced (but not
    * increased) through gitblit.properties key {@link #GLOBAL_DIFF_LIMIT_KEY}.
    */
-  private static final int       GLOBAL_DIFF_LIMIT       = 20000;
+  private static final int GLOBAL_DIFF_LIMIT = 20000;
 
-  private static final boolean   CONVERT_TABS            = true;
+  private static final boolean CONVERT_TABS = true;
 
   private final DiffOutputStream os;
 
-  private final DiffStat         diffStat;
+  private final DiffStat diffStat;
 
-  private PathChangeModel        currentPath;
+  private PathChangeModel currentPath;
 
-  private int                    left, right;
+  private int left, right;
 
   /**
    * If a single file diff in a commitdiff produces more than this number of lines, we don't display
@@ -80,40 +80,40 @@ public class GitBlitDiffFormatter extends DiffFormatter {
    * single-file diffs.
    * </p>
    */
-  private final int              maxDiffLinesPerFile;
+  private final int maxDiffLinesPerFile;
 
   /**
    * Global limit on the number of diff lines. Set to {@link #GLOBAL_DIFF_LIMIT} for commitdiffs,
    * and to -1 (switched off the limit) for single-file diffs.
    */
-  private final int              globalDiffLimit;
+  private final int globalDiffLimit;
 
   /** Number of lines for the current file diff. Set to zero when a new DiffEntry is started. */
-  private int                    nofLinesCurrent;
+  private int nofLinesCurrent;
   /**
    * Position in the stream when we try to write the first line. Used to rewind when we detect that
    * the diff is too large.
    */
-  private int                    startCurrent;
+  private int startCurrent;
   /** Flag set to true when we rewind. Reset to false when we start a new DiffEntry. */
-  private boolean                isOff;
+  private boolean isOff;
   /** The current diff entry. */
-  private DiffEntry              entry;
+  private DiffEntry entry;
 
   // Global limit stuff.
 
   /** Total number of lines written before the current diff entry. */
-  private int                    totalNofLinesPrevious;
+  private int totalNofLinesPrevious;
   /** Running total of the number of diff lines written. Updated until we exceed the global limit. */
-  private int                    totalNofLinesCurrent;
+  private int totalNofLinesCurrent;
   /** Stream position to reset to if we decided to truncate the commitdiff. */
-  private int                    truncateTo;
+  private int truncateTo;
   /** Whether we decided to truncate the commitdiff. */
-  private boolean                truncated;
+  private boolean truncated;
   /** If {@link #truncated}, contains all entries skipped. */
-  private final List<DiffEntry>  skipped                 = new ArrayList<DiffEntry>();
+  private final List<DiffEntry> skipped = new ArrayList<DiffEntry>();
 
-  private int                    tabLength;
+  private int tabLength;
 
   /**
    * A {@link ResettableByteArrayOutputStream} that intercept the "Binary files differ" message
@@ -124,10 +124,10 @@ public class GitBlitDiffFormatter extends DiffFormatter {
    */
   private static class DiffOutputStream extends ResettableByteArrayOutputStream {
 
-    private static final String  BINARY_DIFFERENCE = "Binary files differ\n";
+    private static final String BINARY_DIFFERENCE = "Binary files differ\n";
 
     private GitBlitDiffFormatter formatter;
-    private BinaryDiffHandler    binaryDiffHandler;
+    private BinaryDiffHandler binaryDiffHandler;
 
     public void setFormatter(GitBlitDiffFormatter formatter, BinaryDiffHandler handler) {
       this.formatter = formatter;

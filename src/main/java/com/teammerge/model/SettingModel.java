@@ -16,24 +16,24 @@ import com.teammerge.utils.StringUtils;
  */
 public class SettingModel implements Serializable {
 
-  public static final String SPACE_DELIMITED  = "SPACE-DELIMITED";
+  public static final String SPACE_DELIMITED = "SPACE-DELIMITED";
 
-  public static final String CASE_SENSITIVE   = "CASE-SENSITIVE";
+  public static final String CASE_SENSITIVE = "CASE-SENSITIVE";
 
   public static final String RESTART_REQUIRED = "RESTART REQUIRED";
 
-  public static final String SINCE            = "SINCE";
+  public static final String SINCE = "SINCE";
 
-  public String              name;
-  public volatile String     currentValue;
-  public String              defaultValue;
-  public String              description;
-  public String              since;
-  public boolean             caseSensitive;
-  public boolean             restartRequired;
-  public boolean             spaceDelimited;
+  public String name;
+  public volatile String currentValue;
+  public String defaultValue;
+  public String description;
+  public String since;
+  public boolean caseSensitive;
+  public boolean restartRequired;
+  public boolean spaceDelimited;
 
-  private static final long  serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
   public SettingModel() {}
 

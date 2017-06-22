@@ -18,64 +18,64 @@ import com.sun.jna.Native;
  *
  */
 public class JnaUtils {
-  public static final int     S_ISUID  = 0004000;                                 // set user id on
-                                                                                   // execution
-  public static final int     S_ISGID  = 0002000;                                 // set group id
-                                                                                   // on execution
-  public static final int     S_ISVTX  = 0001000;                                 // sticky bit,
-                                                                                   // save swapped
-                                                                                   // text even
-                                                                                   // after use
+  public static final int S_ISUID = 0004000; // set user id on
+                                             // execution
+  public static final int S_ISGID = 0002000; // set group id
+                                             // on execution
+  public static final int S_ISVTX = 0001000; // sticky bit,
+                                             // save swapped
+                                             // text even
+                                             // after use
 
-  public static final int     S_IRWXU  = 0000700;                                 // RWX mask for
-                                                                                   // owner
-  public static final int     S_IRUSR  = 0000400;                                 // read
-                                                                                   // permission for
-                                                                                   // owner
-  public static final int     S_IWUSR  = 0000200;                                 // write
-                                                                                   // permission for
-                                                                                   // owner
-  public static final int     S_IXUSR  = 0000100;                                 // execute/search
-                                                                                   // permission for
-                                                                                   // owner
-  public static final int     S_IRWXG  = 0000070;                                 // RWX mask for
-                                                                                   // group
-  public static final int     S_IRGRP  = 0000040;                                 // read
-                                                                                   // permission for
-                                                                                   // group
-  public static final int     S_IWGRP  = 0000020;                                 // write
-                                                                                   // permission for
-                                                                                   // group
-  public static final int     S_IXGRP  = 0000010;                                 // execute/search
-                                                                                   // permission for
-                                                                                   // group
-  public static final int     S_IRWXO  = 0000007;                                 // RWX mask for
-                                                                                   // other
-  public static final int     S_IROTH  = 0000004;                                 // read
-                                                                                   // permission for
-                                                                                   // other
-  public static final int     S_IWOTH  = 0000002;                                 // write
-                                                                                   // permission for
-                                                                                   // other
-  public static final int     S_IXOTH  = 0000001;                                 // execute/search
-                                                                                   // permission for
-                                                                                   // other
+  public static final int S_IRWXU = 0000700; // RWX mask for
+                                             // owner
+  public static final int S_IRUSR = 0000400; // read
+                                             // permission for
+                                             // owner
+  public static final int S_IWUSR = 0000200; // write
+                                             // permission for
+                                             // owner
+  public static final int S_IXUSR = 0000100; // execute/search
+                                             // permission for
+                                             // owner
+  public static final int S_IRWXG = 0000070; // RWX mask for
+                                             // group
+  public static final int S_IRGRP = 0000040; // read
+                                             // permission for
+                                             // group
+  public static final int S_IWGRP = 0000020; // write
+                                             // permission for
+                                             // group
+  public static final int S_IXGRP = 0000010; // execute/search
+                                             // permission for
+                                             // group
+  public static final int S_IRWXO = 0000007; // RWX mask for
+                                             // other
+  public static final int S_IROTH = 0000004; // read
+                                             // permission for
+                                             // other
+  public static final int S_IWOTH = 0000002; // write
+                                             // permission for
+                                             // other
+  public static final int S_IXOTH = 0000001; // execute/search
+                                             // permission for
+                                             // other
 
-  public static final int     S_IFMT   = 0170000;                                 // type of file
-                                                                                   // mask
-  public static final int     S_IFIFO  = 0010000;                                 // named pipe
-                                                                                   // (fifo)
-  public static final int     S_IFCHR  = 0020000;                                 // character
-                                                                                   // special device
-  public static final int     S_IFDIR  = 0040000;                                 // directory
-  public static final int     S_IFBLK  = 0060000;                                 // block special
-                                                                                   // device
-  public static final int     S_IFREG  = 0100000;                                 // regular file
-  public static final int     S_IFLNK  = 0120000;                                 // symbolic link
-  public static final int     S_IFSOCK = 0140000;                                 // socket
+  public static final int S_IFMT = 0170000; // type of file
+                                            // mask
+  public static final int S_IFIFO = 0010000; // named pipe
+                                             // (fifo)
+  public static final int S_IFCHR = 0020000; // character
+                                             // special device
+  public static final int S_IFDIR = 0040000; // directory
+  public static final int S_IFBLK = 0060000; // block special
+                                             // device
+  public static final int S_IFREG = 0100000; // regular file
+  public static final int S_IFLNK = 0120000; // symbolic link
+  public static final int S_IFSOCK = 0140000; // socket
 
 
-  private static final Logger LOGGER   = LoggerFactory.getLogger(JGitUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JGitUtils.class);
 
   private static UnixCLibrary unixlibc = null;
 

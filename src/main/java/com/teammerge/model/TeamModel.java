@@ -25,23 +25,23 @@ import com.teammerge.utils.StringUtils;
  */
 public class TeamModel implements Serializable, Comparable<TeamModel> {
 
-  private static final long                  serialVersionUID   = 1L;
+  private static final long serialVersionUID = 1L;
 
   // field names are reflectively mapped in EditTeam page
-  public String                              name;
-  public boolean                             canAdmin;
-  public boolean                             canFork;
-  public boolean                             canCreate;
-  public AccountType                         accountType;
-  public final Set<String>                   users              = new HashSet<String>();
+  public String name;
+  public boolean canAdmin;
+  public boolean canFork;
+  public boolean canCreate;
+  public AccountType accountType;
+  public final Set<String> users = new HashSet<String>();
   // retained for backwards-compatibility with RPC clients
   @Deprecated
-  public final Set<String>                   repositories       = new HashSet<String>();
-  public final Map<String, AccessPermission> permissions        =
-                                                                    new LinkedHashMap<String, AccessPermission>();
-  public final Set<String>                   mailingLists       = new HashSet<String>();
-  public final List<String>                  preReceiveScripts  = new ArrayList<String>();
-  public final List<String>                  postReceiveScripts = new ArrayList<String>();
+  public final Set<String> repositories = new HashSet<String>();
+  public final Map<String, AccessPermission> permissions =
+      new LinkedHashMap<String, AccessPermission>();
+  public final Set<String> mailingLists = new HashSet<String>();
+  public final List<String> preReceiveScripts = new ArrayList<String>();
+  public final List<String> postReceiveScripts = new ArrayList<String>();
 
   public TeamModel(String name) {
     this.name = name;

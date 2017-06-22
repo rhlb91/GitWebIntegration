@@ -15,25 +15,25 @@ import com.teammerge.Constants;
  */
 public class ServerStatus implements Serializable {
 
-  private static final long        serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  public final Date                bootDate;
+  public final Date bootDate;
 
-  public final String              version;
+  public final String version;
 
-  public final String              releaseDate;
+  public final String releaseDate;
 
   public final Map<String, String> systemProperties;
 
-  public final long                heapMaximum;
+  public final long heapMaximum;
 
-  public volatile long             heapAllocated;
+  public volatile long heapAllocated;
 
-  public volatile long             heapFree;
+  public volatile long heapFree;
 
-  public boolean                   isGO;
+  public boolean isGO;
 
-  public String                    servletContainer;
+  public String servletContainer;
 
   public ServerStatus() {
     this.bootDate = new Date();

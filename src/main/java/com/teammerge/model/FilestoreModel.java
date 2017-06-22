@@ -19,35 +19,30 @@ import com.teammerge.Constants;
  */
 public class FilestoreModel implements Serializable, Comparable<FilestoreModel> {
 
-  private static final long    serialVersionUID   = 1L;
+  private static final long serialVersionUID = 1L;
 
-  private static final String  metaRegexText      =
-                                                      new StringBuilder()
-                                                          .append(
-                                                              "version\\shttps://git-lfs.github.com/spec/v1\\s+")
-                                                          .append(
-                                                              "oid\\ssha256:("
-                                                                  + Constants.REGEX_SHA256
-                                                                  + ")\\s+")
-                                                          .append("size\\s([0-9]+)").toString();
+  private static final String metaRegexText = new StringBuilder()
+      .append("version\\shttps://git-lfs.github.com/spec/v1\\s+")
+      .append("oid\\ssha256:(" + Constants.REGEX_SHA256 + ")\\s+").append("size\\s([0-9]+)")
+      .toString();
 
-  private static final Pattern metaRegex          = Pattern.compile(metaRegexText);
+  private static final Pattern metaRegex = Pattern.compile(metaRegexText);
 
-  private static final int     metaRegexIndexSHA  = 1;
+  private static final int metaRegexIndexSHA = 1;
 
-  private static final int     metaRegexIndexSize = 2;
+  private static final int metaRegexIndexSize = 2;
 
-  public final String          oid;
+  public final String oid;
 
-  private Long                 size;
-  private Status               status;
+  private Long size;
+  private Status status;
 
   // Audit
-  private String               stateChangedBy;
-  private Date                 stateChangedOn;
+  private String stateChangedBy;
+  private Date stateChangedOn;
 
   // Access Control
-  private List<String>         repositories;
+  private List<String> repositories;
 
   public FilestoreModel(String id, long definedSize) {
     oid = id;

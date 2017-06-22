@@ -97,8 +97,8 @@ public class DeepCopier {
 
   private static class Receiver<T> extends Thread {
 
-    private final InputStream  inputStream;
-    private volatile T         result;
+    private final InputStream inputStream;
+    private volatile T result;
     private volatile Throwable throwable;
 
     public Receiver(InputStream inputStream) {

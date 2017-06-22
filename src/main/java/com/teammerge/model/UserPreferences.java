@@ -19,18 +19,18 @@ import com.teammerge.utils.StringUtils;
  */
 public class UserPreferences implements Serializable {
 
-  private static final long                            serialVersionUID      = 1L;
+  private static final long serialVersionUID = 1L;
 
-  public final String                                  username;
+  public final String username;
 
-  private String                                       locale;
+  private String locale;
 
-  private Boolean                                      emailMeOnMyTicketChanges;
+  private Boolean emailMeOnMyTicketChanges;
 
-  private Transport                                    transport;
+  private Transport transport;
 
   private final Map<String, UserRepositoryPreferences> repositoryPreferences =
-                                                                                 new TreeMap<String, UserRepositoryPreferences>();
+      new TreeMap<String, UserRepositoryPreferences>();
 
   public UserPreferences(String username) {
     this.username = username;

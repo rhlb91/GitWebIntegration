@@ -25,22 +25,22 @@ import com.teammerge.utils.XssFilter;
 @Singleton
 public class RuntimeManager implements IRuntimeManager {
 
-  private final Logger          logger = LoggerFactory.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final IStoredSettings settings;
 
-  private final XssFilter       xssFilter;
+  private final XssFilter xssFilter;
 
-  private final ServerStatus    serverStatus;
+  private final ServerStatus serverStatus;
 
-  private final ServerSettings  settingsModel;
+  private final ServerSettings settingsModel;
 
-  private File                  baseFolder;
+  private File baseFolder;
 
-  private TimeZone              timezone;
+  private TimeZone timezone;
 
   @Inject
-  private Injector              injector;
+  private Injector injector;
 
   @Inject
   public RuntimeManager(IStoredSettings settings, XssFilter xssFilter) {

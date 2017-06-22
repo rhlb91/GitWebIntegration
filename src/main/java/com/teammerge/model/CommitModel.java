@@ -4,10 +4,10 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 public class CommitModel {
   private PersonIdent commitAuthor;
-  private String      shortMessage;
-  private String      trimmedMessage;
-  private String      commitHash;
-  private String      name;
+  private String shortMessage;
+  private String trimmedMessage;
+  private String commitHash;
+  private String name;
 
   @Override
   public String toString() {

@@ -25,15 +25,13 @@ import com.teammerge.model.RepositoryCommit;
  */
 public class CommitCache {
 
-  private static final CommitCache                                 instance;
+  private static final CommitCache instance;
 
-  protected final Logger                                           logger    =
-                                                                                 LoggerFactory
-                                                                                     .getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected final Map<String, ObjectCache<List<RepositoryCommit>>> cache;
 
-  protected int                                                    cacheDays = -1;
+  protected int cacheDays = -1;
 
   public static CommitCache instance() {
     return instance;

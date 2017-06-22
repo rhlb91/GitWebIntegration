@@ -40,47 +40,47 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
   private static final long serialVersionUID = 1L;
 
-  public String             project;
+  public String project;
 
-  public String             repository;
+  public String repository;
 
-  public long               number;
+  public long number;
 
-  public Date               created;
+  public Date created;
 
-  public String             createdBy;
+  public String createdBy;
 
-  public Date               updated;
+  public Date updated;
 
-  public String             updatedBy;
+  public String updatedBy;
 
-  public String             title;
+  public String title;
 
-  public String             body;
+  public String body;
 
-  public String             topic;
+  public String topic;
 
-  public Type               type;
+  public Type type;
 
-  public Status             status;
+  public Status status;
 
-  public String             responsible;
+  public String responsible;
 
-  public String             milestone;
+  public String milestone;
 
-  public String             mergeSha;
+  public String mergeSha;
 
-  public String             mergeTo;
+  public String mergeTo;
 
-  public List<Change>       changes;
+  public List<Change> changes;
 
-  public Integer            insertions;
+  public Integer insertions;
 
-  public Integer            deletions;
+  public Integer deletions;
 
-  public Priority           priority;
+  public Priority priority;
 
-  public Severity           severity;
+  public Severity severity;
 
   /**
    * Builds an effective ticket from the collection of changes. A change may Add or Subtract
@@ -662,25 +662,25 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
    */
   public static class Change implements Serializable, Comparable<Change> {
 
-    private static final long         serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-    public final Date                 date;
+    public final Date date;
 
-    public final String               author;
+    public final String author;
 
-    public Comment                    comment;
+    public Comment comment;
 
-    public Reference                  reference;
+    public Reference reference;
 
-    public Map<Field, String>         fields;
+    public Map<Field, String> fields;
 
-    public Set<Attachment>            attachments;
+    public Set<Attachment> attachments;
 
-    public Patchset                   patchset;
+    public Patchset patchset;
 
-    public Review                     review;
+    public Review review;
 
-    private transient String          id;
+    private transient String id;
 
     // Once links have been made they become a reference on the target ticket
     // The ticket service handles promoting links to references
@@ -1138,18 +1138,18 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public int                number;
-    public int                rev;
-    public String             tip;
-    public String             parent;
-    public String             base;
-    public int                insertions;
-    public int                deletions;
-    public int                commits;
-    public int                added;
-    public PatchsetType       type;
+    public int number;
+    public int rev;
+    public String tip;
+    public String parent;
+    public String base;
+    public int insertions;
+    public int deletions;
+    public int commits;
+    public int added;
+    public PatchsetType type;
 
-    public transient boolean  canDelete        = false;
+    public transient boolean canDelete = false;
 
     public boolean isFF() {
       return PatchsetType.FastForward == type;
@@ -1200,15 +1200,15 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public String             text;
+    public String text;
 
-    public String             id;
+    public String id;
 
-    public Boolean            deleted;
+    public Boolean deleted;
 
-    public CommentSource      src;
+    public CommentSource src;
 
-    public String             replyTo;
+    public String replyTo;
 
     Comment(String text) {
       this.text = text;
@@ -1231,11 +1231,11 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
   // Intentionally not serialized, links are persisted as "references"
   public static class TicketLink {
-    public long         targetTicketId;
-    public String       hash;
+    public long targetTicketId;
+    public String hash;
     public TicketAction action;
-    public boolean      success;
-    public boolean      isDelete;
+    public boolean success;
+    public boolean isDelete;
 
     public TicketLink(long targetTicketId, TicketAction action) {
       this.targetTicketId = targetTicketId;
@@ -1289,10 +1289,10 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public String             hash;
-    public Long               ticketId;
+    public String hash;
+    public Long ticketId;
 
-    public Boolean            deleted;
+    public Boolean deleted;
 
     Reference(String commitHash) {
       this.hash = commitHash;
@@ -1339,10 +1339,10 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public final String       name;
-    public long               size;
-    public byte[]             content;
-    public Boolean            deleted;
+    public final String name;
+    public long size;
+    public byte[] content;
+    public Boolean deleted;
 
     public Attachment(String name) {
       this.name = name;
@@ -1375,11 +1375,11 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public final int          patchset;
+    public final int patchset;
 
-    public final int          rev;
+    public final int rev;
 
-    public Score              score;
+    public Score score;
 
     public Review(int patchset, int revision) {
       this.patchset = patchset;
@@ -1469,14 +1469,14 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
   public static enum Status {
     New, Open, Closed, Resolved, Fixed, Merged, Wontfix, Declined, Duplicate, Invalid, Abandoned, On_Hold, No_Change_Required;
 
-    public static Status[] requestWorkflow   = {Open, Resolved, Declined, Duplicate, Invalid,
-                                                 Abandoned, On_Hold, No_Change_Required};
+    public static Status[] requestWorkflow = {Open, Resolved, Declined, Duplicate, Invalid,
+        Abandoned, On_Hold, No_Change_Required};
 
-    public static Status[] bugWorkflow       = {Open, Fixed, Wontfix, Duplicate, Invalid,
-                                                 Abandoned, On_Hold, No_Change_Required};
+    public static Status[] bugWorkflow = {Open, Fixed, Wontfix, Duplicate, Invalid, Abandoned,
+        On_Hold, No_Change_Required};
 
-    public static Status[] proposalWorkflow  = {Open, Resolved, Declined, Abandoned, On_Hold,
-                                                 No_Change_Required};
+    public static Status[] proposalWorkflow = {Open, Resolved, Declined, Abandoned, On_Hold,
+        No_Change_Required};
 
     public static Status[] milestoneWorkflow = {Open, Closed, Abandoned, On_Hold};
 
@@ -1558,7 +1558,7 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     public static Priority defaultPriority = Normal;
 
-    final int              value;
+    final int value;
 
     Priority(int value) {
       this.value = value;
@@ -1614,7 +1614,7 @@ public class TicketModel implements Serializable, Comparable<TicketModel> {
 
     public static Severity defaultSeverity = Unrated;
 
-    final int              value;
+    final int value;
 
     Severity(int value) {
       this.value = value;

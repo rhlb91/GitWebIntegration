@@ -33,40 +33,40 @@ import com.teammerge.utils.StringUtils;
  */
 public class UserModel implements Principal, Serializable, Comparable<UserModel> {
 
-  private static final long                  serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  public static final UserModel              ANONYMOUS        = new UserModel();
+  public static final UserModel ANONYMOUS = new UserModel();
 
-  private static final SecureRandom          RANDOM           = new SecureRandom();
+  private static final SecureRandom RANDOM = new SecureRandom();
 
   // field names are reflectively mapped in EditUser page
-  public String                              username;
-  public String                              password;
-  public String                              cookie;
-  public String                              displayName;
-  public String                              emailAddress;
-  public String                              organizationalUnit;
-  public String                              organization;
-  public String                              locality;
-  public String                              stateProvince;
-  public String                              countryCode;
-  public boolean                             canAdmin;
-  public boolean                             canFork;
-  public boolean                             canCreate;
-  public boolean                             excludeFromFederation;
-  public boolean                             disabled;
+  public String username;
+  public String password;
+  public String cookie;
+  public String displayName;
+  public String emailAddress;
+  public String organizationalUnit;
+  public String organization;
+  public String locality;
+  public String stateProvince;
+  public String countryCode;
+  public boolean canAdmin;
+  public boolean canFork;
+  public boolean canCreate;
+  public boolean excludeFromFederation;
+  public boolean disabled;
   // retained for backwards-compatibility with RPC clients
   @Deprecated
-  public final Set<String>                   repositories     = new HashSet<String>();
-  public final Map<String, AccessPermission> permissions      =
-                                                                  new LinkedHashMap<String, AccessPermission>();
-  public final Set<TeamModel>                teams            = new TreeSet<TeamModel>();
+  public final Set<String> repositories = new HashSet<String>();
+  public final Map<String, AccessPermission> permissions =
+      new LinkedHashMap<String, AccessPermission>();
+  public final Set<TeamModel> teams = new TreeSet<TeamModel>();
 
   // non-persisted fields
-  public boolean                             isAuthenticated;
-  public AccountType                         accountType;
+  public boolean isAuthenticated;
+  public AccountType accountType;
 
-  public UserPreferences                     userPreferences;
+  public UserPreferences userPreferences;
 
   public UserModel(String username) {
     this.username = username;

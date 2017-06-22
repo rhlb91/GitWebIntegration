@@ -10,7 +10,7 @@ import com.teammerge.services.RepositoryService;
 public class RepositoryServiceImpl implements RepositoryService {
 
   private static IRepositoryManager repositoryManager = null;
-  private RuntimeServiceImpl        runtimeService    = new RuntimeServiceImpl();
+  private RuntimeServiceImpl runtimeService = new RuntimeServiceImpl();
 
   public IRepositoryManager getRepositoryManager() {
 

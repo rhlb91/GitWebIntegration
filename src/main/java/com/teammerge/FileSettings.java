@@ -18,11 +18,11 @@ import com.teammerge.utils.StringUtils;
  */
 public class FileSettings extends IStoredSettings {
 
-  protected File           propertiesFile;
+  protected File propertiesFile;
 
   private final Properties properties = new Properties();
 
-  private volatile long    lastModified;
+  private volatile long lastModified;
 
   private volatile boolean forceReload;
 

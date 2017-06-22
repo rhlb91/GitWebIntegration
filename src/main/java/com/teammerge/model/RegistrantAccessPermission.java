@@ -17,12 +17,12 @@ public class RegistrantAccessPermission implements Serializable,
 
   private static final long serialVersionUID = 1L;
 
-  public String             registrant;
-  public AccessPermission   permission;
-  public RegistrantType     registrantType;
-  public PermissionType     permissionType;
-  public boolean            mutable;
-  public String             source;
+  public String registrant;
+  public AccessPermission permission;
+  public RegistrantType registrantType;
+  public PermissionType permissionType;
+  public boolean mutable;
+  public String source;
 
   public RegistrantAccessPermission() {}
 

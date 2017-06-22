@@ -12,10 +12,10 @@ public class SecureRandom {
    * Period (in ms) after which a new SecureRandom will be created in order to get a fresh random
    * seed.
    */
-  private static final long          RESEED_PERIOD = 24 * 60 * 60 * 1000; /* 24 hours */
+  private static final long RESEED_PERIOD = 24 * 60 * 60 * 1000; /* 24 hours */
 
 
-  private long                       last;
+  private long last;
   private java.security.SecureRandom random;
 
 

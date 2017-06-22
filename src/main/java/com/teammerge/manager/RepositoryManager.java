@@ -49,18 +49,16 @@ import com.teammerge.utils.StringUtils;
 
 public class RepositoryManager implements IRepositoryManager {
 
-  private final Logger                       logger                 = LoggerFactory
-                                                                        .getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  private final IStoredSettings              settings;
-  private File                               repositoriesFolder;
-  private final IRuntimeManager              runtimeManager;
-  private final IUserManager                 userManager;
-  private final ObjectCache<Long>            repositorySizeCache    = new ObjectCache<Long>();
-  private final ObjectCache<List<Metric>>    repositoryMetricsCache =
-                                                                        new ObjectCache<List<Metric>>();
-  private final Map<String, RepositoryModel> repositoryListCache    =
-                                                                        new ConcurrentHashMap<String, RepositoryModel>();
+  private final IStoredSettings settings;
+  private File repositoriesFolder;
+  private final IRuntimeManager runtimeManager;
+  private final IUserManager userManager;
+  private final ObjectCache<Long> repositorySizeCache = new ObjectCache<Long>();
+  private final ObjectCache<List<Metric>> repositoryMetricsCache = new ObjectCache<List<Metric>>();
+  private final Map<String, RepositoryModel> repositoryListCache =
+      new ConcurrentHashMap<String, RepositoryModel>();
 
 
   @Inject
