@@ -22,7 +22,7 @@ public class ActivityModel {
 
   @Override
   public String toString() {
-    String str = "[";
+    String str = "";
     str += "Repo Name: " + repositoryName;
     str += ", push Date: " + pushDate;
     str += ", who Changed: " + whoChanged;
@@ -32,7 +32,7 @@ public class ActivityModel {
     if (CollectionUtils.isNotEmpty(commits)) {
       str += ", commits: " + commits;
     }
-    str += "]\n\n\n";
+    str += "<br><br>";
     return str;
   }
 
@@ -137,7 +137,7 @@ public class ActivityModel {
   }
 
   public void setRepositoryName(String repositoryName) {
-    repositoryName = repositoryName;
+    this.repositoryName = this.repositoryName;
   }
 
 }

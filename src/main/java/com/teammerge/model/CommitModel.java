@@ -11,13 +11,13 @@ public class CommitModel {
 
   @Override
   public String toString() {
-    String str = "[";
+    String str = "";
     str += "Name: " + name;
     str += ", commit Author: " + commitAuthor;
     str += ", short Msg: " + shortMessage;
     str += ", trimmed Msg: " + trimmedMessage;
     str += ", commit Hash: " + commitHash;
-    str += "]\n";
+    str += "<br>";
     return str;
   }
 

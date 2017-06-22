@@ -101,7 +101,7 @@ public class RestController {
     Repository repo = getRepository(repoName);
 
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -2);
+    cal.add(Calendar.DATE, -20);
     System.out.println("Date = " + cal.getTime());
 
     List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
@@ -146,7 +146,11 @@ public class RestController {
     dashBoardService = new DashboardServiceImpl();
 
     List<ActivityModel> activities = dashBoardService.populateActivities();
-    return Response.status(200).entity(activities.toString()).build();
+    String str = "";
+    for (ActivityModel activity : activities) {
+      str += activity.toString();
+    }
+    return Response.status(200).entity(str).build();
   }
 
   @GET
