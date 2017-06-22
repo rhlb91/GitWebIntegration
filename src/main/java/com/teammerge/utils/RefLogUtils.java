@@ -57,7 +57,7 @@ public class RefLogUtils {
 
   private static final String GB_REFLOG = "refs/meta/gitblit/reflog";
 
-  private static final Logger LOGGER    = LoggerFactory.getLogger(RefLogUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RefLogUtils.class);
 
   /**
    * Log an error message and exception.

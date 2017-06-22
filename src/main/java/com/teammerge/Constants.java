@@ -7,36 +7,36 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 public class Constants {
-  public static final String NAME                           = "Gitblit";
+  public static final String NAME = "Gitblit";
 
   public static final String DEFAULT_USER_REPOSITORY_PREFIX = "~";
-  public static final String REGEX_SHA256                   = "[a-fA-F0-9]{64}";
-  public static final String EXTERNAL_ACCOUNT               = "#externalAccount";
+  public static final String REGEX_SHA256 = "[a-fA-F0-9]{64}";
+  public static final String EXTERNAL_ACCOUNT = "#externalAccount";
 
-  public static final int    LEN_FILESTORE_META_MIN         = 125;
+  public static final int LEN_FILESTORE_META_MIN = 125;
 
-  public static final int    LEN_FILESTORE_META_MAX         = 146;
+  public static final int LEN_FILESTORE_META_MAX = 146;
 
-  public static final String R_PATH                         = "/r/";
+  public static final String R_PATH = "/r/";
 
-  public static final String R_LFS                          = "info/lfs/";
+  public static final String R_LFS = "info/lfs/";
 
-  public static final String ENCODING                       = "UTF-8";
-  public static final String R_TICKETS_PATCHSETS            = "refs/tickets/";
-  public static final String R_TICKET                       = "refs/heads/ticket/";
-  public static final String baseFolder                     = "baseFolder";
-  public static final String baseFolder$                    = "${" + baseFolder + "}";
+  public static final String ENCODING = "UTF-8";
+  public static final String R_TICKETS_PATCHSETS = "refs/tickets/";
+  public static final String R_TICKET = "refs/heads/ticket/";
+  public static final String baseFolder = "baseFolder";
+  public static final String baseFolder$ = "${" + baseFolder + "}";
 
-  public static final String CONFIG_GITBLIT                 = "gitblit";
+  public static final String CONFIG_GITBLIT = "gitblit";
 
-  public static final String ISO8601                        = "yyyy-MM-dd'T'HH:mm:ssZ";
+  public static final String ISO8601 = "yyyy-MM-dd'T'HH:mm:ssZ";
 
-  public static final String CONFIG_CUSTOM_FIELDS           = "customFields";
-  public static final String R_HEADS                        = "refs/heads/";
-  public static final String R_TAGS                         = "refs/tags/";
-  public static final String R_PULL                         = "refs/pull/";
-  public static final int    LEN_SHORTLOG_REFS              = 60;
-  public static final int    LEN_SHORTLOG                   = 78;
+  public static final String CONFIG_CUSTOM_FIELDS = "customFields";
+  public static final String R_HEADS = "refs/heads/";
+  public static final String R_TAGS = "refs/tags/";
+  public static final String R_PULL = "refs/pull/";
+  public static final int LEN_SHORTLOG_REFS = 60;
+  public static final int LEN_SHORTLOG = 78;
 
   public static String getVersion() {
     String v = Constants.class.getPackage().getImplementationVersion();
@@ -48,6 +48,7 @@ public class Constants {
 
   /**
    * This regular expression is used when searching for "mentions" in tickets (when someone writes
+   * 
    * @thisOtherUser)
    */
   public static final String REGEX_TICKET_MENTION = "\\B@(?<user>[^\\s]+)\\b";
@@ -150,13 +151,13 @@ public class Constants {
         "RW+"), OWNER("RW+");
 
     public static final AccessPermission[] NEWPERMISSIONS = {EXCLUDE, VIEW, CLONE, PUSH, CREATE,
-                                                              DELETE, REWIND};
+        DELETE, REWIND};
 
     public static final AccessPermission[] SSHPERMISSIONS = {VIEW, CLONE, PUSH};
 
-    public static AccessPermission         LEGACY         = REWIND;
+    public static AccessPermission LEGACY = REWIND;
 
-    public final String                    code;
+    public final String code;
 
     private AccessPermission(String code) {
       this.code = code;

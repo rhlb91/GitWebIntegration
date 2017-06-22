@@ -13,8 +13,8 @@ public class GitNote implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public final String       content;
-  public final RefModel     notesRef;
+  public final String content;
+  public final RefModel notesRef;
 
   public GitNote(RefModel notesRef, String text) {
     this.notesRef = notesRef;

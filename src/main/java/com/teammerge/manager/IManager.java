@@ -1,5 +1,10 @@
 package com.teammerge.manager;
 
+import java.io.File;
+import java.util.Date;
+
+import com.teammerge.model.RepositoryModel;
+
 
 public interface IManager {
 

@@ -5,11 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.naming.directory.SearchResult;
-
 import org.eclipse.jgit.lib.Repository;
 
-import com.teammerge.GitBlitException;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;

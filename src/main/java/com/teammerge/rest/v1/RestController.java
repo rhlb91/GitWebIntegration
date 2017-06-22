@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -13,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.springframework.stereotype.Component;
 
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.model.ActivityModel;
@@ -20,18 +22,21 @@ import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.services.impl.DashboardServiceImpl;
-import com.teammerge.services.impl.RepositoryServiceImpl;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
 
+@Component
 @Path("/v1")
 public class RestController {
 
+  @Resource(name = "repositoryService")
   private RepositoryService repositoryService;
-  private DashBoardService  dashBoardService;
+
+  @Resource(name = "dashBoardService")
+  private DashBoardService dashBoardService;
 
   private IRepositoryManager getRepositoryManager() {
-    repositoryService = new RepositoryServiceImpl();
+    /* repositoryService = new RepositoryServiceImpl(); */
     return repositoryService.getRepositoryManager();
   }
 
@@ -101,7 +106,7 @@ public class RestController {
     Repository repo = getRepository(repoName);
 
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -2);
+    cal.add(Calendar.DATE, -20);
     System.out.println("Date = " + cal.getTime());
 
     List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
@@ -146,7 +151,11 @@ public class RestController {
     dashBoardService = new DashboardServiceImpl();
 
     List<ActivityModel> activities = dashBoardService.populateActivities();
-    return Response.status(200).entity(activities.toString()).build();
+    String str = "";
+    for (ActivityModel activity : activities) {
+      str += activity.toString();
+    }
+    return Response.status(200).entity(str).build();
   }
 
   @GET

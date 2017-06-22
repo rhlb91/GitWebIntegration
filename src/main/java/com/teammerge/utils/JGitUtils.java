@@ -150,9 +150,9 @@ public class JGitUtils {
    * Encapsulates the result of cloning or pulling from a repository.
    */
   public static class CloneResult {
-    public String      name;
+    public String name;
     public FetchResult fetchResult;
-    public boolean     createdRepository;
+    public boolean createdRepository;
   }
 
   /**
@@ -316,7 +316,7 @@ public class JGitUtils {
         null, -1);
 
     private String configValue;
-    private int    permValue;
+    private int permValue;
 
     private GitConfigSharedRepositoryValue(String config, int perm) {
       configValue = config;
@@ -334,7 +334,7 @@ public class JGitUtils {
   }
 
   private static class GitConfigSharedRepository {
-    private int                            intValue;
+    private int intValue;
     private GitConfigSharedRepositoryValue enumValue;
 
     GitConfigSharedRepository(String s) {
@@ -631,7 +631,7 @@ public class JGitUtils {
    * Encapsulates the result of cloning or pulling from a repository.
    */
   public static class LastChange {
-    public Date   when;
+    public Date when;
     public String who;
 
     LastChange() {
@@ -2411,7 +2411,7 @@ public class JGitUtils {
 
   public static class MergeResult {
     public final MergeStatus status;
-    public final String      sha;
+    public final String sha;
 
     MergeResult(MergeStatus status, String sha) {
       this.status = status;
@@ -2472,16 +2472,16 @@ public class JGitUtils {
 
   private static abstract class IntegrationStrategy {
     Repository repository;
-    String     src;
-    String     toBranch;
+    String src;
+    String toBranch;
 
-    RevWalk    revWalk;
-    RevCommit  branchTip;
-    RevCommit  srcTip;
+    RevWalk revWalk;
+    RevCommit branchTip;
+    RevCommit srcTip;
 
-    RevCommit  mergeCommit;
-    String     refLogMessage;
-    String     operationMessage;
+    RevCommit mergeCommit;
+    String refLogMessage;
+    String operationMessage;
 
     RevCommit getMergeCommit() {
       return mergeCommit;

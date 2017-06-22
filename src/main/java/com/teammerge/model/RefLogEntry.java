@@ -25,21 +25,21 @@ import com.teammerge.utils.StringUtils;
  */
 public class RefLogEntry implements Serializable, Comparable<RefLogEntry> {
 
-  private static final long                        serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  public final String                              repository;
+  public final String repository;
 
-  public final Date                                date;
+  public final Date date;
 
-  public final UserModel                           user;
+  public final UserModel user;
 
-  private final Set<RepositoryCommit>              commits;
+  private final Set<RepositoryCommit> commits;
 
   protected final Map<String, ReceiveCommand.Type> refUpdates;
 
-  protected final Map<String, String>              refIdChanges;
+  protected final Map<String, String> refIdChanges;
 
-  private int                                      authorCount;
+  private int authorCount;
 
   /**
    * Constructor for specified duration of push from start date.

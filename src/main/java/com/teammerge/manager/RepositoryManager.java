@@ -2,6 +2,7 @@ package com.teammerge.manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
@@ -12,11 +13,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,19 +40,26 @@ import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
 import com.teammerge.utils.ArrayUtils;
 import com.teammerge.utils.ByteFormat;
+import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.DeepCopier;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JGitUtils.LastChange;
+import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.StringUtils;
 
 public class RepositoryManager implements IRepositoryManager {
 
-  private final Logger          logger = LoggerFactory.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final IStoredSettings settings;
-  private File                  repositoriesFolder;
+  private File repositoriesFolder;
   private final IRuntimeManager runtimeManager;
-  private final IUserManager    userManager;
+  private final IUserManager userManager;
+  private final ObjectCache<Long> repositorySizeCache = new ObjectCache<Long>();
+  private final ObjectCache<List<Metric>> repositoryMetricsCache = new ObjectCache<List<Metric>>();
+  private final Map<String, RepositoryModel> repositoryListCache =
+      new ConcurrentHashMap<String, RepositoryModel>();
+
 
   @Inject
   public RepositoryManager(IRuntimeManager runtimeManager, IUserManager userManager) {
@@ -63,7 +74,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   public List<String> getRepositoryList() {
     List<String> repositories = null;
-    if (!isValidRepositoryList()) {
+    if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
 
       repositoriesFolder =
           runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, "${baseFolder}/git");
@@ -79,7 +90,7 @@ public class RepositoryManager implements IRepositoryManager {
               settings.getInteger(Keys.git.searchRecursionDepth, -1),
               settings.getStrings(Keys.git.searchExclusions));
 
-      if (!settings.getBoolean(Keys.git.cacheRepositoryList, false)) {
+      if (!settings.getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
         StringUtils.sortRepositorynames(repositories);
         return repositories;
@@ -96,13 +107,17 @@ public class RepositoryManager implements IRepositoryManager {
         }
 
         // rebuild fork networks
-        /*
-         * for (RepositoryModel model : repositoryListCache.values()) { if
-         * (!StringUtils.isEmpty(model.originRepository)) { String originKey =
-         * getRepositoryKey(model.originRepository); if (repositoryListCache.containsKey(originKey))
-         * { RepositoryModel origin = repositoryListCache .get(originKey);
-         * origin.addFork(model.name); } } }
-         */
+
+        for (RepositoryModel model : repositoryListCache.values()) {
+          if (!StringUtils.isEmpty(model.getOriginRepository())) {
+            String originKey = getRepositoryKey(model.getOriginRepository());
+            if (repositoryListCache.containsKey(originKey)) {
+              RepositoryModel origin = repositoryListCache.get(originKey);
+              origin.addFork(model.getName());
+            }
+          }
+        }
+
 
         long duration = System.currentTimeMillis() - startTime;
         logger.info(MessageFormat.format(msg, repositories.size(), duration));
@@ -110,12 +125,14 @@ public class RepositoryManager implements IRepositoryManager {
     }
 
     // return sorted copy of cached list
-    /*
-     * List<String> list = new ArrayList<String>(); for (RepositoryModel model :
-     * repositoryListCache.values()) { list.add(model.name); }
-     * StringUtils.sortRepositorynames(list);
-     */
-    return repositories;
+
+    List<String> list = new ArrayList<String>();
+    for (RepositoryModel model : repositoryListCache.values()) {
+      list.add(model.getName());
+    }
+    StringUtils.sortRepositorynames(list);
+
+    return list;
   }
 
   /**
@@ -171,7 +188,6 @@ public class RepositoryManager implements IRepositoryManager {
    * @param n
    * @return true if the repository exists
    */
-  @Override
   public boolean hasRepository(String repositoryName) {
     return hasRepository(repositoryName, false);
   }
@@ -282,30 +298,77 @@ public class RepositoryManager implements IRepositoryManager {
     return null;
   }
 
+  /**
+   * Adds the repository to the list of cached repositories if Gitblit is configured to cache the
+   * repository list.
+   *
+   * @param model
+   */
   @Override
   public void addToCachedRepositoryList(RepositoryModel model) {
-    // TODO Auto-generated method stub
+    if (settings.getBoolean(Keys.git.cacheRepositoryList, true)) {
+      String key = getRepositoryKey(model.getName());
+      repositoryListCache.put(key, model);
 
+      // update the fork origin repository with this repository clone
+      if (!StringUtils.isEmpty(model.getOriginRepository())) {
+        String originKey = getRepositoryKey(model.getOriginRepository());
+        if (repositoryListCache.containsKey(originKey)) {
+          RepositoryModel origin = repositoryListCache.get(originKey);
+          origin.addFork(model.getName());
+        }
+      }
+    }
   }
 
   @Override
   public void resetRepositoryListCache() {
-    // TODO Auto-generated method stub
+    logger.info("Repository cache manually reset");
+    repositoryListCache.clear();
+    repositorySizeCache.clear();
+    repositoryMetricsCache.clear();
+    CommitCache.instance().clear();
 
   }
 
   @Override
   public void resetRepositoryCache(String repositoryName) {
-    // TODO Auto-generated method stub
-
+    removeFromCachedRepositoryList(repositoryName);
+    clearRepositoryMetadataCache(repositoryName);
+    // force a reload of the repository data (ticket-82, issue-433)
+    getRepositoryModel(repositoryName);
   }
 
-  @Override
+  /**
+   * Removes the repository from the list of cached repositories.
+   *
+   * @param name
+   * @return the model being removed
+   */
+  private RepositoryModel removeFromCachedRepositoryList(String name) {
+    if (StringUtils.isEmpty(name)) {
+      return null;
+    }
+    String key = getRepositoryKey(name);
+    return repositoryListCache.remove(key);
+  }
+
+  /**
+   * Clears all the cached metadata for the specified repository.
+   *
+   * @param repositoryName
+   */
+  private void clearRepositoryMetadataCache(String repositoryName) {
+    repositorySizeCache.remove(repositoryName);
+    repositoryMetricsCache.remove(repositoryName);
+    CommitCache.instance().clear(repositoryName);
+  }
+
+
   public Repository getRepository(String repositoryName) {
     return getRepository(repositoryName, true);
   }
 
-  @Override
   public Repository getRepository(String name, boolean logError) {
     String repositoryName = fixRepositoryName(name);
 
@@ -364,11 +427,78 @@ public class RepositoryManager implements IRepositoryManager {
   public RepositoryModel getRepositoryModel(String name) {
     String repositoryName = fixRepositoryName(name);
 
-    RepositoryModel model = loadRepositoryModel(repositoryName);
-    if (model == null) {
+    String repositoryKey = getRepositoryKey(repositoryName);
+    if (!repositoryListCache.containsKey(repositoryKey)) {
+      RepositoryModel model = loadRepositoryModel(repositoryName);
+      if (model == null) {
+        return null;
+      }
+      addToCachedRepositoryList(model);
+      return DeepCopier.copy(model);
+    }
+    // cached model
+    RepositoryModel model = repositoryListCache.get(repositoryKey);
+
+    if (isCollectingGarbage(model.getName())) {
+      // Gitblit is busy collecting garbage, use our cached model
+      RepositoryModel rm = DeepCopier.copy(model);
+      rm.setCollectingGarbage(true);
+      return rm;
+    }
+
+    // check for updates
+    Repository r = getRepository(model.getName());
+    if (r == null) {
+      // repository is missing
+      removeFromCachedRepositoryList(repositoryName);
+      logger.error(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+          repositoryName));
       return null;
     }
+
+    FileBasedConfig config = (FileBasedConfig) getRepositoryConfig(r);
+    if (config.isOutdated()) {
+      // reload model
+      logger.debug(MessageFormat.format(
+          "Config for \"{0}\" has changed. Reloading model and updating cache.", repositoryName));
+      model = loadRepositoryModel(model.getName());
+      removeFromCachedRepositoryList(model.getName());
+      addToCachedRepositoryList(model);
+    } else {
+      // update a few repository parameters
+      if (!model.isHasCommits()) {
+        // update hasCommits, assume a repository only gains commits :)
+        model.setHasCommits(JGitUtils.hasCommits(r));
+      }
+
+      updateLastChangeFields(r, model);
+    }
+    r.close();
+
+    // return a copy of the cached model
     return DeepCopier.copy(model);
+  }
+
+  /**
+   * Workaround JGit. I need to access the raw config object directly in order to see if the config
+   * is dirty so that I can reload a repository model. If I use the stock JGit method to get the
+   * config it already reloads the config. If the config changes are made within Gitblit this is
+   * fine as the returned config will still be flagged as dirty. BUT... if the config is manipulated
+   * outside Gitblit then it fails to recognize this as dirty.
+   *
+   * @param r
+   * @return a config
+   */
+  private StoredConfig getRepositoryConfig(Repository r) {
+    try {
+      Field f = r.getClass().getDeclaredField("repoConfig");
+      f.setAccessible(true);
+      StoredConfig config = (StoredConfig) f.get(r);
+      return config;
+    } catch (Exception e) {
+      logger.error("Failed to retrieve \"repoConfig\" via reflection", e);
+    }
+    return r.getConfig();
   }
 
   @Override
@@ -405,12 +535,12 @@ public class RepositoryManager implements IRepositoryManager {
       model.setSize(null);
       return 0L;
     }
-    /* if (!repositorySizeCache.hasCurrent(model.name, model.lastChange)) { */
-    File gitDir = r.getDirectory();
-    long sz = com.teammerge.utils.FileUtils.folderSize(gitDir);
-    /* repositorySizeCache.updateObject(model.name, model.lastChange, sz); */
-    /* } */
-    /* long size = repositorySizeCache.getObject(model.name); */
+    if (!repositorySizeCache.hasCurrent(model.getName(), model.getLastChange())) {
+      File gitDir = r.getDirectory();
+      long sz = com.teammerge.utils.FileUtils.folderSize(gitDir);
+      repositorySizeCache.updateObject(model.getName(), model.getLastChange(), sz);
+    }
+    long sz = repositorySizeCache.getObject(model.getName());
     long size = sz;
     ByteFormat byteFormat = new ByteFormat();
     model.setSize(byteFormat.format(size));

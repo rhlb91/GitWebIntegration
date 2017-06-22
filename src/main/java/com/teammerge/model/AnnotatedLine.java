@@ -16,11 +16,11 @@ public class AnnotatedLine implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public final String       commitId;
-  public final String       author;
-  public final Date         when;
-  public final int          lineNumber;
-  public final String       data;
+  public final String commitId;
+  public final String author;
+  public final Date when;
+  public final int lineNumber;
+  public final String data;
 
   public AnnotatedLine(RevCommit commit, int lineNumber, String data) {
     if (commit == null) {

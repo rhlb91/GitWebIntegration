@@ -28,19 +28,19 @@ import com.teammerge.utils.StringUtils;
  */
 public class PatchsetCommand extends ReceiveCommand {
 
-  public static final String TOPIC       = "t=";
+  public static final String TOPIC = "t=";
 
   public static final String RESPONSIBLE = "r=";
 
-  public static final String WATCH       = "cc=";
+  public static final String WATCH = "cc=";
 
-  public static final String MILESTONE   = "m=";
+  public static final String MILESTONE = "m=";
 
-  protected final Change     change;
+  protected final Change change;
 
-  protected boolean          isNew;
+  protected boolean isNew;
 
-  protected long             ticketId;
+  protected long ticketId;
 
   public static String getBasePatchsetBranch(long ticketNumber) {
     StringBuilder sb = new StringBuilder();

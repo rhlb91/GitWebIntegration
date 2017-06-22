@@ -18,13 +18,13 @@ public class RepositoryCommit implements Serializable, Comparable<RepositoryComm
 
   private static final long serialVersionUID = 1L;
 
-  public final String       repository;
+  public final String repository;
 
-  public final String       branch;
+  public final String branch;
 
-  private final RevCommit   commit;
+  private final RevCommit commit;
 
-  private List<RefModel>    refs;
+  private List<RefModel> refs;
 
   public RepositoryCommit(String repository, String branch, RevCommit commit) {
     this.repository = repository;

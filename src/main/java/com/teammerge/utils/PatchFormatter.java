@@ -23,11 +23,11 @@ import com.teammerge.Constants;
  */
 public class PatchFormatter extends DiffFormatter {
 
-  private final OutputStream       os;
+  private final OutputStream os;
 
   private Map<String, PatchTouple> changes = new HashMap<String, PatchTouple>();
 
-  private PatchTouple              currentTouple;
+  private PatchTouple currentTouple;
 
   public PatchFormatter(OutputStream os) {
     super(os);

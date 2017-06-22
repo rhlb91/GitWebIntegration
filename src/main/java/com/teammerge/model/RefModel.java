@@ -22,9 +22,9 @@ import com.teammerge.utils.JGitUtils;
 public class RefModel implements Serializable, Comparable<RefModel> {
 
   private static final long serialVersionUID = 1L;
-  public final String       displayName;
-  public final RevObject    referencedObject;
-  public transient Ref      reference;
+  public final String displayName;
+  public final RevObject referencedObject;
+  public transient Ref reference;
 
   public RefModel(String displayName, Ref ref, RevObject refObject) {
     this.displayName = displayName;

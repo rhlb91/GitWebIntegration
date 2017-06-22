@@ -5,13 +5,26 @@
 <web-app>
 	<display-name>Archetype Created Web Application</display-name>
 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
 		<servlet-class>
-			com.sun.jersey.spi.container.servlet.ServletContainer
+			com.sun.jersey.spi.spring.container.servlet.SpringServlet
 		</servlet-class>
 		<init-param>
-			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-name>
+				com.sun.jersey.config.property.packages
+			</param-name>
 			<param-value>com.teammerge.rest</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>

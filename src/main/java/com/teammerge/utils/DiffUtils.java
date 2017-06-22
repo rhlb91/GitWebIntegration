@@ -106,11 +106,11 @@ public class DiffUtils {
    * Encapsulates the output of a diff.
    */
   public static class DiffOutput implements Serializable {
-    private static final long   serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     public final DiffOutputType type;
-    public final String         content;
-    public final DiffStat       stat;
+    public final String content;
+    public final DiffStat stat;
 
     DiffOutput(DiffOutputType type, String content, DiffStat stat) {
       this.type = type;
@@ -131,13 +131,13 @@ public class DiffUtils {
    */
   public static class DiffStat implements Serializable {
 
-    private static final long          serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-    public final List<PathChangeModel> paths            = new ArrayList<PathChangeModel>();
+    public final List<PathChangeModel> paths = new ArrayList<PathChangeModel>();
 
-    private final String               commitId;
+    private final String commitId;
 
-    private final Repository           repository;
+    private final Repository repository;
 
     public DiffStat(String commitId, Repository repository) {
       this.commitId = commitId;
@@ -192,9 +192,9 @@ public class DiffUtils {
 
     private static final long serialVersionUID = 1L;
 
-    public final int          insertions;
-    public final int          deletions;
-    public final int          blanks;
+    public final int insertions;
+    public final int deletions;
+    public final int blanks;
 
     NormalizedDiffStat(int insertions, int deletions, int blanks) {
       this.insertions = insertions;

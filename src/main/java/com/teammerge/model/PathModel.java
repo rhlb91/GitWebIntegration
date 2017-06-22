@@ -22,16 +22,16 @@ import com.teammerge.utils.JGitUtils;
  */
 public class PathModel implements Serializable, Comparable<PathModel> {
 
-  private static final long    serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  public final String          name;
-  public final String          path;
+  public final String name;
+  public final String path;
   private final FilestoreModel filestoreItem;
-  public final long            size;
-  public final int             mode;
-  public final String          objectId;
-  public final String          commitId;
-  public boolean               isParentPath;
+  public final long size;
+  public final int mode;
+  public final String objectId;
+  public final String commitId;
+  public boolean isParentPath;
 
   public PathModel(String name, String path, FilestoreModel filestoreItem, long size, int mode,
       String objectId, String commitId) {
@@ -117,11 +117,11 @@ public class PathModel implements Serializable, Comparable<PathModel> {
 
     private static final long serialVersionUID = 1L;
 
-    public ChangeType         changeType;
+    public ChangeType changeType;
 
-    public int                insertions;
+    public int insertions;
 
-    public int                deletions;
+    public int deletions;
 
     public PathChangeModel(String name, String path, FilestoreModel filestoreItem, long size,
         int mode, String objectId, String commitId, ChangeType type) {
