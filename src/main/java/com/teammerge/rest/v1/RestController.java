@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,6 +20,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.net.MediaType;
 import com.teammerge.manager.IRepositoryManager;
@@ -235,7 +237,7 @@ public class RestController {
   @GET
   @Path("/activities")
   public Response getActivities() {
-    List<ActivityModel> activities = dashBoardService.populateActivities();
+    List<ActivityModel> activities = dashBoardService.populateActivities(true, -1);
     String str = "";
     for (ActivityModel activity : activities) {
       str += activity.toString();
@@ -245,19 +247,17 @@ public class RestController {
 
   @GET
   @Path("/activitiesInJson")
-  public Response getActivitiesInJson() {
-    List<ActivityModel> activities = dashBoardService.populateActivities();
+  public Response getActivitiesInJson(@DefaultValue("true") @QueryParam("cached") boolean cached,
+      @DefaultValue("-1") @QueryParam("daysBack") int daysBack) {
+
+    List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
     String jsonOutput = JacksonUtils.toJson(activities);
-    String finalOutput = "";
-    finalOutput = "{ \"data\":" + jsonOutput + "}";
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
 
   protected Repository getRepository(String repositoryName) {
-    /*
-     * String repositoryName = getRepositoryManager().getRepositoryList().get( 0);
-     */
     Repository r = getRepositoryManager().getRepository(repositoryName);
     if (r == null) {
       System.out.println("\n\nCannot Load Repository" + " " + repositoryName);
