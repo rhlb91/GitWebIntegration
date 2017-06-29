@@ -36,17 +36,22 @@ public class DashboardServiceImpl implements DashBoardService {
 
   private static final ObjectCache<ActivityModel> activityCache = new ObjectCache<ActivityModel>();
 
-  private static Date lastActivityUpdated = new Date(0);
+  // private static Date lastActivityUpdated = new Date(0);
   private Map<RepositoryModel, Date> lastActivityPerRepo = new HashMap<>();
 
-  public List<DailyLogEntry> getRawActivities() {
+  @Override
+  public List<DailyLogEntry> getRawActivities(final int daysBack) {
 
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
-    // int daysBack = lastActivityUpdated // 2 years, basically getting all activities
     Calendar c = Calendar.getInstance();
-    c.setTime(lastActivityUpdated);
-    Date minimumDate = c.getTime();// set this to last activity added date
+    if (daysBack == -1) {
+      c.setTime(new Date(0));
+    } else {
+      c.add(Calendar.DATE, -1 * daysBack);
+    }
+
+    Date minimumDate = c.getTime();
     TimeZone timezone = c.getTimeZone();
 
     // create daily commit digest feed
@@ -91,9 +96,10 @@ public class DashboardServiceImpl implements DashBoardService {
     lastActivityPerRepo.put(model, lastActivityDate);
   }
 
-  public List<ActivityModel> populateActivities() {
+  @Override
+  public List<ActivityModel> populateActivities(final boolean cached, final int daysBack) {
     List<ActivityModel> activityModels = new ArrayList<>();
-    List<DailyLogEntry> rawActivities = getRawActivities();
+    List<DailyLogEntry> rawActivities = getRawActivities(daysBack);
     ActivityModel activityModel = new ActivityModel();
     int cacheHit = 0;
     int cacheMiss = 0;
@@ -101,16 +107,19 @@ public class DashboardServiceImpl implements DashBoardService {
 
     if (CollectionUtils.isNotEmpty(rawActivities)) {
       for (DailyLogEntry dailyLogEntry : rawActivities) {
-        if (activityCache.hasCurrent(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date)) {
-          ++cacheHit;
-          activityModel = activityCache.getObject(getUniqueKeyForActivity(dailyLogEntry));
-        } else {
-          ++cacheMiss;
-          activityModel = createActivity(dailyLogEntry);
+        if (cached) {
+          if (activityCache.hasCurrent(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date)) {
+            ++cacheHit;
+            activityModel = activityCache.getObject(getUniqueKeyForActivity(dailyLogEntry));
+          } else {
+            ++cacheMiss;
+            activityModel = createActivity(dailyLogEntry);
 
-          activityCache.updateObject(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date,
-              activityModel);
+            activityCache.updateObject(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date,
+                activityModel);
+          }
         }
+
         activityModels.add(activityModel);
       }
     }
@@ -255,12 +264,12 @@ public class DashboardServiceImpl implements DashBoardService {
       }
       commitModel.setName(commit.getName());
 
-      if(commitModel.getShortMessage().startsWith("Merge")){
+      if (commitModel.getShortMessage().startsWith("Merge")) {
         commitModel.setIsMergeCommit(true);
-      }else{
+      } else {
         commitModel.setIsMergeCommit(false);
       }
-      
+
       populatedCommits.add(commitModel);
     }
     return populatedCommits;

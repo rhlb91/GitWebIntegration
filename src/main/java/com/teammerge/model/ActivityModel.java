@@ -137,7 +137,6 @@ public class ActivityModel {
   }
 
   public void setRepositoryName(String repositoryName) {
-    this.repositoryName = this.repositoryName;
+    this.repositoryName = repositoryName;
   }
-
 }
