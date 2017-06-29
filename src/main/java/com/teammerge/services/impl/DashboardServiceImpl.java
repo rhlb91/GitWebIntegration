@@ -34,9 +34,6 @@ public class DashboardServiceImpl implements DashBoardService {
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
 
-  @Resource(name = "runtimeService")
-  RuntimeServiceImpl runtimeService;
-
   private static final ObjectCache<ActivityModel> activityCache = new ObjectCache<ActivityModel>();
 
   private static Date lastActivityUpdated = new Date(0);
@@ -209,7 +206,7 @@ public class DashboardServiceImpl implements DashBoardService {
 
     String repoName = StringUtils.stripDotGit(change.repository);
 
-    int maxCommitCount = 5;
+    int maxCommitCount = 20;
     List<RepositoryCommit> commits = change.getCommits();
     if (commits.size() > maxCommitCount) {
       commits = new ArrayList<RepositoryCommit>(commits.subList(0, maxCommitCount));
@@ -258,6 +255,12 @@ public class DashboardServiceImpl implements DashBoardService {
       }
       commitModel.setName(commit.getName());
 
+      if(commitModel.getShortMessage().startsWith("Merge")){
+        commitModel.setIsMergeCommit(true);
+      }else{
+        commitModel.setIsMergeCommit(false);
+      }
+      
       populatedCommits.add(commitModel);
     }
     return populatedCommits;

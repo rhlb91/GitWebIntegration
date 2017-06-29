@@ -21,7 +21,6 @@ import com.teammerge.model.ActivityModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.services.impl.DashboardServiceImpl;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
 
@@ -35,19 +34,42 @@ public class RestController {
   @Resource(name = "dashBoardService")
   private DashBoardService dashBoardService;
 
+  
   private IRepositoryManager getRepositoryManager() {
-    /* repositoryService = new RepositoryServiceImpl(); */
     return repositoryService.getRepositoryManager();
+  }
+
+  @GET
+  @Path("/")
+  public Response hello() {
+    return Response.status(200).entity("hi rfsdal").build();
   }
 
   @GET
   @Path("/hello/{param}")
   public Response getMsg(@PathParam("param") String msg) {
-
     String output = "Jersey say : " + msg;
-
     return Response.status(200).entity(output).build();
+  }
 
+  @GET
+  @Path("/dataTable")
+  public Response sampleDataTableExample() {
+    String output = "";
+
+    output += "{";
+
+
+    output += "\"data\": [";
+    output += "{";
+    output += "\"name\": \"Tiger Nixon\",";
+    output += "\"position\": \"System Architect\",";
+    output += "\"salary\": \"$320,800\",";
+    output += "\"start_date\": \"2011/04/25\",";
+    output += "\"office\": \"Edinburgh\",";
+    output += "\"extn\": \"5421\"";
+    output += "}]}";
+    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
@@ -62,7 +84,7 @@ public class RestController {
       output += list1 + "<br>";
     }
 
-    return Response.status(200).entity(output).build();
+    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
@@ -148,8 +170,6 @@ public class RestController {
   @GET
   @Path("/activities")
   public Response getActivities() {
-    dashBoardService = new DashboardServiceImpl();
-
     List<ActivityModel> activities = dashBoardService.populateActivities();
     String str = "";
     for (ActivityModel activity : activities) {
@@ -161,13 +181,12 @@ public class RestController {
   @GET
   @Path("/activitiesInJson")
   public Response getActivitiesInJson() {
-    dashBoardService = new DashboardServiceImpl();
-
     List<ActivityModel> activities = dashBoardService.populateActivities();
-
     String jsonOutput = JacksonUtils.toJson(activities);
-
-    return Response.status(200).entity(jsonOutput).build();
+    String finalOutput = "";
+    finalOutput = "{ \"data\":" + jsonOutput + "}";
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
   }
 
   protected Repository getRepository(String repositoryName) {
