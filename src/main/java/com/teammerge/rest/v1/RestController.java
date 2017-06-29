@@ -1,13 +1,17 @@
 package com.teammerge.rest.v1;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,10 +20,13 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
 
+import com.google.common.net.MediaType;
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.CustomTicketModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
+import com.teammerge.services.CustomizeService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
@@ -28,11 +35,16 @@ import com.teammerge.utils.JacksonUtils;
 @Path("/v1")
 public class RestController {
 
+  private static String finalOutput = null;
+
   @Resource(name = "repositoryService")
   private RepositoryService repositoryService;
 
   @Resource(name = "dashBoardService")
   private DashBoardService dashBoardService;
+
+  @Resource(name = "customizeService")
+  private CustomizeService customizeService;
 
   
   private IRepositoryManager getRepositoryManager() {
@@ -152,14 +164,23 @@ public class RestController {
     Repository repo = getRepository(repoName);
     List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
     output += "Branches found: " + branchModels.size() + "<br><br>";
-
+    Set<RefModel> uniqueSet = new HashSet<RefModel>(branchModels);
     if (branchModels.size() > 0) {
 
-      for (RefModel branch : branchModels) {
+      for (RefModel branch : uniqueSet) {
         object = branch.getReferencedObjectId();
-        output +=
-            branch.getName() + "--" + "Referenced Object Id: " + object + ", Object Id:"
-                + branch.getObjectId() + "<br>";
+        String s1=branch.getName(); 
+        String temp=s1.substring(20);
+        int number = Collections.frequency(branchModels, branch);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -20);
+        int count =0;
+        List<RevCommit> commits = JGitUtils.getRevLog(repo, temp, cal.getTime());
+        for (RevCommit commit : commits) {
+          count += 1;
+        }                     
+        output += "Branch Name: " + branch + ", No of Branch:" + number + ", No of Commit:" + count    + "<br>";
+      
       }
     }
 
@@ -167,6 +188,50 @@ public class RestController {
 
   }
 
+  
+  @GET
+  @Produces()
+  @Path("/{repository}/tickets/{ticketid}")
+  public Response getTickets(@PathParam("repository") String repoName,@PathParam("ticketid") String ticket) {
+      ObjectId object = null;
+      String output = "";
+      
+      CustomTicketModel customTicketModel =new  CustomTicketModel();
+      
+      
+      Repository repo = getRepository(repoName);
+      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
+     
+      if (branchModels.size() > 0) {
+
+          for (RefModel temp : branchModels) {
+              object = temp.getReferencedObjectId();
+              
+              String s1=temp.getName(); 
+              String branch=s1.substring(20);
+             if(branch.contains(ticket))
+             {
+              int number = Collections.frequency(branchModels, temp);
+              
+             Calendar cal = Calendar.getInstance();
+             cal.add(Calendar.DATE, -20);             
+             List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
+            RevCommit commit=JGitUtils.getCommit(repo, null);
+           /*  output += "Branch Name: " + branch + ", No of Branch:" + number + ", Commit:" + temp.getAuthorIdent()    + "<br>";               
+           */   
+            List<CustomTicketModel> activities = customizeService.populateActivities(ticket);
+            String jsonOutput = JacksonUtils.toJson(activities);
+            String finalOutput = "";
+            finalOutput = "{ \"data\":" + jsonOutput + "}";
+        }
+            
+          }
+      }
+      
+      
+      return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
+
+  }
   @GET
   @Path("/activities")
   public Response getActivities() {

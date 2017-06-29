@@ -5,9 +5,10 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.CustomTicketModel;
 
 public class JacksonUtils {
-  public static String toJson(List<ActivityModel> activities) {
+  public static String toJson(List<CustomTicketModel> activities) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;
@@ -19,4 +20,6 @@ public class JacksonUtils {
 
     return jsonInString;
   }
+
+  
 }
