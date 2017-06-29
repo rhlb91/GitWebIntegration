@@ -51,6 +51,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
+  private String repositoriesFolderPath;
   private final IStoredSettings settings;
   private File repositoriesFolder;
   private final IRuntimeManager runtimeManager;
@@ -61,15 +62,17 @@ public class RepositoryManager implements IRepositoryManager {
       new ConcurrentHashMap<String, RepositoryModel>();
 
 
+
   @Inject
-  public RepositoryManager(IRuntimeManager runtimeManager, IUserManager userManager) {
+  public RepositoryManager(IRuntimeManager runtimeManager, IUserManager userManager,
+      String repositoriesFolderPath) {
 
     this.settings = runtimeManager.getSettings();
     this.runtimeManager = runtimeManager;
     this.userManager = userManager;
-
+    this.repositoriesFolderPath = repositoriesFolderPath;
     repositoriesFolder =
-        runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, "${baseFolder}/git");
+        runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
   }
 
   public List<String> getRepositoryList() {
@@ -77,7 +80,7 @@ public class RepositoryManager implements IRepositoryManager {
     if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
 
       repositoriesFolder =
-          runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, "${baseFolder}/git");
+          runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
       logger.info("Repositories folder : {}", repositoriesFolder.getAbsolutePath());
 
       // we are not caching OR we have not yet cached OR the cached list
@@ -239,7 +242,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   @Override
   public File getRepositoriesFolder() {
-    return runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, "${baseFolder}/git");
+    return runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
   }
 
   @Override
@@ -825,5 +828,13 @@ public class RepositoryManager implements IRepositoryManager {
     } catch (Exception e) {
     }
     return defaultValue;
+  }
+
+  public String getRepositoriesFolderPath() {
+    return repositoriesFolderPath;
+  }
+
+  public void setRepositoriesFolderPath(String repositoriesFolderPath) {
+    this.repositoriesFolderPath = repositoriesFolderPath;
   }
 }
