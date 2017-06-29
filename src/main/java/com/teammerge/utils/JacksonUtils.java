@@ -8,7 +8,7 @@ import com.teammerge.model.ActivityModel;
 import com.teammerge.model.CustomTicketModel;
 
 public class JacksonUtils {
-  public static String toJson(List<CustomTicketModel> activities) {
+  public static String toJson(List<ActivityModel> activities) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;
@@ -21,5 +21,17 @@ public class JacksonUtils {
     return jsonInString;
   }
 
-  
+
+  public static String toCustomTicketJson(CustomTicketModel customTicketModel) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(customTicketModel);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
 }
