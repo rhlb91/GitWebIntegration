@@ -8,7 +8,8 @@ public class CommitModel {
   private String trimmedMessage;
   private String commitHash;
   private String name;
-
+  private Boolean isMergeCommit;
+  
   @Override
   public String toString() {
     String str = "";
@@ -60,4 +61,14 @@ public class CommitModel {
   public void setName(String name) {
     this.name = name;
   }
+
+  public Boolean getIsMergeCommit() {
+    return isMergeCommit;
+  }
+
+  public void setIsMergeCommit(Boolean isMergeCommit) {
+    this.isMergeCommit = isMergeCommit;
+  }
+
+
 }

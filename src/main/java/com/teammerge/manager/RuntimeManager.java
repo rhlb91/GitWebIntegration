@@ -82,9 +82,9 @@ public class RuntimeManager implements IRuntimeManager {
   }
 
   /**
-   * Returns the boot date of the Gitblit server.
+   * Returns the boot date of the GitWebIntegration server.
    *
-   * @return the boot date of Gitblit
+   * @return the boot date of GitWebIntegration
    */
   public Date getBootDate() {
     return serverStatus.bootDate;
@@ -107,7 +107,7 @@ public class RuntimeManager implements IRuntimeManager {
   }
 
   /**
-   * Returns the preferred timezone for the Gitblit instance.
+   * Returns the preferred timezone for the GitWebIntegration instance.
    *
    * @return a timezone
    */
@@ -148,9 +148,9 @@ public class RuntimeManager implements IRuntimeManager {
   }
 
   /**
-   * Is Gitblit running in debug mode?
+   * Is GitWebIntegration running in debug mode?
    *
-   * @return true if Gitblit is running in debug mode
+   * @return true if GitWebIntegration is running in debug mode
    */
 
   public boolean isDebugMode() {
@@ -170,7 +170,7 @@ public class RuntimeManager implements IRuntimeManager {
 
   /**
    * Returns the file object which may have it's base-path determined by environment variables for
-   * running on a cloud hosting service. All Gitblit file or folder retrievals are (at least
+   * running on a cloud hosting service. All GitWebIntegration file or folder retrievals are (at least
    * initially) funneled through this method so it is the correct point to globally override/alter
    * filesystem access based on environment or some other indicator.
    *

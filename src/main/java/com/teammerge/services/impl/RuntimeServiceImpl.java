@@ -2,6 +2,8 @@ package com.teammerge.services.impl;
 
 import java.io.File;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
@@ -16,14 +18,17 @@ public class RuntimeServiceImpl implements RuntimeService {
 
   private static RuntimeManager runtimeManager = null;
 
+  @Value("${git.baseFolder}")
+  private String baseFolderPath;
+
   @Override
   public RuntimeManager getRuntimeManager() {
     if (runtimeManager == null) {
-      File baseFolder = new File(System.getProperty("user.dir"));
-      String path = "/home/rahul/Downloads/git/";
+      File baseFolder = new File(baseFolderPath);
 
       File regFile =
-          com.teammerge.utils.FileUtils.resolveParameter(Constants.baseFolder$, baseFolder, path);
+          com.teammerge.utils.FileUtils.resolveParameter(Constants.baseFolder$, baseFolder,
+              baseFolderPath);
       FileSettings settings = new FileSettings(regFile.getAbsolutePath());
 
       // configure the Gitblit singleton for minimal, non-server operation

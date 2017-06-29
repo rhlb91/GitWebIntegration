@@ -2,7 +2,8 @@ package com.teammerge.services.impl;
 
 import java.util.List;
 
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.manager.IRepositoryManager;
@@ -14,12 +15,17 @@ import com.teammerge.services.RepositoryService;
 public class RepositoryServiceImpl implements RepositoryService {
 
   private static IRepositoryManager repositoryManager = null;
-  private RuntimeServiceImpl runtimeService = new RuntimeServiceImpl();
+  
+  @Value("${git.repositoriesFolderPlaceholder}")
+  private String repositoriesFolderPath;
+  
+  @Autowired
+  private RuntimeServiceImpl runtimeService;
 
   public IRepositoryManager getRepositoryManager() {
 
     if (repositoryManager == null) {
-      repositoryManager = new RepositoryManager(runtimeService.getRuntimeManager(), null);
+      repositoryManager = new RepositoryManager(runtimeService.getRuntimeManager(), null,repositoriesFolderPath);
     }
 
     return repositoryManager;
