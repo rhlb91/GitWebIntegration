@@ -38,7 +38,7 @@ public class CustomTicketModel {
   }
 
   public void setNumOfBranches(Integer numOfBranches) {
-    numOfBranches = numOfBranches;
+    this.numOfBranches = numOfBranches;
   }
 
   public Integer getNumOfCommits() {
@@ -46,7 +46,7 @@ public class CustomTicketModel {
   }
 
   public void setNumOfCommits(Integer numOfCommits) {
-    numOfCommits = numOfCommits;
+    this.numOfCommits = numOfCommits;
   }
 
   public String getTicketId() {
