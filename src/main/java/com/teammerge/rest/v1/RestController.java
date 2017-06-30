@@ -187,7 +187,7 @@ public class RestController {
       @DefaultValue("-1") @QueryParam("daysBack") int daysBack) {
 
     List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
-    String jsonOutput = JacksonUtils.toJson(activities);
+    String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
     String finalOutput = "{ \"data\":" + jsonOutput + "}";
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
