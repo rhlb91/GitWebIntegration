@@ -1,15 +1,23 @@
 package com.teammerge.model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.eclipse.jgit.lib.PersonIdent;
 
-public class CommitModel {
+public class CommitModel implements Serializable, Comparable<CommitModel> {
+ 
+  private static final long serialVersionUID = 6471094113056162919L;
+  
   private PersonIdent commitAuthor;
   private String shortMessage;
   private String trimmedMessage;
   private String commitHash;
   private String name;
   private Boolean isMergeCommit;
-  
+  private Date commitDate;
+  private String commitTimeFormatted;
+
   @Override
   public String toString() {
     String str = "";
@@ -18,6 +26,7 @@ public class CommitModel {
     str += ", short Msg: " + shortMessage;
     str += ", trimmed Msg: " + trimmedMessage;
     str += ", commit Hash: " + commitHash;
+    str += ", commit Date: " + commitDate;
     str += "<br>";
     return str;
   }
@@ -68,6 +77,33 @@ public class CommitModel {
 
   public void setIsMergeCommit(Boolean isMergeCommit) {
     this.isMergeCommit = isMergeCommit;
+  }
+
+  public Date getCommitDate() {
+    return commitDate;
+  }
+
+  public void setCommitDate(Date commitDate) {
+    this.commitDate = commitDate;
+  }
+
+  @Override
+  public int compareTo(CommitModel o) {
+    // reverse-chronological order
+    if (commitDate.after(o.getCommitDate())) {
+      return -1;
+    } else if (commitDate.before(o.getCommitDate())) {
+      return 1;
+    }
+    return 0;
+  }
+
+  public String getCommitTimeFormatted() {
+    return commitTimeFormatted;
+  }
+
+  public void setCommitTimeFormatted(String commitTimeFormatted) {
+    this.commitTimeFormatted = commitTimeFormatted;
   }
 
 

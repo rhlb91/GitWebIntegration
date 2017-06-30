@@ -1,8 +1,12 @@
 package com.teammerge.services.impl;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +18,7 @@ import javax.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
@@ -22,6 +27,7 @@ import com.teammerge.model.CommitModel;
 import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
+import com.teammerge.model.TimeUtils;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ObjectCache;
@@ -33,6 +39,12 @@ public class DashboardServiceImpl implements DashBoardService {
 
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
+
+  @Value("${git.dashboard.dateFormat}")
+  private String dateFormat;
+  
+  @Value("${git.commit.timeFormat}")
+  private String commitTimeFormat;
 
   private static final ObjectCache<ActivityModel> activityCache = new ObjectCache<ActivityModel>();
 
@@ -127,6 +139,16 @@ public class DashboardServiceImpl implements DashBoardService {
         + ((System.currentTimeMillis() - start) / 1000.0) + " secs");
     System.out.println("Total activities: " + activityModels.size());
     System.out.println("Cache Hits: " + cacheHit + ", Cache Miss: " + cacheMiss);
+
+    Comparator<ActivityModel> activitySort = new Comparator<ActivityModel>() {
+      @Override
+      public int compare(ActivityModel o1, ActivityModel o2) {
+        return o2.getPushDate().compareTo(o1.getPushDate());
+      }
+    };
+
+    Collections.sort(activityModels, activitySort);
+    
     return activityModels;
   }
 
@@ -231,9 +253,30 @@ public class DashboardServiceImpl implements DashBoardService {
     activityModel.setPreposition(preposition); // to/from/etc
     activityModel.setByAuthor(by);
     activityModel.setRepositoryName(repoName);
+    activityModel.setWhenChanged(getWhenChanged(change.date));
     activityModel.setCommits(populateCommits(commits, change));
 
     return activityModel;
+  }
+
+  private String getWhenChanged(Date date) {
+    String fuzzydate;
+    Calendar c = Calendar.getInstance();
+    TimeZone timezone = c.getTimeZone();
+    TimeUtils tu = new TimeUtils(timezone);
+
+    DateFormat df = new SimpleDateFormat(dateFormat);
+    df.setTimeZone(timezone);
+
+    Date pushDate = date;
+    if (TimeUtils.isToday(pushDate, timezone)) {
+      fuzzydate = tu.today();
+    } else if (TimeUtils.isYesterday(pushDate, timezone)) {
+      fuzzydate = tu.yesterday();
+    } else {
+      fuzzydate = tu.timeAgo(pushDate);
+    }
+    return fuzzydate + ", " + df.format(pushDate);
   }
 
   public List<CommitModel> populateCommits(List<RepositoryCommit> commits, DailyLogEntry change) {
@@ -241,7 +284,6 @@ public class DashboardServiceImpl implements DashBoardService {
 
     for (RepositoryCommit commit : commits) {
       CommitModel commitModel = new CommitModel();
-
       // author gravatar
       commitModel.setCommitAuthor(commit.getAuthorIdent());
 
@@ -270,8 +312,17 @@ public class DashboardServiceImpl implements DashBoardService {
         commitModel.setIsMergeCommit(false);
       }
 
+      commitModel.setCommitDate(commit.getCommitDate());
+      commitModel.setCommitTimeFormatted(convertToDateFormat(commit.getCommitDate(),commitTimeFormat));
+      
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
+  }
+
+  private String convertToDateFormat(Date commitDate, String commitTimeFormat) {
+    SimpleDateFormat localDateFormat = new SimpleDateFormat(commitTimeFormat);
+    String formattedTime = localDateFormat.format(commitDate);
+    return formattedTime;
   }
 }

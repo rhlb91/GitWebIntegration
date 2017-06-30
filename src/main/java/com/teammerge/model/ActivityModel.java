@@ -19,6 +19,7 @@ public class ActivityModel {
   private String ticketId;
   private List<CommitModel> commits;
   private String repositoryName;
+  private String whenChanged;
 
   @Override
   public String toString() {
@@ -139,4 +140,14 @@ public class ActivityModel {
   public void setRepositoryName(String repositoryName) {
     this.repositoryName = repositoryName;
   }
+
+  public String getWhenChanged() {
+    return whenChanged;
+  }
+
+  public void setWhenChanged(String whenChanged) {
+    this.whenChanged = whenChanged;
+  }
+
+ 
 }
