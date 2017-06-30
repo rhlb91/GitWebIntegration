@@ -57,7 +57,7 @@ public class RestController {
 
   @GET
   @Path("/dataTable")
-  public Response sampleDataTableExample() {
+  public Response sampleDataTableExample1() {
     String output = "";
 
     output += "{";
