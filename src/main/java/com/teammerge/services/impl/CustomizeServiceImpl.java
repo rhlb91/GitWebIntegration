@@ -24,11 +24,8 @@ import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.RefLogUtils;
 import com.teammerge.utils.StringUtils;
 
-
-
 @Service("customizeService")
 public class CustomizeServiceImpl implements CustomizeService {
-
 
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
@@ -37,8 +34,8 @@ public class CustomizeServiceImpl implements CustomizeService {
     CustomTicketModel customTicketModel = new CustomTicketModel();
 
     int numOfMatchedBranches = 0;
-    List<CommitModel> commits = new ArrayList<>();
 
+    List<CommitModel> commits = new ArrayList<CommitModel>();
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
     Calendar c = Calendar.getInstance();
@@ -47,7 +44,6 @@ public class CustomizeServiceImpl implements CustomizeService {
     TimeZone timezone = c.getTimeZone();
 
     for (RepositoryModel model : repositories) {
-
       if (model.isCollectingGarbage()) {
         continue;
       }
@@ -56,43 +52,42 @@ public class CustomizeServiceImpl implements CustomizeService {
           repositoryService.getRepositoryManager().getRepository(model.getName());
       List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
 
-      for (RefModel branch : branchModels) {
-        if (branch.getName().contains(branchName)) {
-          ++numOfMatchedBranches;
+      if (branchModels.size() > 0) {
 
-          if (model.isHasCommits()) {
+        for (RefModel branch : branchModels) {
 
-            if (repository != null) {
-              List<DailyLogEntry> dailyLogEntries =
-                  RefLogUtils.getDailyLogByRef(model.getName(), repository, minimumDate, timezone);
+          if (branch.getName().contains(branchName)) {
 
-              for (DailyLogEntry dailyLogEntry : dailyLogEntries) {
-                if (dailyLogEntry.getCommitCount() >= 1) {
-                  commits.addAll(populateCommits(dailyLogEntry.getCommits(), dailyLogEntry));
+            numOfMatchedBranches = numOfMatchedBranches + 1;
+
+            if (model.isHasCommits()) {
+              if (repository != null) {
+                List<DailyLogEntry> dailyLogEntries = RefLogUtils.getDailyLogByRef(branch.getName(),
+                    repository, minimumDate, timezone);
+
+                for (DailyLogEntry dailyLogEntry : dailyLogEntries) {
+                  if (dailyLogEntry.getCommitCount() >= 1) {
+                    commits.addAll(populateCommits(dailyLogEntry.getCommits(), dailyLogEntry));
+                  }
                 }
               }
             }
           }
         }
       }
-
-      customTicketModel.setNumOfBranches(numOfMatchedBranches);
-      customTicketModel.setNumOfCommits(commits.size());
-      customTicketModel.setCommits(commits);
-      customTicketModel.setTicketId(branchName);
-      
-      return customTicketModel;
     }
-    return null;
+    customTicketModel.setNumOfBranches(numOfMatchedBranches);
+    customTicketModel.setNumOfCommits(commits.size());
+    customTicketModel.setCommits(commits);
+    customTicketModel.setTicketId(branchName);
+    return customTicketModel;
   }
 
   public List<CommitModel> populateCommits(List<RepositoryCommit> commits, DailyLogEntry change) {
-    List<CommitModel> populatedCommits = new ArrayList<>();
-
+    List<CommitModel> populatedCommits = new ArrayList<CommitModel>();
     for (RepositoryCommit commit : commits) {
       CommitModel commitModel = new CommitModel();
       commitModel.setCommitAuthor(commit.getAuthorIdent());
-
       // short message
       String shortMessage = commit.getShortMessage();
       String trimmedMessage = shortMessage;
@@ -101,7 +96,6 @@ public class CustomizeServiceImpl implements CustomizeService {
       } else {
         trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG);
       }
-
       commitModel.setShortMessage(shortMessage);
       commitModel.setTrimmedMessage(trimmedMessage);
 
@@ -111,16 +105,13 @@ public class CustomizeServiceImpl implements CustomizeService {
         commitModel.setCommitHash(commit.getName().substring(0, hashLen));
       }
       commitModel.setName(commit.getName());
-
       if (commitModel.getShortMessage().startsWith("Merge")) {
         commitModel.setIsMergeCommit(true);
       } else {
         commitModel.setIsMergeCommit(false);
       }
-
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
   }
-
 }
