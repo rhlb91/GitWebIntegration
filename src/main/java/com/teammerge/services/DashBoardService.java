@@ -10,7 +10,7 @@ import com.teammerge.model.RepositoryCommit;
 public interface DashBoardService {
 
   /**
-   * Retrives the activity in a raw format ,i.e, not in {@link ActivityModel} format. <br>
+   * Retrieves the activity in a raw format ,i.e, not in {@link ActivityModel} format. <br>
    * Takes a parameter <code>daysBack</code> <br>
    * <br>
    * For Example: <br>

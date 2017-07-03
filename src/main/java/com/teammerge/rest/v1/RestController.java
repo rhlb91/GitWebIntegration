@@ -17,13 +17,13 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
 
@@ -45,6 +45,7 @@ public class RestController {
   @GET
   @Path("/")
   public Response hello() {
+    applicationPaths();
     return Response.status(200).entity("hi rfsdal").build();
   }
 
@@ -78,7 +79,7 @@ public class RestController {
   @GET
   @Path("/repositories")
   public Response getRepositoriesName() {
-    List<String> list = getRepositoryManager().getRepositoryList();
+    List<String> list = repositoryService.getRepositoryList();
     System.out.println("\n\n " + list.size() + "\n\n");
     String output = "";
 
@@ -93,7 +94,7 @@ public class RestController {
   @GET
   @Path("/repository/gitlist")
   public Response getRepoForBrowser() {
-    Repository repo = getRepository("gitlist");
+    Repository repo = repositoryService.getRepository("gitlist");
     String output = null;
     if (repo == null) {
       output = "Error in loading repository 'Gitlist'";
@@ -108,7 +109,7 @@ public class RestController {
   @Path("/{repository}/commit")
   public Response getCommit(@PathParam("repository") String repoName) {
     String output = null;
-    Repository repo = getRepository(repoName);
+    Repository repo = repositoryService.getRepository(repoName);
 
     RevCommit commit = JGitUtils.getCommit(repo, null);
 
@@ -128,7 +129,7 @@ public class RestController {
   @Path("/{repository}/commit/{branch}")
   public Response getAllCommits(@PathParam("repository") String repoName,
       @PathParam("branch") String branch) {
-    Repository repo = getRepository(repoName);
+    Repository repo = repositoryService.getRepository(repoName);
 
     Calendar cal = Calendar.getInstance();
     cal.add(Calendar.DATE, -20);
@@ -152,7 +153,7 @@ public class RestController {
     ObjectId object = null;
     String output = "";
 
-    Repository repo = getRepository(repoName);
+    Repository repo = repositoryService.getRepository(repoName);
     List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
     output += "Branches found: " + branchModels.size() + "<br><br>";
 
@@ -193,13 +194,15 @@ public class RestController {
         .build();
   }
 
-  protected Repository getRepository(String repositoryName) {
-    Repository r = getRepositoryManager().getRepository(repositoryName);
-    if (r == null) {
-      System.out.println("\n\nCannot Load Repository" + " " + repositoryName);
-      return null;
-    }
-    return r;
+  @GET
+  @Path("/appPath")
+  public Response applicationPaths() {
+    String dir = ApplicationDirectoryUtils.getProgramDirectory();
+
+
+    return Response.status(200).entity("Application Dir: " + dir)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
+
 
 }
