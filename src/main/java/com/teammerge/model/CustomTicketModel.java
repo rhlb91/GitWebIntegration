@@ -1,75 +1,73 @@
 package com.teammerge.model;
 
 import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.Map;
 
 public class CustomTicketModel {
-  private Integer numOfBranches;
-  private Integer numOfCommits;
-  private String ticketId;
-  private List<CommitModel> commits;
-  private String repositoryName;
-  private String byAuthor;
+	private Integer numOfBranches;
+	private Integer numOfCommits;
+	private String ticketId;
+	private Map<String, List<RepositoryCommit>> branchCommitMap;
+	private String repositoryName;
+	private String byAuthor;
 
-  @Override
-  public String toString() {
-    String str = "";
-    str += "Repo Name: " + repositoryName;
-    str += ", by Author: " + byAuthor;
-    str += ", ticket Id:" + ticketId;
-    if (CollectionUtils.isNotEmpty(commits)) {
-      str += ", commits: " + commits;
-    }
-    str += "<br><br>";
-    return str;
-  }
+	@Override
+	public String toString() {
+		String str = "";
+		str += "Repo Name: " + repositoryName;
+		str += ", by Author: " + byAuthor;
+		str += ", ticket Id:" + ticketId;
 
-  public String getByAuthor() {
-    return byAuthor;
-  }
+		str += "<br><br>";
+		return str;
+	}
 
-  public void setByAuthor(String byAuthor) {
-    this.byAuthor = byAuthor;
-  }
+	public String getByAuthor() {
+		return byAuthor;
+	}
 
-  public Integer getNumOfBranches() {
-    return numOfBranches;
-  }
+	public void setByAuthor(String byAuthor) {
+		this.byAuthor = byAuthor;
+	}
 
-  public void setNumOfBranches(Integer numOfBranches) {
-    numOfBranches = numOfBranches;
-  }
+	public Integer getNumOfBranches() {
+		return numOfBranches;
+	}
 
-  public Integer getNumOfCommits() {
-    return numOfCommits;
-  }
+	public void setNumOfBranches(Integer numOfBranches) {
+		this.numOfBranches = numOfBranches;
+	}
 
-  public void setNumOfCommits(Integer numOfCommits) {
-    numOfCommits = numOfCommits;
-  }
+	public Integer getNumOfCommits() {
+		return numOfCommits;
+	}
 
-  public String getTicketId() {
-    return ticketId;
-  }
+	public void setNumOfCommits(Integer numOfCommits) {
+		this.numOfCommits = numOfCommits;
+	}
 
-  public void setTicketId(String ticketId) {
-    this.ticketId = ticketId;
-  }
+	public String getTicketId() {
+		return ticketId;
+	}
 
-  public List<CommitModel> getCommits() {
-    return commits;
-  }
+	public void setTicketId(String ticketId) {
+		this.ticketId = ticketId;
+	}
 
-  public void setCommits(List<CommitModel> commits) {
-    this.commits = commits;
-  }
+	public String getRepositoryName() {
+		return repositoryName;
+	}
 
-  public String getRepositoryName() {
-    return repositoryName;
-  }
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
+	}
 
-  public void setRepositoryName(String repositoryName) {
-    this.repositoryName = repositoryName;
-  }
+	public Map<String, List<RepositoryCommit>> getBranchCommitMap() {
+		return branchCommitMap;
+	}
+
+	public void setBranchCommitMap(Map<String, List<RepositoryCommit>> branchCommitMap) {
+		this.branchCommitMap = branchCommitMap;
+	}
+
 }

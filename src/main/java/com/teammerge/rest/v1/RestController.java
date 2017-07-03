@@ -24,9 +24,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.net.MediaType;
 import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.model.CustomTicketModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
+import com.teammerge.services.BranchService;
 import com.teammerge.services.CustomizeService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ApplicationDirectoryUtils;
@@ -47,6 +49,9 @@ public class RestController {
 
   @Resource(name = "customizeService")
   private CustomizeService customizeService;
+  
+  @Resource(name = "branchService")
+  private BranchService branchService;
 
   
   private IRepositoryManager getRepositoryManager() {
@@ -161,7 +166,7 @@ public class RestController {
   @GET
   @Path("/{repository}/branches")
   public Response getAllBranches(@PathParam("repository") String repoName) {
-    ObjectId object = null;
+   /* ObjectId object = null;
     String output = "";
 
     Repository repo = repositoryService.getRepository(repoName);
@@ -190,51 +195,32 @@ public class RestController {
     return Response.status(200).entity(output).build();
 
   }
+*/
+
+    BranchModel brnch = branchService.getBranchByName(repoName);  
+    String jsonOutput = JacksonUtils.toBrancJson(brnch);  
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";  
+  
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")  
+        .build();  
+  }  
 
   
   @GET
-  @Produces()
+  
   @Path("/{repository}/tickets/{ticketid}")
-  public Response getTickets(@PathParam("repository") String repoName,@PathParam("ticketid") String ticket) {
-      ObjectId object = null;
-      String output = "";
-      
-      CustomTicketModel customTicketModel =new  CustomTicketModel();
-      
-      
-      Repository repo = getRepository(repoName);
-      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
-     
-      if (branchModels.size() > 0) {
+  public Response getTickets(@PathParam("repository") String repoName,  
+      @PathParam("ticketid") String ticket) {  
+  
+    CustomTicketModel customTicketModel = customizeService.getDetailsForBranchName(ticket,repoName);  
+    String jsonOutput = JacksonUtils.toCustomTicketJson(customTicketModel);  
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";  
+  
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")  
+        .build();  
+  }  
 
-          for (RefModel temp : branchModels) {
-              object = temp.getReferencedObjectId();
-              
-              String s1=temp.getName(); 
-              String branch=s1.substring(20);
-             if(branch.contains(ticket))
-             {
-              int number = Collections.frequency(branchModels, temp);
-              
-             Calendar cal = Calendar.getInstance();
-             cal.add(Calendar.DATE, -20);             
-             List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
-            RevCommit commit=JGitUtils.getCommit(repo, null);
-           /*  output += "Branch Name: " + branch + ", No of Branch:" + number + ", Commit:" + temp.getAuthorIdent()    + "<br>";               
-           */   
-            List<CustomTicketModel> activities = customizeService.populateActivities(ticket);
-            String jsonOutput = JacksonUtils.toJson(activities);
-            String finalOutput = "";
-            finalOutput = "{ \"data\":" + jsonOutput + "}";
-        }
             
-          }
-      }
-      
-      
-      return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
-
-  }
   @GET
   @Path("/activities")
   public Response getActivities() {
