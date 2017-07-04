@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teammerge.model.ActivityModel;
 
 public class JacksonUtils {
-  public static String toJson(List<ActivityModel> activities) {
+  public static String convertActivitiestoJson(List<ActivityModel> activities) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;

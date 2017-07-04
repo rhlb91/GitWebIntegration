@@ -17,13 +17,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.teammerge.manager.IRepositoryManager;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
 
@@ -37,14 +36,10 @@ public class RestController {
   @Resource(name = "dashBoardService")
   private DashBoardService dashBoardService;
 
-
-  private IRepositoryManager getRepositoryManager() {
-    return repositoryService.getRepositoryManager();
-  }
-
   @GET
   @Path("/")
   public Response hello() {
+    applicationPaths();
     return Response.status(200).entity("hi rfsdal").build();
   }
 
@@ -61,8 +56,6 @@ public class RestController {
     String output = "";
 
     output += "{";
-
-
     output += "\"data\": [";
     output += "{";
     output += "\"name\": \"Tiger Nixon\",";
@@ -78,7 +71,7 @@ public class RestController {
   @GET
   @Path("/repositories")
   public Response getRepositoriesName() {
-    List<String> list = getRepositoryManager().getRepositoryList();
+    List<String> list = repositoryService.getRepositoryList();
     System.out.println("\n\n " + list.size() + "\n\n");
     String output = "";
 
@@ -86,14 +79,13 @@ public class RestController {
       System.out.println("\n\n " + list1 + "\n\n");
       output += list1 + "<br>";
     }
-
     return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
   @Path("/repository/gitlist")
   public Response getRepoForBrowser() {
-    Repository repo = getRepository("gitlist");
+    Repository repo = repositoryService.getRepository("gitlist", true);
     String output = null;
     if (repo == null) {
       output = "Error in loading repository 'Gitlist'";
@@ -108,7 +100,7 @@ public class RestController {
   @Path("/{repository}/commit")
   public Response getCommit(@PathParam("repository") String repoName) {
     String output = null;
-    Repository repo = getRepository(repoName);
+    Repository repo = repositoryService.getRepository(repoName, true);
 
     RevCommit commit = JGitUtils.getCommit(repo, null);
 
@@ -125,13 +117,13 @@ public class RestController {
   }
 
   @GET
-  @Path("/{repository}/commit/{branch}")
+  @Path("/{repository}/commit/{branch}/{daysBack}")
   public Response getAllCommits(@PathParam("repository") String repoName,
-      @PathParam("branch") String branch) {
-    Repository repo = getRepository(repoName);
+      @PathParam("branch") String branch, @PathParam("daysBack") @DefaultValue("7") int daysBack) {
+    Repository repo = repositoryService.getRepository(repoName, true);
 
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -20);
+    cal.add(Calendar.DATE, -daysBack);
     System.out.println("Date = " + cal.getTime());
 
     List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
@@ -152,7 +144,7 @@ public class RestController {
     ObjectId object = null;
     String output = "";
 
-    Repository repo = getRepository(repoName);
+    Repository repo = repositoryService.getRepository(repoName, true);
     List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
     output += "Branches found: " + branchModels.size() + "<br><br>";
 
@@ -187,19 +179,17 @@ public class RestController {
       @DefaultValue("-1") @QueryParam("daysBack") int daysBack) {
 
     List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
-    String jsonOutput = JacksonUtils.toJson(activities);
+    String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
     String finalOutput = "{ \"data\":" + jsonOutput + "}";
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
 
-  protected Repository getRepository(String repositoryName) {
-    Repository r = getRepositoryManager().getRepository(repositoryName);
-    if (r == null) {
-      System.out.println("\n\nCannot Load Repository" + " " + repositoryName);
-      return null;
-    }
-    return r;
+  @GET
+  @Path("/appPath")
+  public Response applicationPaths() {
+    String dir = ApplicationDirectoryUtils.getProgramDirectory();
+    return Response.status(200).entity("Application Dir: " + dir)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
-
 }
