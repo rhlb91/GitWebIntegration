@@ -104,7 +104,6 @@ public class RepositoryManager implements IRepositoryManager {
         }
 
         // rebuild fork networks
-
         for (RepositoryModel model : repositoryListCache.values()) {
           if (!StringUtils.isEmpty(model.getOriginRepository())) {
             String originKey = getRepositoryKey(model.getOriginRepository());
@@ -115,14 +114,12 @@ public class RepositoryManager implements IRepositoryManager {
           }
         }
 
-
         long duration = System.currentTimeMillis() - startTime;
         logger.info(MessageFormat.format(msg, repositories.size(), duration));
       }
     }
 
     // return sorted copy of cached list
-
     List<String> list = new ArrayList<String>();
     for (RepositoryModel model : repositoryListCache.values()) {
       list.add(model.getName());

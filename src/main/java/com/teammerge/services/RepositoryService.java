@@ -12,7 +12,7 @@ public interface RepositoryService {
 
   List<RepositoryModel> getRepositoryModels();
 
-  Repository getRepository(String repositoryName);
+  Repository getRepository(String repositoryName,boolean updateRequired);
 
   List<String> getRepositoryList();
 
