@@ -18,6 +18,8 @@ import javax.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,30 +32,39 @@ import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.RefLogUtils;
 import com.teammerge.utils.StringUtils;
 
 @Service("dashBoardService")
 public class DashboardServiceImpl implements DashBoardService {
+  private final Logger LOG = LoggerFactory.getLogger(DashboardServiceImpl.class);
 
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
 
   @Value("${git.dashboard.dateFormat}")
   private String dateFormat;
-  
+
   @Value("${git.commit.timeFormat}")
   private String commitTimeFormat;
+
+  @Value("${app.debug}")
+  private String debug;
 
   private static final ObjectCache<ActivityModel> activityCache = new ObjectCache<ActivityModel>();
 
   // private static Date lastActivityUpdated = new Date(0);
   private Map<RepositoryModel, Date> lastActivityPerRepo = new HashMap<>();
 
+  public boolean isDebugOn() {
+    return Boolean.parseBoolean(debug);
+  }
+
   @Override
   public List<DailyLogEntry> getRawActivities(final int daysBack) {
-
+    long start = System.currentTimeMillis();
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
     Calendar c = Calendar.getInstance();
@@ -73,8 +84,7 @@ public class DashboardServiceImpl implements DashBoardService {
         continue;
       }
       if (model.isHasCommits() && model.getLastChange().after(minimumDate)) {
-        Repository repository =
-            repositoryService.getRepositoryManager().getRepository(model.getName());
+        Repository repository = repositoryService.getRepository(model.getName(), true);
 
         if (repository != null) {
           List<DailyLogEntry> entries =
@@ -96,6 +106,11 @@ public class DashboardServiceImpl implements DashBoardService {
     for (RepositoryModel repo : lastActivityPerRepo.keySet()) {
       System.out.println("LastActivity for " + repo.getName() + ": "
           + lastActivityPerRepo.get(repo));
+    }
+
+    if (isDebugOn()) {
+      LOG.debug("Fetched raw activities in "
+          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
     return digests;
   }
@@ -135,10 +150,7 @@ public class DashboardServiceImpl implements DashBoardService {
         activityModels.add(activityModel);
       }
     }
-    System.out.println("Total time taken to populate activities: "
-        + ((System.currentTimeMillis() - start) / 1000.0) + " secs");
-    System.out.println("Total activities: " + activityModels.size());
-    System.out.println("Cache Hits: " + cacheHit + ", Cache Miss: " + cacheMiss);
+
 
     Comparator<ActivityModel> activitySort = new Comparator<ActivityModel>() {
       @Override
@@ -148,7 +160,13 @@ public class DashboardServiceImpl implements DashBoardService {
     };
 
     Collections.sort(activityModels, activitySort);
-    
+
+    if (isDebugOn()) {
+      LOG.debug("Total time taken to populate activities: "
+          + ((System.currentTimeMillis() - start) / 1000.0) + " secs");
+      LOG.debug("Total activities: " + activityModels.size());
+      LOG.debug("Cache Hits: " + cacheHit + ", Cache Miss: " + cacheMiss);
+    }
     return activityModels;
   }
 
@@ -313,8 +331,9 @@ public class DashboardServiceImpl implements DashBoardService {
       }
 
       commitModel.setCommitDate(commit.getCommitDate());
-      commitModel.setCommitTimeFormatted(convertToDateFormat(commit.getCommitDate(),commitTimeFormat));
-      
+      commitModel.setCommitTimeFormatted(convertToDateFormat(commit.getCommitDate(),
+          commitTimeFormat));
+
       populatedCommits.add(commitModel);
     }
     return populatedCommits;

@@ -5,6 +5,7 @@ public class GitOptions {
   private String destinationDirectory;
   private boolean isCloneAllBranches;
   private boolean includeSubModule;
+  private boolean isBare;
 
   public GitOptions() {
     this("", "", true, true);
@@ -14,8 +15,7 @@ public class GitOptions {
     this(uri, dir, true, true);
   }
 
-  public GitOptions(String uri, String dir, boolean cloneAllBranches,
-      boolean includeSubModule) {
+  public GitOptions(String uri, String dir, boolean cloneAllBranches, boolean includeSubModule) {
     this.URI = uri;
     this.setDestinationDirectory(dir);
     this.isCloneAllBranches = cloneAllBranches;
@@ -52,6 +52,14 @@ public class GitOptions {
 
   public void setDestinationDirectory(String destinationDirectory) {
     this.destinationDirectory = destinationDirectory;
+  }
+
+  public boolean isBare() {
+    return isBare;
+  }
+
+  public void setBare(boolean isBare) {
+    this.isBare = isBare;
   }
 
 }

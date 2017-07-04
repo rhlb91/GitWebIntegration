@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.model.ActivityModel;
@@ -35,6 +36,13 @@ public class RestController {
 
   @Resource(name = "dashBoardService")
   private DashBoardService dashBoardService;
+
+  @Value("${app.debug}")
+  private String debug;
+
+  public boolean isDebugOn() {
+    return Boolean.parseBoolean(debug);
+  }
 
   @GET
   @Path("/")
@@ -117,13 +125,13 @@ public class RestController {
   }
 
   @GET
-  @Path("/{repository}/commit/{branch}/{daysBack}")
+  @Path("/{repository}/commit/{branch}")
   public Response getAllCommits(@PathParam("repository") String repoName,
-      @PathParam("branch") String branch, @PathParam("daysBack") @DefaultValue("7") int daysBack) {
+      @PathParam("branch") String branch) {
     Repository repo = repositoryService.getRepository(repoName, true);
 
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -daysBack);
+    cal.setTime(new Date(0));
     System.out.println("Date = " + cal.getTime());
 
     List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
