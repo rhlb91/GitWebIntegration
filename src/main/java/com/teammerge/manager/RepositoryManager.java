@@ -25,7 +25,6 @@ import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
 import com.teammerge.Constants;
 import com.teammerge.Constants.AccessRestrictionType;
 import com.teammerge.Constants.AuthorizationControl;
@@ -36,8 +35,10 @@ import com.teammerge.Keys;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;
+import com.teammerge.model.RepoParams;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
+import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.ArrayUtils;
 import com.teammerge.utils.ByteFormat;
 import com.teammerge.utils.CommitCache;
@@ -49,45 +50,38 @@ import com.teammerge.utils.StringUtils;
 
 public class RepositoryManager implements IRepositoryManager {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(RepositoryManager.class);
 
-  private String repositoriesFolderPath;
-  private final IStoredSettings settings;
+  /**
+   * Eg- git , where all the repositories will be stored
+   */
   private File repositoriesFolder;
-  private final IRuntimeManager runtimeManager;
-  private final IUserManager userManager;
   private final ObjectCache<Long> repositorySizeCache = new ObjectCache<Long>();
   private final ObjectCache<List<Metric>> repositoryMetricsCache = new ObjectCache<List<Metric>>();
   private final Map<String, RepositoryModel> repositoryListCache =
       new ConcurrentHashMap<String, RepositoryModel>();
 
+  private RepoParams repoParams;
 
+  public RepositoryManager(RepoParams params) {
+    this.repoParams = params;
 
-  @Inject
-  public RepositoryManager(IRuntimeManager runtimeManager, IUserManager userManager,
-      String repositoriesFolderPath) {
-
-    this.settings = runtimeManager.getSettings();
-    this.runtimeManager = runtimeManager;
-    this.userManager = userManager;
-    this.repositoriesFolderPath = repositoriesFolderPath;
-    repositoriesFolder =
-        runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
+    setRepositoriesFolder(params.getRuntimeManager().getFileOrFolder(Keys.git.repositoriesFolder,
+        ApplicationDirectoryUtils.getProgramDirectory() + "/" + repoParams.getRepoFolderName()));
   }
 
   public List<String> getRepositoryList() {
     List<String> repositories = null;
     if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
 
-      repositoriesFolder =
-          runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
-      logger.info("Repositories folder : {}", repositoriesFolder.getAbsolutePath());
+      LOG.info("Repositories folder : {}", getRepositoriesFolder().getAbsolutePath());
 
+      IStoredSettings settings = repoParams.getRuntimeManager().getSettings();
       // we are not caching OR we have not yet cached OR the cached list
       // is invalid
       long startTime = System.currentTimeMillis();
       repositories =
-          JGitUtils.getRepositoryList(repositoriesFolder,
+          JGitUtils.getRepositoryList(getRepositoriesFolder(),
               settings.getBoolean(Keys.git.onlyAccessBareRepositories, false),
               settings.getBoolean(Keys.git.searchRepositoriesSubfolders, true),
               settings.getInteger(Keys.git.searchRecursionDepth, -1),
@@ -110,7 +104,6 @@ public class RepositoryManager implements IRepositoryManager {
         }
 
         // rebuild fork networks
-
         for (RepositoryModel model : repositoryListCache.values()) {
           if (!StringUtils.isEmpty(model.getOriginRepository())) {
             String originKey = getRepositoryKey(model.getOriginRepository());
@@ -121,22 +114,31 @@ public class RepositoryManager implements IRepositoryManager {
           }
         }
 
-
         long duration = System.currentTimeMillis() - startTime;
-        logger.info(MessageFormat.format(msg, repositories.size(), duration));
+        LOG.info(MessageFormat.format(msg, repositories.size(), duration));
       }
     }
 
     // return sorted copy of cached list
-
     List<String> list = new ArrayList<String>();
     for (RepositoryModel model : repositoryListCache.values()) {
+      Repository r = getRepository(model.getName());
+      if (r == null) {
+        // repository is missing
+        removeFromCachedRepositoryList(model.getName());
+        LOG.warn(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+            model.getName()));
+        continue;
+      }
       list.add(model.getName());
     }
+
     StringUtils.sortRepositorynames(list);
 
     return list;
   }
+
+
 
   /**
    * Returns the cache key for the repository name.
@@ -242,7 +244,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   @Override
   public File getRepositoriesFolder() {
-    return runtimeManager.getFileOrFolder(Keys.git.repositoriesFolder, repositoriesFolderPath);
+    return repositoriesFolder;
   }
 
   @Override
@@ -309,7 +311,7 @@ public class RepositoryManager implements IRepositoryManager {
    */
   @Override
   public void addToCachedRepositoryList(RepositoryModel model) {
-    if (settings.getBoolean(Keys.git.cacheRepositoryList, true)) {
+    if (repoParams.getRuntimeManager().getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
       String key = getRepositoryKey(model.getName());
       repositoryListCache.put(key, model);
 
@@ -326,7 +328,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   @Override
   public void resetRepositoryListCache() {
-    logger.info("Repository cache manually reset");
+    LOG.info("Repository cache manually reset");
     repositoryListCache.clear();
     repositorySizeCache.clear();
     repositoryMetricsCache.clear();
@@ -376,12 +378,12 @@ public class RepositoryManager implements IRepositoryManager {
     String repositoryName = fixRepositoryName(name);
 
     if (isCollectingGarbage(repositoryName)) {
-      logger.warn(MessageFormat.format("Rejecting request for {0}, busy collecting garbage!",
+      LOG.warn(MessageFormat.format("Rejecting request for {0}, busy collecting garbage!",
           repositoryName));
       return null;
     }
 
-    File dir = FileKey.resolve(new File(repositoriesFolder, repositoryName), FS.DETECTED);
+    File dir = FileKey.resolve(new File(getRepositoriesFolder(), repositoryName), FS.DETECTED);
     if (dir == null)
       return null;
 
@@ -391,8 +393,9 @@ public class RepositoryManager implements IRepositoryManager {
       r = RepositoryCache.open(key, true);
     } catch (IOException e) {
       if (logError) {
-        logger.error("GitBlit.getRepository(String) failed to find "
-            + new File(repositoriesFolder, repositoryName).getAbsolutePath());
+        LOG.error(
+            "Failed to find " + new File(getRepositoriesFolder(), repositoryName).getAbsolutePath(),
+            e);
       }
     }
     return r;
@@ -410,7 +413,7 @@ public class RepositoryManager implements IRepositoryManager {
       }
     }
     long duration = System.currentTimeMillis() - methodStart;
-    logger.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
+    LOG.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
     return repositories;
   }
 
@@ -454,7 +457,7 @@ public class RepositoryManager implements IRepositoryManager {
     if (r == null) {
       // repository is missing
       removeFromCachedRepositoryList(repositoryName);
-      logger.error(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+      LOG.error(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
           repositoryName));
       return null;
     }
@@ -462,7 +465,7 @@ public class RepositoryManager implements IRepositoryManager {
     FileBasedConfig config = (FileBasedConfig) getRepositoryConfig(r);
     if (config.isOutdated()) {
       // reload model
-      logger.debug(MessageFormat.format(
+      LOG.debug(MessageFormat.format(
           "Config for \"{0}\" has changed. Reloading model and updating cache.", repositoryName));
       model = loadRepositoryModel(model.getName());
       removeFromCachedRepositoryList(model.getName());
@@ -499,7 +502,7 @@ public class RepositoryManager implements IRepositoryManager {
       StoredConfig config = (StoredConfig) f.get(r);
       return config;
     } catch (Exception e) {
-      logger.error("Failed to retrieve \"repoConfig\" via reflection", e);
+      LOG.error("Failed to retrieve \"repoConfig\" via reflection", e);
     }
     return r.getConfig();
   }
@@ -534,7 +537,9 @@ public class RepositoryManager implements IRepositoryManager {
     model.setLastChange(lc.when);
     model.setLastChangeAuthor(lc.who);
 
-    if (!settings.getBoolean(Keys.web.showRepositorySizes, true) || model.isSkipSizeCalculation()) {
+    if (!repoParams.getRuntimeManager().getSettings()
+        .getBoolean(Keys.web.showRepositorySizes, true)
+        || model.isSkipSizeCalculation()) {
       model.setSize(null);
       return 0L;
     }
@@ -641,6 +646,7 @@ public class RepositoryManager implements IRepositoryManager {
    * @return a repositoryModel or null if the repository does not exist
    */
   private RepositoryModel loadRepositoryModel(String repositoryName) {
+    IStoredSettings settings = repoParams.getRuntimeManager().getSettings();
     Repository r = getRepository(repositoryName);
     if (r == null) {
       return null;
@@ -773,7 +779,7 @@ public class RepositoryManager implements IRepositoryManager {
           }
         }
       } catch (URISyntaxException e) {
-        logger.error("Failed to determine fork for " + model, e);
+        LOG.error("Failed to determine fork for " + model, e);
       }
     }
     return model;
@@ -830,11 +836,15 @@ public class RepositoryManager implements IRepositoryManager {
     return defaultValue;
   }
 
-  public String getRepositoriesFolderPath() {
-    return repositoriesFolderPath;
+  public RepoParams getRepoParams() {
+    return repoParams;
   }
 
-  public void setRepositoriesFolderPath(String repositoriesFolderPath) {
-    this.repositoriesFolderPath = repositoriesFolderPath;
+  public void setRepoParams(RepoParams repoParams) {
+    this.repoParams = repoParams;
+  }
+
+  public void setRepositoriesFolder(File repositoriesFolder) {
+    this.repositoriesFolder = repositoriesFolder;
   }
 }

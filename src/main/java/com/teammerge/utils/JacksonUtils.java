@@ -8,7 +8,7 @@ import com.teammerge.model.ActivityModel;
 import com.teammerge.model.ExtCommitModel;
 
 public class JacksonUtils {
-	public static String convertActivitiestoJson(List<ActivityModel> activities) {
+  public static String convertActivitiestoJson(List<ActivityModel> activities) {
 
 	    ObjectMapper mapper = new ObjectMapper();
 	    String jsonInString = null;
