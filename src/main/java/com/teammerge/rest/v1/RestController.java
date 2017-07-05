@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.ExtCommitModel;
 import com.teammerge.model.RefModel;
+import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ApplicationDirectoryUtils;
@@ -36,6 +38,9 @@ public class RestController {
 
   @Resource(name = "dashBoardService")
   private DashBoardService dashBoardService;
+
+  @Resource(name = "commitService")
+  private CommitService commitService;
 
   @Value("${app.debug}")
   private String debug;
@@ -160,9 +165,8 @@ public class RestController {
 
       for (RefModel branch : branchModels) {
         object = branch.getReferencedObjectId();
-        output +=
-            branch.getName() + "--" + "Referenced Object Id: " + object + ", Object Id:"
-                + branch.getObjectId() + "<br>";
+        output += branch.getName() + "--" + "Referenced Object Id: " + object + ", Object Id:"
+            + branch.getObjectId() + "<br>";
       }
     }
 
@@ -189,6 +193,19 @@ public class RestController {
     List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
     String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
     String finalOutput = "{ \"data\":" + jsonOutput + "}";
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+
+  @GET
+  @Path("/{repository}/tickets/{ticketid}")
+  public Response getTickets(@PathParam("repository") String repoName,
+      @PathParam("ticketid") String ticket) {
+
+    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
+    String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
