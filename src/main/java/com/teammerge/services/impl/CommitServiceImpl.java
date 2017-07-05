@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.annotation.Resource;
 
@@ -27,91 +26,83 @@ import com.teammerge.utils.StringUtils;
 
 @Service("commitService")
 public class CommitServiceImpl implements CommitService {
-	private final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-	@Resource(name = "repositoryService")
-	RepositoryService repositoryService;
+  @Resource(name = "repositoryService")
+  RepositoryService repositoryService;
 
-	public List<ExtCommitModel> getDetailsForBranchName(String branchName) {
-		List<ExtCommitModel> commits = new ArrayList<ExtCommitModel>();
-		int numOfMatchedBranches = 0;
+  public List<ExtCommitModel> getDetailsForBranchName(String branchName) {
+    List<ExtCommitModel> commits = new ArrayList<ExtCommitModel>();
+    int numOfMatchedBranches = 0;
 
-		List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
+    List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
-		Calendar c = Calendar.getInstance();
-		c.setTime(new Date(0));
-		Date minimumDate = c.getTime();
-		TimeZone timezone = c.getTimeZone();
+    Calendar c = Calendar.getInstance();
+    c.setTime(new Date(0));
+    Date minimumDate = c.getTime();
 
-		for (RepositoryModel model : repositories) {
-			if (model.isCollectingGarbage()) {
-				continue;
-			}
+    for (RepositoryModel model : repositories) {
+      if (model.isCollectingGarbage()) {
+        continue;
+      }
 
-			Repository repository = repositoryService.getRepositoryManager().getRepository(model.getName());
-			List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
+      Repository repository =
+          repositoryService.getRepositoryManager().getRepository(model.getName());
+      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
 
-			if (CollectionUtils.isNotEmpty(branchModels)) {
-				for (RefModel branch : branchModels) {
-					if (branch.getName().contains(branchName)) {
-						++numOfMatchedBranches;
+      if (CollectionUtils.isNotEmpty(branchModels)) {
+        for (RefModel branch : branchModels) {
+          if (branch.getName().contains(branchName)) {
+            ++numOfMatchedBranches;
 
-						if (repository != null && model.isHasCommits()) {
-//							List<DailyLogEntry> dailyLogEntries = RefLogUtils.getDailyLogByRef(model.getName(),
-//									repository, minimumDate, timezone);
-//
-//							for (DailyLogEntry dailyLogEntry : dailyLogEntries) {
-//								if (dailyLogEntry.getCommitCount() >= 1) {
-//									commits.addAll(populateCommits(dailyLogEntry.getCommits(), dailyLogEntry, branch));
-//								}
-//							}
-							
-							 List<RepositoryCommit> repoCommitsPerBranch = CommitCache.instance() 
-					                    .getCommits(model.getName(), repository, branch.getName(), minimumDate); 
-					 
-							 commits.addAll(populateCommits(repoCommitsPerBranch, model.getName(), branch));
-						}
-					}
-				}
-			}
-		}
-		LOG.debug("Num of branches: " + commits.size() + ", Num of commits: " + numOfMatchedBranches);
+            if (repository != null && model.isHasCommits()) {
+              List<RepositoryCommit> repoCommitsPerBranch = CommitCache.instance()
+                  .getCommits(model.getName(), repository, branch.getName(), minimumDate);
 
-		return commits;
-	}
+              commits.addAll(populateCommits(repoCommitsPerBranch, model.getName(), branch));
+            }
+          }
+        }
+      }
+    }
+    LOG.debug("Num of branches: " + commits.size() + ", Num of commits: " + numOfMatchedBranches);
 
-	public List<ExtCommitModel> populateCommits(List<RepositoryCommit> commits, String repoName, RefModel branch) {
-		List<ExtCommitModel> populatedCommits = new ArrayList<ExtCommitModel>();
-		for (RepositoryCommit commit : commits) {
-			ExtCommitModel commitModel = new ExtCommitModel();
-			commitModel.setCommitAuthor(commit.getAuthorIdent());
-			// short message
-			String shortMessage = commit.getShortMessage();
-			String trimmedMessage = shortMessage;
-			if (commit.getRefs() != null && commit.getRefs().size() > 0) {
-				trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG_REFS);
-			} else {
-				trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG);
-			}
-			commitModel.setShortMessage(shortMessage);
-			commitModel.setTrimmedMessage(trimmedMessage);
+    return commits;
+  }
 
-			// commit hash link
-			int hashLen = 6;
-			if (commit.getName() != null) {
-				commitModel.setCommitHash(commit.getName().substring(0, hashLen));
-			}
-			commitModel.setName(commit.getName());
-			if (commitModel.getShortMessage().startsWith("Merge")) {
-				commitModel.setIsMergeCommit(true);
-			} else {
-				commitModel.setIsMergeCommit(false);
-			}
+  public List<ExtCommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
+      RefModel branch) {
+    List<ExtCommitModel> populatedCommits = new ArrayList<ExtCommitModel>();
+    for (RepositoryCommit commit : commits) {
+      ExtCommitModel commitModel = new ExtCommitModel();
+      commitModel.setCommitAuthor(commit.getAuthorIdent());
+      // short message
+      String shortMessage = commit.getShortMessage();
+      String trimmedMessage = shortMessage;
+      if (commit.getRefs() != null && commit.getRefs().size() > 0) {
+        trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG_REFS);
+      } else {
+        trimmedMessage = StringUtils.trimString(shortMessage, Constants.LEN_SHORTLOG);
+      }
+      commitModel.setShortMessage(shortMessage);
+      commitModel.setTrimmedMessage(trimmedMessage);
 
-			commitModel.setBranchName(branch.displayName);
-			commitModel.setRepositoryName(repoName);
-			populatedCommits.add(commitModel);
-		}
-		return populatedCommits;
-	}
+      // commit hash link
+      int hashLen = 6;
+      if (commit.getName() != null) {
+        commitModel.setCommitHash(commit.getName().substring(0, hashLen));
+      }
+      commitModel.setName(commit.getName());
+      if (commitModel.getShortMessage().startsWith("Merge")) {
+        commitModel.setIsMergeCommit(true);
+      } else {
+        commitModel.setIsMergeCommit(false);
+      }
+
+      commitModel.setBranchName(branch.displayName);
+      commitModel.setRepositoryName(repoName);
+      populatedCommits.add(commitModel);
+    }
+    return populatedCommits;
+  }
 }
