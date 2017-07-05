@@ -11,7 +11,6 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.FetchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +24,12 @@ import com.teammerge.model.RepoParams;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.StringUtils;
 
 @Service("repositoryService")
 public class RepositoryServiceImpl implements RepositoryService {
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final static Logger LOG = LoggerFactory.getLogger(RepositoryServiceImpl.class);
 
   private static IRepositoryManager repositoryManager = null;
 
@@ -42,11 +42,19 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Value("${git.repository.folderName}")
   private String repoFolderName;
 
+  @Value("${app.debug}")
+  private String debug;
+
   @Autowired
   private RuntimeServiceImpl runtimeService;
 
   @Resource(name = "gitService")
   private GitService gitService;
+
+
+  public boolean isDebugOn() {
+    return Boolean.parseBoolean(debug);
+  }
 
   public IRepositoryManager getRepositoryManager() {
 
@@ -59,7 +67,6 @@ public class RepositoryServiceImpl implements RepositoryService {
 
       repositoryManager = new RepositoryManager(params);
     }
-
     return repositoryManager;
   }
 
@@ -67,13 +74,24 @@ public class RepositoryServiceImpl implements RepositoryService {
     return getRepositoryManager().getRepositoryModels();
   }
 
-  public Repository getRepository(String repositoryName) {
-    Repository r = getRepositoryManager().getRepository(repositoryName);
-    if (r == null) {
-      System.out.println("\n\nCannot Load Repository" + " " + repositoryName);
+  public Repository getRepository(String repositoryName, boolean updated) {
+    long start = System.currentTimeMillis();
+
+    Repository repo = getUpdatedRepository(repositoryName, updated);
+
+    if (repo == null) {
+      repo = getRepositoryManager().getRepository(repositoryName);
+    }
+    if (repo == null) {
+      LOG.error("\nCannot Load Repository" + " " + repositoryName);
       return null;
     }
-    return r;
+
+    if (isDebugOn()) {
+      LOG.debug("Repository fetched in "
+          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+    }
+    return repo;
   }
 
   /**
@@ -86,76 +104,123 @@ public class RepositoryServiceImpl implements RepositoryService {
    * If the repository exists, this function tries to update the repository by taking a pull of the
    * remote repository
    * 
+   * <br>
+   * <br>
+   * This function takes first argument as repository name to update or create (if not exists), if
+   * specified null it will try to update all the repositories mentioned in the config file
+   * 
    * @return
    */
-  private File createOrUpdateRepoIfRequired() {
-    // check if repository folder exists
-    // if repofolder exists : check if the reposiories inside in up to date or not
-    // if repo is upto date : good
-    // else update the repo
-    // else : clone the repo
+  private Repository getUpdatedRepository(String repoName, boolean updateRequired) {
+    long start = System.currentTimeMillis();
+    Repository repo = null;
+    boolean toUpdate = false;
 
     File repositoriesFolder = getRepositoryManager().getRepositoriesFolder();
-    if (repositoriesFolder.exists() && repositoriesFolder.isDirectory()) {
-      createOrUpdateRepo(repositoriesFolder);
-    } else {
+    if (!repositoriesFolder.exists() || !repositoriesFolder.isDirectory()) {
       boolean isDirCreated = repositoriesFolder.mkdir();
+
       if (isDirCreated) {
-        createOrUpdateRepo(repositoriesFolder);
+        toUpdate = true;
       } else {
-        logger.error("Cannot create directory " + repositoriesFolder.getAbsolutePath()
+        LOG.error("Cannot create directory " + repositoriesFolder.getAbsolutePath()
             + ", resolve the issue create and clone dir!! ");
       }
     }
-    return repositoriesFolder;
+
+    boolean isRepoExists = isRepoExists(repositoriesFolder, repoName);
+    if (toUpdate || updateRequired || !isRepoExists) {
+      repo = createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
+    }
+
+    if (isDebugOn()) {
+      LOG.debug("Get updated repository(s) in "
+          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+    }
+    return repo;
   }
 
-  private void createOrUpdateRepo(File f) {
-    String repositoryNameFromConfigFile = getRepoNamesFromConfigFile();
+  boolean isRepoExists(File repoFolder, String repoName) {
     boolean isRepoExists = false;
-    if (f.list().length > 0) {
-      for (String fName : f.list()) {
-        if (repositoryNameFromConfigFile.equals(fName)) {
-          isRepoExists = true;
+    if (repoFolder != null && !StringUtils.isEmpty(repoName)) {
+      if (repoFolder.list().length > 0) {
+        for (String fName : repoFolder.list()) {
+          if (repoName.equals(fName)) {
+            isRepoExists = true;
+            break;
+          }
         }
       }
+    }
+    return isRepoExists;
+  }
+
+  private Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
+    String repositoryName = repoName;
+    Git git = null;
+    long start = 0;
+    Repository repo = null;
+
+
+    if (repoName == null) {
+      repositoryName = getRepoNamesFromConfigFile();
+    }
+
+    if (isDebugOn()) {
+      start = System.currentTimeMillis();
     }
 
     // clone the new repo for the first time - the repo name should be mentioned in the config
     // file
     if (!isRepoExists) {
-      System.out.println("Repo doesnot exits " + repositoryNameFromConfigFile+", creating the repository!!");
+      LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
 
       GitOptions gitOptions = new GitOptions();
       gitOptions.setURI(remoteRepoPath);
-      gitOptions.setDestinationDirectory(f.getAbsolutePath()+ "/" +repositoryNameFromConfigFile);
+      gitOptions.setDestinationDirectory(f.getAbsolutePath() + "/" + repositoryName);
       gitOptions.setCloneAllBranches(Boolean.TRUE);
       gitOptions.setIncludeSubModule(Boolean.TRUE);
+      gitOptions.setBare(Boolean.FALSE);
 
       try {
-        Git git = gitService.cloneRepository(gitOptions);
+        git = gitService.cloneRepository(gitOptions);
+        repo = git.getRepository();
 
-        logger.info("Git Repo cloned successufully from " + remoteRepoPath + " to "
+        LOG.info("Git Repo cloned successufully from " + remoteRepoPath + " to "
             + f.getAbsolutePath());
       } catch (GitAPIException e) {
-        logger.error("Error cloning repository from path " + remoteRepoPath, e);
+        LOG.error("Error cloning repository from path " + remoteRepoPath, e);
       }
+
+      if (isDebugOn()) {
+        LOG.debug("Created new repository " + f.getAbsolutePath() + " in "
+            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+      }
+      return repo;
     } else {
       // check for updates
-      Repository r = getRepository(repositoryNameFromConfigFile);
+      repo = getRepository(repositoryName, false);
 
-      Git g = new Git(r);
-      PullCommand pc = g.pull();
+      git = new Git(repo);
+      PullCommand pc = git.pull();
       try {
         PullResult pr = pc.call();
-        FetchResult fetchResult = pr.getFetchResult();
         MergeResult mergeResult = pr.getMergeResult();
-        System.out.println("Result of pull of repo " + repositoryNameFromConfigFile + ": "
-            + mergeResult.getMergeStatus());
+
+        if (isDebugOn()) {
+          LOG.debug("Result of repo pull of " + repositoryName + ": "
+              + mergeResult.getMergeStatus());
+        }
       } catch (GitAPIException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG.error("Error in updating repository " + repositoryName, e);
+      } finally {
+        git.close();
       }
+      if (isDebugOn()) {
+        LOG.debug("Updated repository " + repositoryName + " in "
+            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+      }
+      return repo;
     }
 
   }
@@ -168,8 +233,11 @@ public class RepositoryServiceImpl implements RepositoryService {
     return null;
   }
 
+  /**
+   * No need to update repository from remote, as it is only printing the list of repositries
+   * avalaible in local
+   */
   public List<String> getRepositoryList() {
-    createOrUpdateRepoIfRequired();
     return getRepositoryManager().getRepositoryList();
   }
 }

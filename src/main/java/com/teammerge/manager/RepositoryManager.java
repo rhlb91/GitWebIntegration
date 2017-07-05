@@ -50,7 +50,7 @@ import com.teammerge.utils.StringUtils;
 
 public class RepositoryManager implements IRepositoryManager {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private final Logger LOG = LoggerFactory.getLogger(RepositoryManager.class);
 
   /**
    * Eg- git , where all the repositories will be stored
@@ -74,7 +74,7 @@ public class RepositoryManager implements IRepositoryManager {
     List<String> repositories = null;
     if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
 
-      logger.info("Repositories folder : {}", getRepositoriesFolder().getAbsolutePath());
+      LOG.info("Repositories folder : {}", getRepositoriesFolder().getAbsolutePath());
 
       IStoredSettings settings = repoParams.getRuntimeManager().getSettings();
       // we are not caching OR we have not yet cached OR the cached list
@@ -104,7 +104,6 @@ public class RepositoryManager implements IRepositoryManager {
         }
 
         // rebuild fork networks
-
         for (RepositoryModel model : repositoryListCache.values()) {
           if (!StringUtils.isEmpty(model.getOriginRepository())) {
             String originKey = getRepositoryKey(model.getOriginRepository());
@@ -115,18 +114,25 @@ public class RepositoryManager implements IRepositoryManager {
           }
         }
 
-
         long duration = System.currentTimeMillis() - startTime;
-        logger.info(MessageFormat.format(msg, repositories.size(), duration));
+        LOG.info(MessageFormat.format(msg, repositories.size(), duration));
       }
     }
 
     // return sorted copy of cached list
-
     List<String> list = new ArrayList<String>();
     for (RepositoryModel model : repositoryListCache.values()) {
+      Repository r = getRepository(model.getName());
+      if (r == null) {
+        // repository is missing
+        removeFromCachedRepositoryList(model.getName());
+        LOG.warn(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+            model.getName()));
+        continue;
+      }
       list.add(model.getName());
     }
+
     StringUtils.sortRepositorynames(list);
 
     return list;
@@ -322,7 +328,7 @@ public class RepositoryManager implements IRepositoryManager {
 
   @Override
   public void resetRepositoryListCache() {
-    logger.info("Repository cache manually reset");
+    LOG.info("Repository cache manually reset");
     repositoryListCache.clear();
     repositorySizeCache.clear();
     repositoryMetricsCache.clear();
@@ -372,7 +378,7 @@ public class RepositoryManager implements IRepositoryManager {
     String repositoryName = fixRepositoryName(name);
 
     if (isCollectingGarbage(repositoryName)) {
-      logger.warn(MessageFormat.format("Rejecting request for {0}, busy collecting garbage!",
+      LOG.warn(MessageFormat.format("Rejecting request for {0}, busy collecting garbage!",
           repositoryName));
       return null;
     }
@@ -387,8 +393,9 @@ public class RepositoryManager implements IRepositoryManager {
       r = RepositoryCache.open(key, true);
     } catch (IOException e) {
       if (logError) {
-        logger.error("GitBlit.getRepository(String) failed to find "
-            + new File(getRepositoriesFolder(), repositoryName).getAbsolutePath());
+        LOG.error(
+            "Failed to find " + new File(getRepositoriesFolder(), repositoryName).getAbsolutePath(),
+            e);
       }
     }
     return r;
@@ -406,7 +413,7 @@ public class RepositoryManager implements IRepositoryManager {
       }
     }
     long duration = System.currentTimeMillis() - methodStart;
-    logger.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
+    LOG.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
     return repositories;
   }
 
@@ -450,7 +457,7 @@ public class RepositoryManager implements IRepositoryManager {
     if (r == null) {
       // repository is missing
       removeFromCachedRepositoryList(repositoryName);
-      logger.error(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+      LOG.error(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
           repositoryName));
       return null;
     }
@@ -458,7 +465,7 @@ public class RepositoryManager implements IRepositoryManager {
     FileBasedConfig config = (FileBasedConfig) getRepositoryConfig(r);
     if (config.isOutdated()) {
       // reload model
-      logger.debug(MessageFormat.format(
+      LOG.debug(MessageFormat.format(
           "Config for \"{0}\" has changed. Reloading model and updating cache.", repositoryName));
       model = loadRepositoryModel(model.getName());
       removeFromCachedRepositoryList(model.getName());
@@ -495,7 +502,7 @@ public class RepositoryManager implements IRepositoryManager {
       StoredConfig config = (StoredConfig) f.get(r);
       return config;
     } catch (Exception e) {
-      logger.error("Failed to retrieve \"repoConfig\" via reflection", e);
+      LOG.error("Failed to retrieve \"repoConfig\" via reflection", e);
     }
     return r.getConfig();
   }
@@ -772,7 +779,7 @@ public class RepositoryManager implements IRepositoryManager {
           }
         }
       } catch (URISyntaxException e) {
-        logger.error("Failed to determine fork for " + model, e);
+        LOG.error("Failed to determine fork for " + model, e);
       }
     }
     return model;
