@@ -116,7 +116,7 @@ public class RestController {
 
   @GET
   @Path("/{repository}/commit")
-  public Response getCommit(@PathParam("repository") String repoName) {
+  public Response getCommits(@PathParam("repository") String repoName) {
     String output = null;
     Repository repo = repositoryService.getRepository(repoName, true);
 
@@ -191,9 +191,8 @@ public class RestController {
   }
 
   @GET
-  @Path("/{repository}/tickets/{ticketid}")
-  public Response getTickets(@PathParam("repository") String repoName,
-      @PathParam("ticketid") String ticket) {
+  @Path("/tickets/{ticketid}")
+  public Response getTickets(@PathParam("ticketid") String ticket) {
 
     List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
     String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
@@ -204,9 +203,8 @@ public class RestController {
   }
 
   @GET
-  @Path("/{repository}/commitcount/{ticketid}")
-  public Response getCommit(@PathParam("repository") String repoName,
-      @PathParam("ticketid") String ticket) {
+  @Path("/commitcount/{ticketid}")
+  public Response getCommit(@PathParam("ticketid") String ticket) {
 
     List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
     String jsonOutput = JacksonUtils.toCommitsCountJson(commits.size());
