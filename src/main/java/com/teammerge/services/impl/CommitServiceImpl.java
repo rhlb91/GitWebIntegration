@@ -48,7 +48,7 @@ public class CommitServiceImpl implements CommitService {
       }
 
       Repository repository =
-          repositoryService.getRepositoryManager().getRepository(model.getName());
+          repositoryService.getRepository(model.getName());
       List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
 
       if (CollectionUtils.isNotEmpty(branchModels)) {
