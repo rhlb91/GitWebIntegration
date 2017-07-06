@@ -20,8 +20,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
 import com.teammerge.model.RefModel;
+import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
@@ -41,6 +43,9 @@ public class RestController {
 
   @Resource(name = "commitService")
   private CommitService commitService;
+  
+  @Resource(name = "branchService")
+  private BranchService branchService;
 
   @Value("${app.debug}")
   private String debug;
@@ -152,26 +157,14 @@ public class RestController {
   }
 
   @GET
-  @Path("/{repository}/branches")
-  public Response getAllBranches(@PathParam("repository") String repoName) {
-    ObjectId object = null;
-    String output = "";
+  @Path("/{repository}/branches/{branchname}")
+  public Response getAllBranches(@PathParam("repository") String repoName,@PathParam("branchname")String name) {
+    List<BranchModel> branchs = branchService.getBranchName(name);
+    String jsonOutput = JacksonUtils.toBrachNamesJson(branchs);
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";
 
-    Repository repo = repositoryService.getRepository(repoName, true);
-    List<RefModel> branchModels = JGitUtils.getRemoteBranches(repo, true, -1);
-    output += "Branches found: " + branchModels.size() + "<br><br>";
-
-    if (branchModels.size() > 0) {
-
-      for (RefModel branch : branchModels) {
-        object = branch.getReferencedObjectId();
-        output += branch.getName() + "--" + "Referenced Object Id: " + object + ", Object Id:"
-            + branch.getObjectId() + "<br>";
-      }
-    }
-
-    return Response.status(200).entity(output).build();
-
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
   }
 
   @GET
@@ -210,6 +203,19 @@ public class RestController {
         .build();
   }
 
+  @GET
+  @Path("/{repository}/commitcount/{ticketid}")
+  public Response getCommit(@PathParam("repository") String repoName,
+      @PathParam("ticketid") String ticket) {
+
+    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
+    String jsonOutput = JacksonUtils.toCommitsCountJson(commits.size());
+    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
   @GET
   @Path("/appPath")
   public Response applicationPaths() {
