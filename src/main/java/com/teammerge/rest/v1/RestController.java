@@ -96,20 +96,6 @@ public class RestController {
   }
 
   @GET
-  @Path("/repository/gitlist")
-  public Response getRepoForBrowser() {
-    Repository repo = repositoryService.getRepository("gitlist", true);
-    String output = null;
-    if (repo == null) {
-      output = "Error in loading repository 'Gitlist'";
-      return Response.status(200).entity(output).build();
-    }
-    output = "Repository 'gitlist' successfully loaded!!";
-    System.out.println("Repo: " + repo);
-    return Response.status(200).entity(output).build();
-  }
-
-  @GET
   @Path("/{repository}/commit")
   public Response getCommit(@PathParam("repository") String repoName) {
     String output = null;
