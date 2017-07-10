@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
+import com.teammerge.model.CommitModel;
 import com.teammerge.model.ExtCommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
@@ -65,7 +66,7 @@ public class CommitServiceImpl implements CommitService {
         }
       }
     }
-    LOG.debug("Num of branches: " + commits.size() + ", Num of commits: " + numOfMatchedBranches);
+    LOG.debug("Num of branches: " + numOfMatchedBranches + ", Num of commits: " +commits.size() );
 
     return commits;
   }
