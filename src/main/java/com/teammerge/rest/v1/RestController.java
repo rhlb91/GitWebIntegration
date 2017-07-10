@@ -13,16 +13,16 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.teammerge.form.RepoForm;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
-import com.teammerge.model.RefModel;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
@@ -205,6 +205,15 @@ public class RestController {
   public Response applicationPaths() {
     String dir = ApplicationDirectoryUtils.getProgramDirectory();
     return Response.status(200).entity("Application Dir: " + dir)
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
+  
+  @GET
+  @Path("/addRepo")
+  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm){
+    //TODO take form parameters and add new repository in DB
+    
+    return Response.status(200).entity("Application Dir: " + "")
         .header("Access-Control-Allow-Origin", "*").build();
   }
 }
