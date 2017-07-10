@@ -67,15 +67,12 @@ public class DashboardServiceImpl implements DashBoardService {
     long start = System.currentTimeMillis();
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
-    Calendar c = Calendar.getInstance();
+    Date minimumDate = null;
     if (daysBack == -1) {
-      c.setTime(new Date(0));
+      minimumDate = TimeUtils.getInceptionDate();
     } else {
-      c.add(Calendar.DATE, -1 * daysBack);
+      minimumDate = TimeUtils.getDateInDaysBack(daysBack);
     }
-
-    Date minimumDate = c.getTime();
-    TimeZone timezone = c.getTimeZone();
 
     // create daily commit digest feed
     List<DailyLogEntry> digests = new ArrayList<DailyLogEntry>();
@@ -88,30 +85,27 @@ public class DashboardServiceImpl implements DashBoardService {
 
         if (repository != null) {
           List<DailyLogEntry> entries =
-              RefLogUtils.getDailyLogByRef(model.getName(), repository, minimumDate, timezone);
+              RefLogUtils.getDailyLogByRef(model.getName(), repository, minimumDate,
+                  TimeUtils.getTimeZone());
 
           updateLastActivityInsertedPerRepo(model, entries);
 
           digests.addAll(entries);
           repository.close();
         } else {
-          System.out.println("Repository " + model.getName() + " is null!!");
+          LOG.error("Repository " + model.getName() + " is null!!");
         }
       } else {
-        System.out.println("Either repository " + model.getName()
-            + " not has commits or there are no new changes after !!" + model.getLastChange());
+        LOG.warn("Either repository " + model.getName()
+            + " not has commits or there are no new changes after " + model.getLastChange());
       }
-    }
-
-    for (RepositoryModel repo : lastActivityPerRepo.keySet()) {
-      System.out.println("LastActivity for " + repo.getName() + ": "
-          + lastActivityPerRepo.get(repo));
     }
 
     if (isDebugOn()) {
       LOG.debug("Fetched raw activities in "
           + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
+
     return digests;
   }
 
@@ -140,7 +134,7 @@ public class DashboardServiceImpl implements DashBoardService {
             activityModel = activityCache.getObject(getUniqueKeyForActivity(dailyLogEntry));
           } else {
             ++cacheMiss;
-            activityModel = createActivity(dailyLogEntry);
+            activityModel = populateActivity(dailyLogEntry);
 
             activityCache.updateObject(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date,
                 activityModel);
@@ -150,7 +144,6 @@ public class DashboardServiceImpl implements DashBoardService {
         activityModels.add(activityModel);
       }
     }
-
 
     Comparator<ActivityModel> activitySort = new Comparator<ActivityModel>() {
       @Override
@@ -178,7 +171,7 @@ public class DashboardServiceImpl implements DashBoardService {
     return str;
   }
 
-  private ActivityModel createActivity(DailyLogEntry change) {
+  private ActivityModel populateActivity(DailyLogEntry change) {
     ActivityModel activityModel = new ActivityModel();
 
     Date pushDate = change.date;
@@ -272,7 +265,7 @@ public class DashboardServiceImpl implements DashBoardService {
     activityModel.setByAuthor(by);
     activityModel.setRepositoryName(repoName);
     activityModel.setWhenChanged(getWhenChanged(change.date));
-    activityModel.setCommits(populateCommits(commits, change));
+    activityModel.setCommits(populateCommits(commits));
 
     return activityModel;
   }
@@ -297,7 +290,7 @@ public class DashboardServiceImpl implements DashBoardService {
     return fuzzydate + ", " + df.format(pushDate);
   }
 
-  public List<CommitModel> populateCommits(List<RepositoryCommit> commits, DailyLogEntry change) {
+  public List<CommitModel> populateCommits(List<RepositoryCommit> commits) {
     List<CommitModel> populatedCommits = new ArrayList<>();
 
     for (RepositoryCommit commit : commits) {
@@ -331,7 +324,7 @@ public class DashboardServiceImpl implements DashBoardService {
       }
 
       commitModel.setCommitDate(commit.getCommitDate());
-      commitModel.setCommitTimeFormatted(convertToDateFormat(commit.getCommitDate(),
+      commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(),
           commitTimeFormat));
 
       populatedCommits.add(commitModel);
@@ -339,9 +332,5 @@ public class DashboardServiceImpl implements DashBoardService {
     return populatedCommits;
   }
 
-  private String convertToDateFormat(Date commitDate, String commitTimeFormat) {
-    SimpleDateFormat localDateFormat = new SimpleDateFormat(commitTimeFormat);
-    String formattedTime = localDateFormat.format(commitDate);
-    return formattedTime;
-  }
+
 }
