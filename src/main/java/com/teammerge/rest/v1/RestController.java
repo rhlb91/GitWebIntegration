@@ -18,7 +18,9 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.teammerge.form.RepoForm;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
@@ -176,5 +178,14 @@ public class RestController {
 
   private String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
+  }
+  
+  @GET
+  @Path("/addRepo")
+  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm){
+    //TODO take form parameters and add new repository in DB
+    
+    return Response.status(200).entity("Application Dir: " + "")
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 }
