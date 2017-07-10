@@ -36,5 +36,5 @@ public interface DashBoardService {
    */
   public List<ActivityModel> populateActivities(final boolean cached, final int daysBack);
 
-  public List<CommitModel> populateCommits(List<RepositoryCommit> commits, DailyLogEntry change);
+  public List<CommitModel> populateCommits(List<RepositoryCommit> commits);
 }
