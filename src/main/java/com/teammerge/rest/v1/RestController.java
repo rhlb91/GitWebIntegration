@@ -54,7 +54,6 @@ public class RestController {
   @GET
   @Path("/")
   public Response hello() {
-    applicationPaths();
     return Response.status(200).entity("Hi Rest Working working fine!!").build();
   }
 
