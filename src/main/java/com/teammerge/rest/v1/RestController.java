@@ -1,6 +1,9 @@
 package com.teammerge.rest.v1;
 
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.ws.rs.DefaultValue;
@@ -126,7 +129,15 @@ public class RestController {
   @Path("/ticket/{ticketid}")
   public Response getTickets(@PathParam("ticketid") String ticket) {
 
-    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
+    List<ExtCommitModel> commits = new ArrayList<>();
+
+    Map<String, List<ExtCommitModel>> commitsPerBranch =
+        commitService.getDetailsForBranchName(ticket);
+
+    for (String branchStr : commitsPerBranch.keySet()) {
+      commits.addAll(commitsPerBranch.get(branchStr));
+    }
+
     String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
@@ -135,12 +146,20 @@ public class RestController {
   }
 
   @GET
-  @Path("/commitcount/{ticketid}")
-  public Response getCommit(@PathParam("ticketid") String ticket) {
+  @Path("/count/{ticketid}")
+  public Response getCommitAndBranchCount(@PathParam("ticketid") String ticket) {
+    String finalOutput = "";
 
-    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
-    String jsonOutput = JacksonUtils.toCommitsCountJson(commits.size());
-    String finalOutput = convertToFinalOutput(jsonOutput);
+    Map<String, List<ExtCommitModel>> commitsPerBranch =
+        commitService.getDetailsForBranchName(ticket);
+
+    int commitCount = 0;
+    for (String branchStr : commitsPerBranch.keySet()) {
+      commitCount += commitsPerBranch.get(branchStr).size();
+    }
+    finalOutput =
+        convertToFinalOutput("{\"numOfBranches\": " + commitsPerBranch.keySet().size() + ","
+            + "\"numOfCommits\": " + commitCount + "}");
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();

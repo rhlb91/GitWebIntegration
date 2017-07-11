@@ -2,7 +2,9 @@ package com.teammerge.services.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -48,7 +50,10 @@ public class CommitServiceImpl implements CommitService {
    * 
    * Thus branch name should be same as ticket id
    */
-  public List<ExtCommitModel> getDetailsForBranchName(String branchName) {
+  public Map<String, List<ExtCommitModel>> getDetailsForBranchName(String branchName) {
+
+    Map<String, List<ExtCommitModel>> commitsPerMatchedBranch = new HashMap<>();
+    List<RepositoryCommit> repoCommits = new ArrayList<>();
     List<ExtCommitModel> commits = new ArrayList<ExtCommitModel>();
     int numOfMatchedBranches = 0;
     Date minimumDate = TimeUtils.getInceptionDate();
@@ -56,7 +61,7 @@ public class CommitServiceImpl implements CommitService {
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
     if (CollectionUtils.isEmpty(repositories) || StringUtils.isEmpty(branchName)) {
-      return commits;
+      return commitsPerMatchedBranch;
     }
 
     for (RepositoryModel repoModel : repositories) {
@@ -69,8 +74,10 @@ public class CommitServiceImpl implements CommitService {
 
       if (CollectionUtils.isNotEmpty(branchModels)) {
         for (RefModel branch : branchModels) {
+          repoCommits.clear();
           if (branch.getName().contains(branchName)) {
             ++numOfMatchedBranches;
+
 
             if (repository != null && repoModel.isHasCommits()) {
               List<RepositoryCommit> commitsPerBranch =
@@ -79,6 +86,7 @@ public class CommitServiceImpl implements CommitService {
 
               commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
             }
+            commitsPerMatchedBranch.put(branchName, commits);
           }
         }
       }
@@ -88,7 +96,7 @@ public class CommitServiceImpl implements CommitService {
       LOG.debug("Num of branches: " + numOfMatchedBranches + ", Num of commits: " + commits.size());
     }
 
-    return commits;
+    return commitsPerMatchedBranch;
   }
 
   public List<ExtCommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
