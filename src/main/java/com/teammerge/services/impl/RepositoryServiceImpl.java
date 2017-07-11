@@ -206,6 +206,11 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   boolean isRepoExists(File repoFolder, String repoName) {
     boolean isRepoExists = false;
+
+    if (StringUtils.isEmpty(repoName)) {
+      return checkIfRepoExistsInGitDirectory(repoFolder);
+    }
+
     if (repoFolder != null && !StringUtils.isEmpty(repoName)) {
       if (repoFolder.list().length > 0) {
         for (String fName : repoFolder.list()) {
@@ -217,6 +222,12 @@ public class RepositoryServiceImpl implements RepositoryService {
       }
     }
     return isRepoExists;
+  }
+
+  private boolean checkIfRepoExistsInGitDirectory(File repoFolder) {
+
+    File destDir = new File(repoFolder.getAbsolutePath(), getRepoNamesFromConfigFile());
+    return destDir.exists() && destDir.isDirectory();
   }
 
   private Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
