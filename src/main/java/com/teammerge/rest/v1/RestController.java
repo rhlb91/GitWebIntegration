@@ -1,8 +1,10 @@
 package com.teammerge.rest.v1;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.ws.rs.DefaultValue;
@@ -13,7 +15,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
 import com.teammerge.model.RefModel;
+import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
@@ -43,7 +45,7 @@ public class RestController {
 
   @Resource(name = "commitService")
   private CommitService commitService;
-  
+
   @Resource(name = "branchService")
   private BranchService branchService;
 
@@ -144,7 +146,8 @@ public class RestController {
 
   @GET
   @Path("/{repository}/branches/{branchname}")
-  public Response getAllBranches(@PathParam("repository") String repoName,@PathParam("branchname")String name) {
+  public Response getAllBranches(@PathParam("repository") String repoName,
+      @PathParam("branchname") String name) {
     List<BranchModel> branchs = branchService.getBranchName(name);
     String jsonOutput = JacksonUtils.toBrachNamesJson(branchs);
     String finalOutput = "{ \"data\":" + jsonOutput + "}";
@@ -180,7 +183,15 @@ public class RestController {
   @Path("/tickets/{ticketid}")
   public Response getTickets(@PathParam("ticketid") String ticket) {
 
-    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
+    List<ExtCommitModel> commits = new ArrayList<>();
+
+    Map<String, List<ExtCommitModel>> commitsPerBranch =
+        commitService.getDetailsForBranchName(ticket);
+
+    for (String branchStr : commitsPerBranch.keySet()) {
+      commits.addAll(commitsPerBranch.get(branchStr));
+    }
+
     String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
     String finalOutput = "{ \"data\":" + jsonOutput + "}";
 
@@ -189,17 +200,25 @@ public class RestController {
   }
 
   @GET
-  @Path("/commitcount/{ticketid}")
-  public Response getCommit(@PathParam("ticketid") String ticket) {
+  @Path("/count/{ticketid}")
+  public Response getCommitAndBranchCount(@PathParam("ticketid") String ticket) {
+    String finalOutput = "";
 
-    List<ExtCommitModel> commits = commitService.getDetailsForBranchName(ticket);
-    String jsonOutput = JacksonUtils.toCommitsCountJson(commits.size());
-    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+    Map<String, List<ExtCommitModel>> commitsPerBranch =
+        commitService.getDetailsForBranchName(ticket);
+
+    int commitCount = 0;
+    for (String branchStr : commitsPerBranch.keySet()) {
+      commitCount += commitsPerBranch.get(branchStr).size();
+    }
+    finalOutput =
+        "{ \"data\":" + "{\"numOfBranches\": " + commitsPerBranch.keySet().size() + ","
+            + "\"numOfCommits\": " + commitCount + "}}";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
+
   @GET
   @Path("/appPath")
   public Response applicationPaths() {
