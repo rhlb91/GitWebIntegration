@@ -345,4 +345,31 @@ public class TimeUtils {
     }
     return mins;
   }
+
+  /**
+   * Gets the date in past from where the calendar starts
+   * 
+   * @return
+   */
+  public static Date getInceptionDate() {
+    Calendar c = Calendar.getInstance();
+    c.setTime(new Date(0));
+    return c.getTime();
+  }
+
+  public static TimeZone getTimeZone() {
+    return Calendar.getInstance().getTimeZone();
+  }
+
+  public static Date getDateInDaysBack(int daysBack) {
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.DATE, -1 * daysBack);
+    return c.getTime();
+  }
+
+  public static String convertToDateFormat(Date commitDate, String commitTimeFormat) {
+    SimpleDateFormat localDateFormat = new SimpleDateFormat(commitTimeFormat);
+    String formattedTime = localDateFormat.format(commitDate);
+    return formattedTime;
+  }
 }

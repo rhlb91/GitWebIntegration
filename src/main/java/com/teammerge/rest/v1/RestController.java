@@ -1,8 +1,7 @@
 package com.teammerge.rest.v1;
 
+
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +22,7 @@ import org.springframework.stereotype.Component;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
-import com.teammerge.model.RefModel;
-import com.teammerge.model.RepositoryModel;
+import com.teammerge.model.TimeUtils;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
@@ -59,67 +57,19 @@ public class RestController {
   @GET
   @Path("/")
   public Response hello() {
-    applicationPaths();
-    return Response.status(200).entity("hi rfsdal").build();
-  }
-
-  @GET
-  @Path("/hello/{param}")
-  public Response getMsg(@PathParam("param") String msg) {
-    String output = "Jersey say : " + msg;
-    return Response.status(200).entity(output).build();
-  }
-
-  @GET
-  @Path("/dataTable")
-  public Response sampleDataTableExample() {
-    String output = "";
-
-    output += "{";
-    output += "\"data\": [";
-    output += "{";
-    output += "\"name\": \"Tiger Nixon\",";
-    output += "\"position\": \"System Architect\",";
-    output += "\"salary\": \"$320,800\",";
-    output += "\"start_date\": \"2011/04/25\",";
-    output += "\"office\": \"Edinburgh\",";
-    output += "\"extn\": \"5421\"";
-    output += "}]}";
-    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
+    return Response.status(200).entity("Hi Rest Working working fine!!").build();
   }
 
   @GET
   @Path("/repositories")
   public Response getRepositoriesName() {
     List<String> list = repositoryService.getRepositoryList();
-    System.out.println("\n\n " + list.size() + "\n\n");
     String output = "";
 
     for (String list1 : list) {
-      System.out.println("\n\n " + list1 + "\n\n");
       output += list1 + "<br>";
     }
     return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
-  }
-
-  @GET
-  @Path("/{repository}/commit")
-  public Response getCommits(@PathParam("repository") String repoName) {
-    String output = null;
-    Repository repo = repositoryService.getRepository(repoName, true);
-
-    RevCommit commit = JGitUtils.getCommit(repo, null);
-
-    if (commit != null) {
-      Date commitDate = JGitUtils.getCommitDate(commit);
-      System.out.println("Commit: " + commit);
-      System.out.println("Message: " + commit.getFullMessage());
-      System.out.println("Name:" + commit.getName());
-      output = "Commit Date: " + commitDate;
-    } else {
-      output = "Unable to find commit!!";
-    }
-    return Response.status(200).entity(output).build();
   }
 
   @GET
@@ -127,30 +77,26 @@ public class RestController {
   public Response getAllCommits(@PathParam("repository") String repoName,
       @PathParam("branch") String branch) {
     Repository repo = repositoryService.getRepository(repoName, true);
+    List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, TimeUtils.getInceptionDate());
 
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(new Date(0));
-    System.out.println("Date = " + cal.getTime());
-
-    List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, cal.getTime());
-    String output = "";
+    StringBuilder output = new StringBuilder();
     if (CollectionUtils.isNotEmpty(commits)) {
       for (RevCommit commit : commits) {
-        output += commit.getFullMessage() + "<br>";
+        output.append(commit.getFullMessage()).append("<br>");
       }
     } else {
-      output = "No commits found for the branch: " + branch;
+      output.append("No commits found for the branch: " + branch);
     }
-    return Response.status(200).entity(output).build();
+
+    return Response.status(200).entity(output.toString()).build();
   }
 
   @GET
-  @Path("/{repository}/branches/{branchname}")
-  public Response getAllBranches(@PathParam("repository") String repoName,
-      @PathParam("branchname") String name) {
-    List<BranchModel> branchs = branchService.getBranchName(name);
-    String jsonOutput = JacksonUtils.toBrachNamesJson(branchs);
-    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+  @Path("/branches/{branchName}")
+  public Response getAllBranches(@PathParam("branchName") String branchName) {
+    List<BranchModel> branches = branchService.getBranchName(branchName);
+    String jsonOutput = JacksonUtils.toBrachNamesJson(branches);
+    String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -174,13 +120,13 @@ public class RestController {
 
     List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
     String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
-    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+    String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
 
   @GET
-  @Path("/tickets/{ticketid}")
+  @Path("/ticket/{ticketid}")
   public Response getTickets(@PathParam("ticketid") String ticket) {
 
     List<ExtCommitModel> commits = new ArrayList<>();
@@ -193,7 +139,7 @@ public class RestController {
     }
 
     String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
-    String finalOutput = "{ \"data\":" + jsonOutput + "}";
+    String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -212,8 +158,8 @@ public class RestController {
       commitCount += commitsPerBranch.get(branchStr).size();
     }
     finalOutput =
-        "{ \"data\":" + "{\"numOfBranches\": " + commitsPerBranch.keySet().size() + ","
-            + "\"numOfCommits\": " + commitCount + "}}";
+        convertToFinalOutput("{\"numOfBranches\": " + commitsPerBranch.keySet().size() + ","
+            + "\"numOfCommits\": " + commitCount + "}");
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -225,5 +171,9 @@ public class RestController {
     String dir = ApplicationDirectoryUtils.getProgramDirectory();
     return Response.status(200).entity("Application Dir: " + dir)
         .header("Access-Control-Allow-Origin", "*").build();
+  }
+
+  private String convertToFinalOutput(final String output) {
+    return "{ \"data\":" + output + "}";
   }
 }
