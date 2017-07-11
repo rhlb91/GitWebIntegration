@@ -106,8 +106,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         repositories.add(model);
       }
     }
-    long duration = System.currentTimeMillis() - methodStart;
-    LOG.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
+    LOG.info(MessageFormat.format("{0} repository models loaded in {1}",repositories.size(), LoggerUtils.getTimeInSecs(methodStart, System.currentTimeMillis())));
     return repositories;
   }
 
@@ -337,10 +336,10 @@ public class RepositoryServiceImpl implements RepositoryService {
         return repositories;
       } else {
         // we are caching this list
-        String msg = "{0} repositories identified in {1} msecs";
+        String msg = "{0} repositories identified in {1}";
         if (getSettings().getBoolean(Keys.web.showRepositorySizes, true)) {
           // optionally (re)calculate repository sizes
-          msg = "{0} repositories identified with calculated folder sizes in {1} msecs";
+          msg = "{0} repositories identified with calculated folder sizes in {1}";
         }
 
         for (String repository : repositories) {
@@ -358,8 +357,7 @@ public class RepositoryServiceImpl implements RepositoryService {
           }
         }
 
-        long duration = System.currentTimeMillis() - startTime;
-        LOG.info(MessageFormat.format(msg, repositories.size(), duration));
+        LOG.info(MessageFormat.format(msg, repositories.size(), LoggerUtils.getTimeInSecs(startTime, System.currentTimeMillis())));
       }
     }
 
