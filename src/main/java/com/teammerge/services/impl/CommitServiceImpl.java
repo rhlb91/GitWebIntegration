@@ -86,7 +86,7 @@ public class CommitServiceImpl implements CommitService {
 
               commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
             }
-            commitsPerMatchedBranch.put(branchName, commits);
+            commitsPerMatchedBranch.put(branch.displayName, commits);
           }
         }
       }
