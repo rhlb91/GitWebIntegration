@@ -31,7 +31,7 @@ public class GitServiceImpl implements GitService {
   public Git cloneRepository(GitOptions options) throws InvalidRemoteException, TransportException,
       GitAPIException {
     long start = System.currentTimeMillis();
-    LOG.info("Cloning repo " + options.getDestinationDirectory());
+    LOG.info("Cloning repo " + options.getURI());
 
     CloneCommand cmd = Git.cloneRepository();
     cmd.setCloneAllBranches(options.isCloneAllBranches());
@@ -44,7 +44,8 @@ public class GitServiceImpl implements GitService {
     Git git = cmd.call();
 
     if (isDebugOn()) {
-      LOG.debug("Repo " + options.getDestinationDirectory() + " cloned in "
+      LOG.debug("Repo " + options.getURI() + " cloned to "
+          + options.getDestinationDirectory() + " in "
           + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
     return git;

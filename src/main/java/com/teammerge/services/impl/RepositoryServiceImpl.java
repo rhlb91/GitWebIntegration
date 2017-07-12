@@ -48,9 +48,11 @@ import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.ArrayUtils;
+import com.teammerge.utils.ByteFormat;
 import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.DeepCopier;
 import com.teammerge.utils.JGitUtils;
+import com.teammerge.utils.JGitUtils.LastChange;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.StringUtils;
@@ -72,7 +74,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Value("${git.repository.folderName}")
   private String repoFolderName;
 
-  @Resource(name = "updateRepoWithCloningStrategy")
+  @Resource(name = "cloneStrategy")
   private CloneStrategy cloneStrategy;
 
   @Value("${app.debug}")
@@ -194,11 +196,6 @@ public class RepositoryServiceImpl implements RepositoryService {
     if (toUpdate || updateRequired || !isRepoExists) {
       repo = cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
     }
-
-    if (isDebugOn()) {
-      LOG.debug("Get updated repository(s) in "
-          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-    }
     return repo;
   }
 
@@ -237,8 +234,8 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   /**
-   * No need to update repository from remote, as it is only printing the list of repositries
-   * avalaible in local
+   * No need to update repository from remote, as it is only printing the list of repositories
+   * Available in local
    */
   public List<String> getRepositoryList() {
     List<String> repositories = null;
@@ -250,7 +247,7 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
       long startTime = System.currentTimeMillis();
 
-      getUpdatedRepository(null, true);
+      getUpdatedRepository(null, false);
 
       repositories =
           JGitUtils.getRepositoryList(getRepositoriesFolder(),
@@ -571,8 +568,24 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Override
   public long updateLastChangeFields(Repository r, RepositoryModel model) {
-    // TODO Auto-generated method stub
-    return 0;
+    LastChange lc = JGitUtils.getLastChange(r);
+    model.setLastChange(lc.when);
+    model.setLastChangeAuthor(lc.who);
+
+    if (!getSettings().getBoolean(Keys.web.showRepositorySizes, true)
+        || model.isSkipSizeCalculation()) {
+      model.setSize(null);
+      return 0L;
+    }
+    if (!repositorySizeCache.hasCurrent(model.getName(), model.getLastChange())) {
+      File gitDir = r.getDirectory();
+      long sz = com.teammerge.utils.FileUtils.folderSize(gitDir);
+      repositorySizeCache.updateObject(model.getName(), model.getLastChange(), sz);
+    }
+    long size = repositorySizeCache.getObject(model.getName());
+    ByteFormat byteFormat = new ByteFormat();
+    model.setSize(byteFormat.format(size));
+    return size;
   }
 
   @Override

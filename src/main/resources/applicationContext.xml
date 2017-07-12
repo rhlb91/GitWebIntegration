@@ -30,9 +30,12 @@
 		</property>
 	</bean>
 
-	<alias name="cloneStrategy" alias="updateRepoWithCloningStrategy" />
 	<bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithCloning">
 		<property name="remoteRepoPath" value="${git.remote.repository.path}" />
 		<property name="gitService" ref="gitService"></property>
 	</bean>
+
+	<!-- <bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithPull"> 
+		<property name="remoteRepoPath" value="${git.remote.repository.path}" /> 
+		<property name="gitService" ref="gitService"></property> </bean> -->
 </beans>

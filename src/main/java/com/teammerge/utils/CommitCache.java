@@ -172,7 +172,7 @@ public class CommitCache {
             commits = get(repositoryName, repository, branch, cacheCutoffDate);
             repoCache.updateObject(branchKey, tipDate, commits);
             logger.debug(MessageFormat.format(
-                "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4} msecs",
+                "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
                 commits.size(), repositoryName, branch, cacheCutoffDate,
                 LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
           } else {
@@ -181,7 +181,7 @@ public class CommitCache {
             List<RepositoryCommit> incremental =
                 get(repositoryName, repository, branch, sinceCommit);
             logger.info(MessageFormat.format(
-                "incrementally added {0} commits to cache for {1}:{2} in {3} msecs",
+                "incrementally added {0} commits to cache for {1}:{2} in {3}",
                 incremental.size(), repositoryName, branch,
                 LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
             incremental.addAll(commits);
@@ -213,7 +213,7 @@ public class CommitCache {
       // not caching or request outside cache window
       list = get(repositoryName, repository, branch, sinceDate);
       logger.debug(MessageFormat.format(
-          "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4} msecs", list.size(),
+          "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", list.size(),
           repositoryName, branch, sinceDate,
           LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
     }

@@ -1,6 +1,7 @@
 package com.teammerge.strategy.impl;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
@@ -8,6 +9,9 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -38,7 +42,7 @@ public class UpdateRepoWithPull implements CloneStrategy {
   public Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
     String repositoryName = repoName;
     Git git = null;
-    long start = 0;
+    long start = System.currentTimeMillis();
     Repository repo = null;
 
 
@@ -46,8 +50,6 @@ public class UpdateRepoWithPull implements CloneStrategy {
       repositoryName = getRepoNamesFromConfigFile();
     }
 
-    // clone the new repo for the first time - the repo name should be mentioned in the config
-    // file
     if (!isRepoExists) {
       LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
 
@@ -61,22 +63,13 @@ public class UpdateRepoWithPull implements CloneStrategy {
       try {
         git = gitService.cloneRepository(gitOptions);
         repo = git.getRepository();
-
-        LOG.info("Git Repo cloned successufully from " + remoteRepoPath + " to "
-            + f.getAbsolutePath());
       } catch (GitAPIException e) {
         LOG.error("Error cloning repository from path " + remoteRepoPath, e);
-      }
-
-      if (isDebugOn()) {
-        LOG.debug("Created new repository " + f.getAbsolutePath() + " in "
-            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
       }
       return repo;
     } else {
       // check for updates
-      // TODO see how loadRepository() will work here
-      repo = null;// loadRepository(repositoryName, false);
+      repo = loadRepository(f, repositoryName);
 
       git = new Git(repo);
       PullCommand pc = git.pull();
@@ -108,6 +101,22 @@ public class UpdateRepoWithPull implements CloneStrategy {
       return StringUtils.stripDotGit(reponameWithDotGit);
     }
     return null;
+  }
+
+  private Repository loadRepository(final File repoDir, final String repoName) {
+
+    File dir = FileKey.resolve(new File(repoDir, repoName), FS.DETECTED);
+    if (dir == null)
+      return null;
+
+    Repository r = null;
+    try {
+      FileKey key = FileKey.exact(dir, FS.DETECTED);
+      r = RepositoryCache.open(key, true);
+    } catch (IOException e) {
+      LOG.error("Failed to find " + new File(repoDir, repoName).getAbsolutePath(), e);
+    }
+    return r;
   }
 
   public String getRemoteRepoPath() {
