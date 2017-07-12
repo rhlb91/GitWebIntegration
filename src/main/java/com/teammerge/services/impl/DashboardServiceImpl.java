@@ -156,7 +156,7 @@ public class DashboardServiceImpl implements DashBoardService {
 
     if (isDebugOn()) {
       LOG.debug("Total time taken to populate activities: "
-          + ((System.currentTimeMillis() - start) / 1000.0) + " secs");
+          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
       LOG.debug("Total activities: " + activityModels.size());
       LOG.debug("Cache Hits: " + cacheHit + ", Cache Miss: " + cacheMiss);
     }

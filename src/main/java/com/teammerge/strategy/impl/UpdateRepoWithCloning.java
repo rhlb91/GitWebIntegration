@@ -70,12 +70,6 @@ public class UpdateRepoWithCloning implements CloneStrategy {
     } catch (GitAPIException e) {
       LOG.error("Error cloning repository from path " + remoteRepoPath, e);
     }
-
-    if (isDebugOn()) {
-      LOG.debug("Git Repo cloned successufully from " + remoteRepoPath + " to "
-          + gitDir.getAbsolutePath() + " in "
-          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-    }
     return repo;
   }
 

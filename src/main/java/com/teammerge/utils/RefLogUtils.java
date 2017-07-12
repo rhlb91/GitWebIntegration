@@ -617,7 +617,7 @@ public class RefLogUtils {
     Map<String, DailyLogEntry> pulls = new HashMap<String, DailyLogEntry>();
     Map<String, DailyLogEntry> dailydigests = new HashMap<String, DailyLogEntry>();
     String linearParent = null;
-    for (RefModel local : JGitUtils.getLocalBranches(repository, true, -1)) {
+    for (RefModel local : JGitUtils.getRemoteBranches(repository, true, -1)) {
       if (!local.getDate().after(minimumDate)) {
         // branch not recently updated
         continue;

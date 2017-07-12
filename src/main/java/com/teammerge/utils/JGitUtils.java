@@ -1319,12 +1319,8 @@ public class JGitUtils {
       ObjectId branchObject;
       if (StringUtils.isEmpty(objectId)) {
         branchObject = getDefaultBranch(repository);
-        System.out.println("\ndefault objectId : " + objectId + ", branch Object Id:"
-            + branchObject + "\n");
       } else {
         branchObject = repository.resolve(objectId);
-        System.out.println("\n provided objectId: " + objectId + ", branch object Id:"
-            + branchObject + "\n");
       }
 
       RevWalk rw = new RevWalk(repository);
