@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
+import com.teammerge.rest.model.BranchDetailModel;
 import com.teammerge.rest.model.Ticketmodel;
 
 public class JacksonUtils {
@@ -87,4 +88,19 @@ public class JacksonUtils {
 
     return jsonInString;
   }
+  
+  public static String toBranchDetailJson(BranchDetailModel branchDetailModel) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchDetailModel);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
+  
+  
 }

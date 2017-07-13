@@ -42,7 +42,8 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-
-
-
+	
+	<bean id="branchDetailDao" class="com.teammerge.dao.impl.BranchDetailDaoImpl">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 </beans>
