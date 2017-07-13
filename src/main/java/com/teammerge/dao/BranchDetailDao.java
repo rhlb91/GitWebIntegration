@@ -1,15 +1,16 @@
 package com.teammerge.dao;
 
 
-import java.util.List;
-
+import org.hibernate.Session;
 
 import com.teammerge.rest.model.BranchDetailModel;
 
-public interface BranchDetailDao {
+public interface BranchDetailDao{
  
   public BranchDetailModel getBranchDetails(String branchId);
-  public int deleteBranchdao(String branchId);
-  public int updateBranchdao(BranchDetailModel branch);
-  public int createBranchdao(BranchDetailModel branch);
+  public void deleteBranchdao(String branchId);
+  public void updateBranchdao(BranchDetailModel branch);
+  public void createBranchdao(BranchDetailModel branch);
+  public Session openCurrentSessionwithTransaction();
+  public void closeCurrentSessionwithTransaction();
 }

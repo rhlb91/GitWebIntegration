@@ -1,18 +1,30 @@
 package com.teammerge.rest.model;
 
-import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name="branchDetails")
 public class BranchDetailModel {
  
-  
-  
+  @Id
+  @Column(name = "branchId")
   private String branchId;
+  
+  @Column(name = "numOfCommits")
   private int numOfCommits;
+  
+  @Column(name = "numOfPull")
   private int numOfPull;
   
-
-  private int numOfBranches;
+  
+  
+  @Column(name = "lastModifiedDate")
   private String lastModifiedDate;
+  
+  @Column(name = "repositaryId")
   private String repositaryId;
   
   @Override
@@ -21,7 +33,6 @@ public class BranchDetailModel {
    str.append("branch Id:- " + getBranchId());
    str.append(" num Of Commits:- " + getNumOfCommits());
    str.append(" num Of Pull:- " + getNumOfPull());
-   str.append(" num Of Branches:- " + getNumOfBranches());
    str.append(" last Modified Date:- " + getLastModifiedDate());
    str.append(" repositary Id:- " + getRepositaryId());
    return str.toString();
@@ -51,13 +62,6 @@ public class BranchDetailModel {
     this.numOfPull = numOfPull;
   }
 
-  public int getNumOfBranches() {
-    return numOfBranches;
-  }
-
-  public void setNumOfBranches(int numOfBranches) {
-    this.numOfBranches = numOfBranches;
-  }
 
   public String getLastModifiedDate() {
     return lastModifiedDate;

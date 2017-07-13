@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.rest.model.BranchDetailModel;
-import com.teammerge.rest.model.CommitDetailModel;
 import com.teammerge.rest.model.Ticketmodel;
 import com.teammerge.services.BranchDetailService;
 import com.teammerge.services.BranchService;
@@ -32,7 +31,6 @@ import com.teammerge.utils.JacksonUtils;
 @Component
 @Path("/v2")
 public class RestControllerV2 {
-  
   @Resource(name = "branchDetailService")
   private BranchDetailService branchDetailService;
 
@@ -158,13 +156,13 @@ public class RestControllerV2 {
     int count = 0;
     branchDetailService.createBranch(branchs);
     count++;
-   String finalOutput =
-        convertToFinalOutput("{\"branch created successfully\": " + count + "}");
+    String finalOutput = convertToFinalOutput("{\"branch created successfully\": " + count + "}");
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
    }
   
+ 
   private String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
   }

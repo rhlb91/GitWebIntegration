@@ -1,72 +1,87 @@
 package com.teammerge.dao.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sql.DataSource;
-import javax.ws.rs.PathParam;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Repository;
 
 import com.teammerge.dao.BranchDetailDao;
-import com.teammerge.dao.TicketDao;
 import com.teammerge.rest.model.BranchDetailModel;
-import com.teammerge.rest.model.Ticketmodel;
 
 @Repository("branchDetailDao")
 public class BranchDetailDaoImpl implements BranchDetailDao {
 
-  private JdbcTemplate jdbcTemplate;
 
-  @Autowired
-  public void setDataSource(DataSource dataSource) {
-   this.jdbcTemplate = new JdbcTemplate(dataSource);
+  private Session currentSession;
+
+  private Transaction currentTransaction;
+
+  
+
+  public Session openCurrentSession() {
+    currentSession = getSessionFactory().openSession();
+    return currentSession;
+  }
+
+  public Session openCurrentSessionwithTransaction() {
+    currentSession = getSessionFactory().openSession();
+    currentTransaction = currentSession.beginTransaction();
+    return currentSession;
+  }
+
+  public void closeCurrentSession() {
+    currentSession.close();
+  }
+
+  public void closeCurrentSessionwithTransaction() {
+    currentTransaction.commit();
+    currentSession.close();
+  }
+
+  private static SessionFactory getSessionFactory() {
+    Configuration configuration = new Configuration().configure();
+    StandardServiceRegistryBuilder builder =
+        new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+    SessionFactory sessionFactory = configuration.buildSessionFactory(builder.build());
+    return sessionFactory;
+  }
+
+  public Session getCurrentSession() {
+    return currentSession;
+  }
+
+  public void setCurrentSession(Session currentSession) {
+    this.currentSession = currentSession;
+  }
+
+  public Transaction getCurrentTransaction() {
+    return currentTransaction;
+  }
+
+  public void setCurrentTransaction(Transaction currentTransaction) {
+    this.currentTransaction = currentTransaction;
   }
 
   public BranchDetailModel getBranchDetails(String branchId) {
-    BranchDetailModel branchDetails = null;
-    try {
-      branchDetails = jdbcTemplate.queryForObject("SELECT * FROM branchDetails WHERE branchID = ?",
-       new Object[] { branchId }, new BeanPropertyRowMapper<BranchDetailModel>(BranchDetailModel.class));
-    System.out.println("branchDetails ::"+branchDetails);
-    } catch (DataAccessException e) {
-     e.printStackTrace();
-    }
+    BranchDetailModel branchDetails =
+        (BranchDetailModel) openCurrentSession().get(BranchDetailModel.class, branchId);
     return branchDetails;
-
-   }
-
-  @Override
-  public int deleteBranchdao(String branchId) {
-    // TODO Auto-generated method stub
-    int count = jdbcTemplate.update("DELETE from branchDetails WHERE branchID = ?", new Object[] { branchId });
-    return count;
   }
 
   @Override
-  public int updateBranchdao(BranchDetailModel branch) {
-    int count = jdbcTemplate.update(
-        "UPDATE branchDetails set num_of_commits = ? , num_of_pull = ? , num_of_branches= ?, last_Modified_Date = ? ,repositaryID =? where branchID = ?", new Object[] {
-            branch.getNumOfCommits(), branch.getNumOfPull(),branch.getNumOfBranches(), branch.getLastModifiedDate().toString(), branch.getRepositaryId(),branch.getBranchId() });
-      return count;
+  public void deleteBranchdao(String branchId) {
+    getCurrentSession().delete(branchId);
   }
 
   @Override
-  public int createBranchdao(BranchDetailModel branch) {
-    // TODO Auto-generated method stub
-    int count = jdbcTemplate.update(
-        "INSERT INTO branchDetails(branchID,num_of_commits, num_of_pull, num_of_branches,last_Modified_Date,repositaryID)VALUES(?,?,?,?,?,?)", new Object[] {
-            branch.getBranchId(),branch.getNumOfCommits(), branch.getNumOfPull(),branch.getNumOfBranches(), branch.getLastModifiedDate().toString(), branch.getRepositaryId() });
-      return count;
+  public void updateBranchdao(BranchDetailModel branch) {
+    getCurrentSession().update(branch);
   }
 
-  
+  public void createBranchdao(BranchDetailModel branch) {
+    getCurrentSession().save(branch);
+  }
 
 }
