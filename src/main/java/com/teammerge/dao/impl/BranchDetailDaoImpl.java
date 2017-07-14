@@ -14,7 +14,6 @@ public class BranchDetailDaoImpl implements BranchDetailDao {
     BranchDetailModel branchDetails =
         (BranchDetailModel) HibernateUtils.openCurrentSession().get(BranchDetailModel.class,
             branchId);
-    HibernateUtils.closeCurrentSessionwithTransaction();
     return branchDetails;
   }
 
