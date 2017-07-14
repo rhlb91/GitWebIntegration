@@ -1,3 +1,4 @@
+    HibernateUtils.closeCurrentSessionwithTransaction();
 package com.teammerge.dao.impl;
 
 import com.teammerge.dao.CompanyDetailDao;

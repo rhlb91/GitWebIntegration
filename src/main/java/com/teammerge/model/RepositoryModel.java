@@ -520,14 +520,14 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
     HEAD = hEAD;
   }
 
-  /*public List<String> getAvailableRefs() {
+  public List<String> getAvailableRefs() {
     return availableRefs;
   }
 
   public void setAvailableRefs(List<String> availableRefs) {
     this.availableRefs = availableRefs;
   }
-*/
+
   public List<String> getIndexedBranches() {
     return indexedBranches;
   }
