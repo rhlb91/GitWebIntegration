@@ -1,9 +1,10 @@
 package com.teammerge.services.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -11,14 +12,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
-import com.teammerge.model.CommitModel;
 import com.teammerge.model.ExtCommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
+import com.teammerge.model.TimeUtils;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.CommitCache;
@@ -27,53 +29,80 @@ import com.teammerge.utils.StringUtils;
 
 @Service("commitService")
 public class CommitServiceImpl implements CommitService {
-  private final Logger LOG = LoggerFactory.getLogger(getClass());
+  private static final Logger LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
 
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
 
-  public List<ExtCommitModel> getDetailsForBranchName(String branchName) {
+  @Value("${git.commit.timeFormat}")
+  private String commitTimeFormat;
+
+  @Value("${app.debug}")
+  private String debug;
+
+  public boolean isDebugOn() {
+    return Boolean.parseBoolean(debug);
+  }
+
+  /**
+   * Here a branch represents a ticket, commits inside a branch represents the work done for that
+   * ticket <br>
+   * 
+   * Thus branch name should be same as ticket id
+   */
+  public Map<String, List<ExtCommitModel>> getDetailsForBranchName(String branchName) {
+
+    Map<String, List<ExtCommitModel>> commitsPerMatchedBranch = new HashMap<>();
+    List<RepositoryCommit> repoCommits = new ArrayList<>();
     List<ExtCommitModel> commits = new ArrayList<ExtCommitModel>();
     int numOfMatchedBranches = 0;
+    Date minimumDate = TimeUtils.getInceptionDate();
 
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
-    Calendar c = Calendar.getInstance();
-    c.setTime(new Date(0));
-    Date minimumDate = c.getTime();
+    if (CollectionUtils.isEmpty(repositories) || StringUtils.isEmpty(branchName)) {
+      return commitsPerMatchedBranch;
+    }
 
-    for (RepositoryModel model : repositories) {
-      if (model.isCollectingGarbage()) {
+    for (RepositoryModel repoModel : repositories) {
+      if (repoModel.isCollectingGarbage()) {
         continue;
       }
 
-      Repository repository =
-          repositoryService.getRepository(model.getName());
+      Repository repository = repositoryService.getRepository(repoModel.getName());
       List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
 
       if (CollectionUtils.isNotEmpty(branchModels)) {
         for (RefModel branch : branchModels) {
+          repoCommits.clear();
           if (branch.getName().contains(branchName)) {
             ++numOfMatchedBranches;
 
-            if (repository != null && model.isHasCommits()) {
-              List<RepositoryCommit> repoCommitsPerBranch = CommitCache.instance()
-                  .getCommits(model.getName(), repository, branch.getName(), minimumDate);
 
-              commits.addAll(populateCommits(repoCommitsPerBranch, model.getName(), branch));
+            if (repository != null && repoModel.isHasCommits()) {
+              List<RepositoryCommit> commitsPerBranch =
+                  CommitCache.instance().getCommits(repoModel.getName(), repository,
+                      branch.getName(), minimumDate);
+
+              commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
             }
+            commitsPerMatchedBranch.put(branch.displayName, commits);
           }
         }
       }
     }
-    LOG.debug("Num of branches: " + numOfMatchedBranches + ", Num of commits: " +commits.size() );
 
-    return commits;
+    if (isDebugOn()) {
+      LOG.debug("Num of branches: " + numOfMatchedBranches + ", Num of commits: " + commits.size());
+    }
+
+    return commitsPerMatchedBranch;
   }
 
   public List<ExtCommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
       RefModel branch) {
     List<ExtCommitModel> populatedCommits = new ArrayList<ExtCommitModel>();
+
     for (RepositoryCommit commit : commits) {
       ExtCommitModel commitModel = new ExtCommitModel();
       commitModel.setCommitAuthor(commit.getAuthorIdent());
@@ -100,8 +129,12 @@ public class CommitServiceImpl implements CommitService {
         commitModel.setIsMergeCommit(false);
       }
 
+      commitModel.setCommitDate(commit.getCommitDate());
+      commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(),
+          commitTimeFormat));
       commitModel.setBranchName(branch.displayName);
       commitModel.setRepositoryName(repoName);
+
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
