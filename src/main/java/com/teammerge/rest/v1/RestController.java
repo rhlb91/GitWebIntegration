@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -24,39 +22,15 @@ import com.teammerge.form.RepoForm;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
-import com.teammerge.model.RefModel;
-import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
-import com.teammerge.services.BranchService;
-import com.teammerge.services.CommitService;
-import com.teammerge.services.DashBoardService;
-import com.teammerge.services.RepositoryService;
+import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
 
 @Component
 @Path("/v1")
-public class RestController {
-
-  @Resource(name = "repositoryService")
-  private RepositoryService repositoryService;
-
-  @Resource(name = "dashBoardService")
-  private DashBoardService dashBoardService;
-
-  @Resource(name = "commitService")
-  private CommitService commitService;
-
-  @Resource(name = "branchService")
-  private BranchService branchService;
-
-  @Value("${app.debug}")
-  private String debug;
-
-  public boolean isDebugOn() {
-    return Boolean.parseBoolean(debug);
-  }
+public class RestController extends AbstractController {
 
   @GET
   @Path("/")
@@ -67,7 +41,7 @@ public class RestController {
   @GET
   @Path("/repositories")
   public Response getRepositoriesName() {
-    List<String> list = repositoryService.getRepositoryList();
+    List<String> list = getRepositoryService().getRepositoryList();
     String output = "";
 
     for (String list1 : list) {
@@ -80,7 +54,7 @@ public class RestController {
   @Path("/{repository}/commit/{branch}")
   public Response getAllCommits(@PathParam("repository") String repoName,
       @PathParam("branch") String branch) {
-    Repository repo = repositoryService.getRepository(repoName, true);
+    Repository repo = getRepositoryService().getRepository(repoName, true);
     List<RevCommit> commits = JGitUtils.getRevLog(repo, branch, TimeUtils.getInceptionDate());
 
     StringBuilder output = new StringBuilder();
@@ -98,7 +72,7 @@ public class RestController {
   @GET
   @Path("/branches/{branchName}")
   public Response getAllBranches(@PathParam("branchName") String branchName) {
-    List<BranchModel> branches = branchService.getBranchName(branchName);
+    List<BranchModel> branches = getBranchService().getBranchName(branchName);
     String jsonOutput = JacksonUtils.toBrachNamesJson(branches);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
@@ -109,7 +83,7 @@ public class RestController {
   @GET
   @Path("/activities")
   public Response getActivities() {
-    List<ActivityModel> activities = dashBoardService.populateActivities(true, -1);
+    List<ActivityModel> activities = getDashBoardService().populateActivities(true, -1);
     String str = "";
     for (ActivityModel activity : activities) {
       str += activity.toString();
@@ -122,7 +96,7 @@ public class RestController {
   public Response getActivitiesInJson(@DefaultValue("true") @QueryParam("cached") boolean cached,
       @DefaultValue("-1") @QueryParam("daysBack") int daysBack) {
 
-    List<ActivityModel> activities = dashBoardService.populateActivities(cached, daysBack);
+    List<ActivityModel> activities = getDashBoardService().populateActivities(cached, daysBack);
     String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -136,7 +110,7 @@ public class RestController {
     List<ExtCommitModel> commits = new ArrayList<>();
 
     Map<String, List<ExtCommitModel>> commitsPerBranch =
-        commitService.getDetailsForBranchName(ticket);
+        getCommitService().getDetailsForBranchName(ticket);
 
     for (String branchStr : commitsPerBranch.keySet()) {
       commits.addAll(commitsPerBranch.get(branchStr));
@@ -155,7 +129,7 @@ public class RestController {
     String finalOutput = "";
 
     Map<String, List<ExtCommitModel>> commitsPerBranch =
-        commitService.getDetailsForBranchName(ticket);
+        getCommitService().getDetailsForBranchName(ticket);
 
     int commitCount = 0;
     for (String branchStr : commitsPerBranch.keySet()) {
@@ -168,6 +142,7 @@ public class RestController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
+
   @GET
   @Path("/appPath")
   public Response applicationPaths() {
@@ -175,26 +150,15 @@ public class RestController {
     return Response.status(200).entity("Application Dir: " + dir)
         .header("Access-Control-Allow-Origin", "*").build();
   }
-  
+
   @GET
   @Path("/addRepo")
-  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm){
-    //TODO take form parameters and add new repository in DB
-    
+  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm) {
+    // TODO take form parameters and add new repository in DB
+
     return Response.status(200).entity("Application Dir: " + "")
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
-  private String convertToFinalOutput(final String output) {
-    return "{ \"data\":" + output + "}";
-  }
-  
-  @GET
-  @Path("/addRepo")
-  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm){
-    //TODO take form parameters and add new repository in DB
-    
-    return Response.status(200).entity("Application Dir: " + "")
-        .header("Access-Control-Allow-Origin", "*").build();
-  }
+
 }
