@@ -175,6 +175,15 @@ public class RestController {
     return Response.status(200).entity("Application Dir: " + dir)
         .header("Access-Control-Allow-Origin", "*").build();
   }
+  
+  @GET
+  @Path("/addRepo")
+  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm){
+    //TODO take form parameters and add new repository in DB
+    
+    return Response.status(200).entity("Application Dir: " + "")
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
 
   private String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
