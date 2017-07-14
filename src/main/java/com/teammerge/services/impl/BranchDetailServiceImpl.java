@@ -24,7 +24,7 @@ public class BranchDetailServiceImpl implements BranchDetailService {
   @Override
   public int createBranch(BranchDetailModel branch) {
     // TODO Auto-generated method stub
-    branchDetailDao.createBranchdao(branch);
+    branchDetailDao.createBranch(branch);
     return 0;
   }
 }

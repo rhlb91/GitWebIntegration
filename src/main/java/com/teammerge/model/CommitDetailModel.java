@@ -9,7 +9,6 @@ import javax.persistence.Table;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-
 @Entity
 @Table(name = "commitDetails")
 public class CommitDetailModel {
