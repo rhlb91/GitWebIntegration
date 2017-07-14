@@ -2,7 +2,7 @@ package com.teammerge.services;
 
 import java.util.List;
 
-import com.teammerge.rest.model.BranchDetailModel;
+import com.teammerge.model.BranchDetailModel;
 
 public interface BranchDetailService {
   public BranchDetailModel getBranchDetailService(String branchId);

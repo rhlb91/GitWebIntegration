@@ -12,7 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.teammerge.dao.Database;
 import com.teammerge.dao.TicketDao;
 import com.teammerge.dao.impl.TicketDaoImpl;
-import com.teammerge.rest.model.Ticketmodel;
+import com.teammerge.model.Ticketmodel;
 import com.teammerge.services.TicketService;
 
 

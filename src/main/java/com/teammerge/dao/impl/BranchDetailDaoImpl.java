@@ -8,7 +8,7 @@ import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Repository;
 
 import com.teammerge.dao.BranchDetailDao;
-import com.teammerge.rest.model.BranchDetailModel;
+import com.teammerge.model.BranchDetailModel;
 
 @Repository("branchDetailDao")
 public class BranchDetailDaoImpl implements BranchDetailDao {

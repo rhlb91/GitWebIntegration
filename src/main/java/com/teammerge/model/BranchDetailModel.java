@@ -1,4 +1,4 @@
-package com.teammerge.rest.model;
+package com.teammerge.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -6,38 +6,36 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="branchDetails")
+@Table(name = "branchDetails")
 public class BranchDetailModel {
- 
+
   @Id
   @Column(name = "branchId")
   private String branchId;
-  
+
   @Column(name = "numOfCommits")
   private int numOfCommits;
-  
+
   @Column(name = "numOfPull")
   private int numOfPull;
-  
-  
-  
+
   @Column(name = "lastModifiedDate")
   private String lastModifiedDate;
-  
-  @Column(name = "repositaryId")
-  private String repositaryId;
-  
+
+  @Column(name = "repositoryId")
+  private String repositoryId;
+
   @Override
   public String toString() {
-   StringBuilder str = new StringBuilder();
-   str.append("branch Id:- " + getBranchId());
-   str.append(" num Of Commits:- " + getNumOfCommits());
-   str.append(" num Of Pull:- " + getNumOfPull());
-   str.append(" last Modified Date:- " + getLastModifiedDate());
-   str.append(" repositary Id:- " + getRepositaryId());
-   return str.toString();
+    StringBuilder str = new StringBuilder();
+    str.append("branch Id:- " + getBranchId());
+    str.append(" num Of Commits:- " + getNumOfCommits());
+    str.append(" num Of Pull:- " + getNumOfPull());
+    str.append(" last Modified Date:- " + getLastModifiedDate());
+    str.append(" repositary Id:- " + getRepositoryId());
+    return str.toString();
   }
-  
+
   public String getBranchId() {
     return branchId;
   }
@@ -62,7 +60,6 @@ public class BranchDetailModel {
     this.numOfPull = numOfPull;
   }
 
-
   public String getLastModifiedDate() {
     return lastModifiedDate;
   }
@@ -71,11 +68,11 @@ public class BranchDetailModel {
     this.lastModifiedDate = lastModifiedDate;
   }
 
-  public String getRepositaryId() {
-    return repositaryId;
+  public String getRepositoryId() {
+    return repositoryId;
   }
 
-  public void setRepositaryId(String repositaryId) {
-    this.repositaryId = repositaryId;
+  public void setRepositoryId(String repositaryId) {
+    this.repositoryId = repositaryId;
   }
 }

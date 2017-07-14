@@ -5,10 +5,10 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teammerge.model.ActivityModel;
+import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
-import com.teammerge.rest.model.BranchDetailModel;
-import com.teammerge.rest.model.Ticketmodel;
+import com.teammerge.model.Ticketmodel;
 
 public class JacksonUtils {
   public static String convertActivitiestoJson(List<ActivityModel> activities) {

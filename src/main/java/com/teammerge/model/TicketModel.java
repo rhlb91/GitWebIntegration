@@ -33,7 +33,6 @@ import com.teammerge.Constants;
 /**
  * The Gitblit Ticket model, its component classes, and enums.
  *
- * @author James Moger
  *
  */
 public class TicketModel implements Serializable, Comparable<TicketModel> {

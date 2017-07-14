@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import javax.ws.rs.PathParam;
 
 import com.teammerge.dao.TicketDao;
-import com.teammerge.rest.model.Ticketmodel;
+import com.teammerge.model.Ticketmodel;
 
 public class TicketDaoImpl implements TicketDao {
   

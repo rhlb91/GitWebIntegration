@@ -10,7 +10,7 @@ import javax.ws.rs.PathParam;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.dao.BranchDetailDao;
-import com.teammerge.rest.model.BranchDetailModel;
+import com.teammerge.model.BranchDetailModel;
 import com.teammerge.services.BranchDetailService;
 
 @Service("branchDetailService")

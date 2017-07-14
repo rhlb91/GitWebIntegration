@@ -3,7 +3,7 @@ package com.teammerge.dao;
 
 import org.hibernate.Session;
 
-import com.teammerge.rest.model.BranchDetailModel;
+import com.teammerge.model.BranchDetailModel;
 
 public interface BranchDetailDao{
  
