@@ -18,7 +18,7 @@ public class BranchDetailDaoImpl implements BranchDetailDao {
 
   private Transaction currentTransaction;
 
-  
+
 
   public Session openCurrentSession() {
     currentSession = getSessionFactory().openSession();
@@ -68,16 +68,6 @@ public class BranchDetailDaoImpl implements BranchDetailDao {
     BranchDetailModel branchDetails =
         (BranchDetailModel) openCurrentSession().get(BranchDetailModel.class, branchId);
     return branchDetails;
-  }
-
-  @Override
-  public void deleteBranchdao(String branchId) {
-    getCurrentSession().delete(branchId);
-  }
-
-  @Override
-  public void updateBranchdao(BranchDetailModel branch) {
-    getCurrentSession().update(branch);
   }
 
   public void createBranchdao(BranchDetailModel branch) {

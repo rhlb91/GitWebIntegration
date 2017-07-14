@@ -8,21 +8,20 @@ import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.ExtCommitModel;
-import com.teammerge.model.Ticketmodel;
 
 public class JacksonUtils {
   public static String convertActivitiestoJson(List<ActivityModel> activities) {
 
-	    ObjectMapper mapper = new ObjectMapper();
-	    String jsonInString = null;
-	    try {
-	      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(activities);
-	    } catch (JsonProcessingException e) {
-	      e.printStackTrace();
-	    }
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(activities);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
 
-	    return jsonInString;
-	  }
+    return jsonInString;
+  }
 
 
   public static String toTicketCommitsJson(List<ExtCommitModel> commits) {
@@ -37,7 +36,7 @@ public class JacksonUtils {
 
     return jsonInString;
   }
-  
+
   public static String toCommitsCountJson(int commits) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -50,6 +49,7 @@ public class JacksonUtils {
 
     return jsonInString;
   }
+
   public static String toBrachNamesJson(List<BranchModel> branchs) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -62,33 +62,9 @@ public class JacksonUtils {
 
     return jsonInString;
   }
-  
-  public static String toTicketNamesJson(List<Ticketmodel> branchs) {
 
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchs);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
 
-    return jsonInString;
-  }
-  
-  public static String toTicketCommitNamesJson(List<Ticketmodel> commits) {
 
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commits);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-  
   public static String toBranchDetailJson(BranchDetailModel branchDetailModel) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -101,6 +77,6 @@ public class JacksonUtils {
 
     return jsonInString;
   }
-  
-  
+
+
 }

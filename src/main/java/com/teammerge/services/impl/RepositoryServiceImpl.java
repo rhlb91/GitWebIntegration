@@ -18,11 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullCommand;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
@@ -44,18 +39,20 @@ import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
 import com.teammerge.manager.IManager;
 import com.teammerge.model.ForkModel;
-import com.teammerge.model.GitOptions;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.ArrayUtils;
+import com.teammerge.utils.ByteFormat;
 import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.DeepCopier;
 import com.teammerge.utils.JGitUtils;
+import com.teammerge.utils.JGitUtils.LastChange;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.StringUtils;
@@ -76,6 +73,9 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Value("${git.repository.folderName}")
   private String repoFolderName;
+
+  @Resource(name = "cloneStrategy")
+  private CloneStrategy cloneStrategy;
 
   @Value("${app.debug}")
   private String debug;
@@ -106,8 +106,8 @@ public class RepositoryServiceImpl implements RepositoryService {
         repositories.add(model);
       }
     }
-    long duration = System.currentTimeMillis() - methodStart;
-    LOG.info(MessageFormat.format("{0} repository models loaded in {1} msecs", duration));
+    LOG.info(MessageFormat.format("{0} repository models loaded in {1}", repositories.size(),
+        LoggerUtils.getTimeInSecs(methodStart, System.currentTimeMillis())));
     return repositories;
   }
 
@@ -194,18 +194,18 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     boolean isRepoExists = isRepoExists(repositoriesFolder, repoName);
     if (toUpdate || updateRequired || !isRepoExists) {
-      repo = createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
-    }
-
-    if (isDebugOn()) {
-      LOG.debug("Get updated repository(s) in "
-          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+      repo = cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
     }
     return repo;
   }
 
   boolean isRepoExists(File repoFolder, String repoName) {
     boolean isRepoExists = false;
+
+    if (StringUtils.isEmpty(repoName)) {
+      return checkIfRepoExistsInGitDirectory(repoFolder);
+    }
+
     if (repoFolder != null && !StringUtils.isEmpty(repoName)) {
       if (repoFolder.list().length > 0) {
         for (String fName : repoFolder.list()) {
@@ -219,74 +219,10 @@ public class RepositoryServiceImpl implements RepositoryService {
     return isRepoExists;
   }
 
-  private Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
-    String repositoryName = repoName;
-    Git git = null;
-    long start = 0;
-    Repository repo = null;
+  private boolean checkIfRepoExistsInGitDirectory(File repoFolder) {
 
-
-    if (repoName == null) {
-      repositoryName = getRepoNamesFromConfigFile();
-    }
-
-    if (isDebugOn()) {
-      start = System.currentTimeMillis();
-    }
-
-    // clone the new repo for the first time - the repo name should be mentioned in the config
-    // file
-    if (!isRepoExists) {
-      LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
-
-      GitOptions gitOptions = new GitOptions();
-      gitOptions.setURI(remoteRepoPath);
-      gitOptions.setDestinationDirectory(f.getAbsolutePath() + "/" + repositoryName);
-      gitOptions.setCloneAllBranches(Boolean.TRUE);
-      gitOptions.setIncludeSubModule(Boolean.TRUE);
-      gitOptions.setBare(Boolean.FALSE);
-
-      try {
-        git = gitService.cloneRepository(gitOptions);
-        repo = git.getRepository();
-
-        LOG.info("Git Repo cloned successufully from " + remoteRepoPath + " to "
-            + f.getAbsolutePath());
-      } catch (GitAPIException e) {
-        LOG.error("Error cloning repository from path " + remoteRepoPath, e);
-      }
-
-      if (isDebugOn()) {
-        LOG.debug("Created new repository " + f.getAbsolutePath() + " in "
-            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-      }
-      return repo;
-    } else {
-      // check for updates
-      repo = loadRepository(repositoryName, false);
-
-      git = new Git(repo);
-      PullCommand pc = git.pull();
-      try {
-        PullResult pr = pc.call();
-        MergeResult mergeResult = pr.getMergeResult();
-
-        if (isDebugOn()) {
-          LOG.debug("Result of repo pull of " + repositoryName + ": "
-              + mergeResult.getMergeStatus());
-        }
-      } catch (GitAPIException e) {
-        LOG.error("Error in updating repository " + repositoryName, e);
-      } finally {
-        git.close();
-      }
-      if (isDebugOn()) {
-        LOG.debug("Updated repository " + repositoryName + " in "
-            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-      }
-      return repo;
-    }
-
+    File destDir = new File(repoFolder.getAbsolutePath(), getRepoNamesFromConfigFile());
+    return destDir.exists() && destDir.isDirectory();
   }
 
   private String getRepoNamesFromConfigFile() {
@@ -298,8 +234,8 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   /**
-   * No need to update repository from remote, as it is only printing the list of repositries
-   * avalaible in local
+   * No need to update repository from remote, as it is only printing the list of repositories
+   * Available in local
    */
   public List<String> getRepositoryList() {
     List<String> repositories = null;
@@ -311,7 +247,7 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
       long startTime = System.currentTimeMillis();
 
-      getUpdatedRepository(null, true);
+      getUpdatedRepository(null, false);
 
       repositories =
           JGitUtils.getRepositoryList(getRepositoriesFolder(),
@@ -326,10 +262,10 @@ public class RepositoryServiceImpl implements RepositoryService {
         return repositories;
       } else {
         // we are caching this list
-        String msg = "{0} repositories identified in {1} msecs";
+        String msg = "{0} repositories identified in {1}";
         if (getSettings().getBoolean(Keys.web.showRepositorySizes, true)) {
           // optionally (re)calculate repository sizes
-          msg = "{0} repositories identified with calculated folder sizes in {1} msecs";
+          msg = "{0} repositories identified with calculated folder sizes in {1}";
         }
 
         for (String repository : repositories) {
@@ -347,8 +283,8 @@ public class RepositoryServiceImpl implements RepositoryService {
           }
         }
 
-        long duration = System.currentTimeMillis() - startTime;
-        LOG.info(MessageFormat.format(msg, repositories.size(), duration));
+        LOG.info(MessageFormat.format(msg, repositories.size(),
+            LoggerUtils.getTimeInSecs(startTime, System.currentTimeMillis())));
       }
     }
 
@@ -632,8 +568,24 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Override
   public long updateLastChangeFields(Repository r, RepositoryModel model) {
-    // TODO Auto-generated method stub
-    return 0;
+    LastChange lc = JGitUtils.getLastChange(r);
+    model.setLastChange(lc.when);
+    model.setLastChangeAuthor(lc.who);
+
+    if (!getSettings().getBoolean(Keys.web.showRepositorySizes, true)
+        || model.isSkipSizeCalculation()) {
+      model.setSize(null);
+      return 0L;
+    }
+    if (!repositorySizeCache.hasCurrent(model.getName(), model.getLastChange())) {
+      File gitDir = r.getDirectory();
+      long sz = com.teammerge.utils.FileUtils.folderSize(gitDir);
+      repositorySizeCache.updateObject(model.getName(), model.getLastChange(), sz);
+    }
+    long size = repositorySizeCache.getObject(model.getName());
+    ByteFormat byteFormat = new ByteFormat();
+    model.setSize(byteFormat.format(size));
+    return size;
   }
 
   @Override

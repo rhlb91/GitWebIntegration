@@ -30,20 +30,14 @@
 		</property>
 	</bean>
 
-	<bean id="dataSource"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost:3306/TMGit" />
-		<property name="username" value="TMGit" />
-		<property name="password" value="TMGit" />
-	</bean>
-	
-	<bean id="ticketDAO" class="com.teammerge.dao.impl.TicketDaoImpl">
-		<property name="dataSource" ref="dataSource" />
+	<bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithCloning">
+		<property name="remoteRepoPath" value="${git.remote.repository.path}" />
+		<property name="gitService" ref="gitService"></property>
 	</bean>
 
-	
-	<bean id="branchDetailDao" class="com.teammerge.dao.impl.BranchDetailDaoImpl">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
+	<!-- <bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithPull"> 
+		<property name="remoteRepoPath" value="${git.remote.repository.path}" /> 
+		<property name="gitService" ref="gitService"></property> </bean> -->
+
+	<bean id="branchDetailDao" class="com.teammerge.dao.impl.BranchDetailDaoImpl" />
 </beans>
