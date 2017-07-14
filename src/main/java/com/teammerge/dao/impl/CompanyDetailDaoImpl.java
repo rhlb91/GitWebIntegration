@@ -1,4 +1,3 @@
-    HibernateUtils.closeCurrentSessionwithTransaction();
 package com.teammerge.dao.impl;
 
 import com.teammerge.dao.CompanyDetailDao;
@@ -9,11 +8,13 @@ public class CompanyDetailDaoImpl implements CompanyDetailDao{
 
   @Override
   public Company getCompany(String name) {
+    HibernateUtils.openCurrentSessionwithTransaction();
     Company company =
-        (Company) HibernateUtils.openCurrentSessionwithTransaction().get(Company.class,
+        (Company) HibernateUtils.getCurrentSession().get(Company.class,
             name);
     HibernateUtils.closeCurrentSessionwithTransaction();
     return company;
+    
   }
 
   @Override
