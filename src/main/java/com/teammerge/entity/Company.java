@@ -10,7 +10,6 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
 import javax.persistence.MapKeyClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -26,9 +25,7 @@ public class Company implements java.io.Serializable {
   private String name;
 
   @Column(name = "ownedRepositories")
-  //@OneToMany(cascade = CascadeType.ALL)
-  //@JoinTable(name = "STUDENT_PHONE", joinColumns = { @JoinColumn(name = "STUDENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "PHONE_ID") })
-  @ElementCollection(targetClass=String.class)
+  @ElementCollection( targetClass = String.class )
   private List<String> ownedRepositories;
 
   @Column(name = "remoteRepoUrls")
