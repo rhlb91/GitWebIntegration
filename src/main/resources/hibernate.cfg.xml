@@ -12,8 +12,10 @@
 		<property name="hibernate.hbm2ddl.auto">update</property>
 		<property name="show_sql">true</property>
 		<property name="hibernate.current_session_context_class">thread</property>
-		<mapping class="com.teammerge.rest.model.BranchDetailModel" />
-		<mapping class="com.teammerge.rest.model.CommitDetailModel" />
+		<mapping class="com.teammerge.model.BranchDetailModel" />
+		<mapping class="com.teammerge.model.CommitDetailModel" />
 		<!-- <mapping class="com.teammerge.model.RepositoryModel"/> -->
+		<mapping class="com.teammerge.entity.Company" />
+		<mapping class="com.teammerge.entity.RepoCredentials" />
 	</session-factory>
 </hibernate-configuration>
