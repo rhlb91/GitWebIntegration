@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
 
+import com.teammerge.entity.Company;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
@@ -49,6 +50,27 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createBranchDetails(BranchDetailModel branchs) {
     getBranchDetailService().createBranch(branchs);
+    String finalOutput = "true";
+
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
+  @GET
+  @Path("/company/{id}")
+  public Response getCompanyDetails(@PathParam("id") String name) {
+    Company company = getCompanyDetailService().getCompanyDetails(name);
+    String jsonOutput = JacksonUtils.toCompanyDetailJson(company);
+    String finalOutput = convertToFinalOutput(jsonOutput);
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
+  @POST
+  @Path("/company")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response saveCompanyDetails(Company company) {
+    getCompanyDetailService().saveDetails(company);
     String finalOutput = "true";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")

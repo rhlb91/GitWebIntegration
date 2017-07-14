@@ -3,9 +3,14 @@ package com.teammerge.entity;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.MapKeyClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -20,10 +25,12 @@ public class Company implements java.io.Serializable {
   private String name;
 
   @Column(name = "ownedRepositories")
-  @OneToMany
+  @ElementCollection( targetClass = String.class )
   private List<String> ownedRepositories;
 
   @Column(name = "remoteRepoUrls")
+  @ElementCollection(targetClass = String.class)
+  @MapKeyClass(String.class)
   private Map<String, String> remoteRepoUrls;
 
   public String getName() {
