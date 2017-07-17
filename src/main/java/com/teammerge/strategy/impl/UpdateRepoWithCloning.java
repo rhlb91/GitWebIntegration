@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
-import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.StringUtils;
 
 public class UpdateRepoWithCloning implements CloneStrategy {
