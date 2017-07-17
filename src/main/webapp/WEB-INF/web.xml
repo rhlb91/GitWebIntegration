@@ -8,7 +8,13 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:applicationContext.xml</param-value>
-	</context-param>
+		
+		</context-param>
+	
+	
+	<listener>
+<listener-class>com.teammerge.cronjob.QuartzListener</listener-class>
+</listener>
 
 	<listener>
 		<listener-class>
@@ -34,5 +40,7 @@
 		<servlet-name>jersey-serlvet</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	
+	
 
 </web-app>
