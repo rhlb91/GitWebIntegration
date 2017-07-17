@@ -151,14 +151,4 @@ public class RestController extends AbstractController {
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
-  @GET
-  @Path("/addRepo")
-  public Response addRepo(@RequestParam("repoForm") RepoForm repoForm) {
-    // TODO take form parameters and add new repository in DB
-
-    return Response.status(200).entity("Application Dir: " + "")
-        .header("Access-Control-Allow-Origin", "*").build();
-  }
-
-
 }

@@ -9,7 +9,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.teammerge.form.RepoForm;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.model.BranchDetailModel;
@@ -99,4 +101,16 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
+
+  @POST
+  @Path("/addRepo")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response addRepo(RepoForm repoForm) {
+    // TODO take form parameters and add new repository in DB
+
+    
+    return Response.status(200).entity("Application Dir: " + "")
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
+
 }

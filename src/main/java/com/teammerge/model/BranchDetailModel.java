@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "branchDetails")
+@Table(name = "branch_details")
 public class BranchDetailModel {
 
   @Id

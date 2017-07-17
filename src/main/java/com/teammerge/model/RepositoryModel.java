@@ -9,6 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.MapKeyClass;
+import javax.persistence.Table;
+
 import com.teammerge.Constants.AccessRestrictionType;
 import com.teammerge.Constants.AuthorizationControl;
 import com.teammerge.Constants.CommitMessageRenderer;

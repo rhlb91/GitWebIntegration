@@ -22,6 +22,7 @@ public class Company implements java.io.Serializable {
   private String name;
   @ElementCollection(targetClass=String.class)
   @Column(name = "ownedRepositories")
+  @ElementCollection(targetClass=String.class)
   private List<String> ownedRepositories;
 
   @ElementCollection(targetClass = String.class) 

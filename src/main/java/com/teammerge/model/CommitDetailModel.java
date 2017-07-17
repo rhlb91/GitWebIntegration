@@ -10,10 +10,13 @@ import javax.persistence.Table;
 import org.eclipse.jgit.lib.PersonIdent;
 
 @Entity
-@Table(name = "commitDetails")
+@Table(name = "commit_details")
 public class CommitDetailModel {
 
   @Id
+  @Column(name = "commitId")
+  private String commitId;
+
   @Column(name = "commitAuthor")
   private PersonIdent commitAuthor;
 
