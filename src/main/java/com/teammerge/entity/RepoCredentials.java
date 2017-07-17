@@ -2,6 +2,7 @@ package com.teammerge.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
@@ -12,10 +13,11 @@ public class RepoCredentials implements java.io.Serializable {
 
   @Column(name = "company", nullable = false)
   private String company;
-
+  
   @Column(name = "repoName", nullable = false)
   private String repoName;
 
+  @Id
   @Column(name = "username", nullable = false)
   private String username;
 

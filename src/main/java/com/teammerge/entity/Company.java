@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.MapKeyClass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -18,11 +20,12 @@ public class Company implements java.io.Serializable {
   @Id
   @Column(name = "name", unique = true, nullable = false)
   private String name;
-
+  @ElementCollection(targetClass=String.class)
   @Column(name = "ownedRepositories")
-  @OneToMany
   private List<String> ownedRepositories;
 
+  @ElementCollection(targetClass = String.class) 
+  @MapKeyClass(String.class) 
   @Column(name = "remoteRepoUrls")
   private Map<String, String> remoteRepoUrls;
 
