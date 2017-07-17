@@ -40,6 +40,8 @@
 		<property name="gitService" ref="gitService"></property> </bean> -->
 
 	<bean id="branchDetailDao" class="com.teammerge.dao.impl.BranchDetailDaoImpl" />
-
-    <bean id="companyDetailDao" class="com.teammerge.dao.impl.CompanyDetailDaoImpl" /> 
+	
+	<bean id="companyDetailDao" class="com.teammerge.dao.impl.CompanyDetailDaoImpl" />
+	
+	<bean id="repoCredentialDao" class="com.teammerge.dao.impl.RepoCredentialDaoImpl" />
 </beans>

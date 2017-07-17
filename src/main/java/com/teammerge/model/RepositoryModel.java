@@ -68,22 +68,15 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private AccessRestrictionType accessRestriction;
   private AuthorizationControl authorizationControl;
   private boolean allowAuthenticated;
-  
   private boolean isFrozen;
   
   @ElementCollection(targetClass=String.class)
   private List<String> federationSets;
-  
   private boolean isFederated;
-  
   private boolean skipSizeCalculation;
-  
   private boolean skipSummaryMetrics;
-  
   private String frequency;
-  
   private boolean isBare;
-  
   private boolean isMirror;
   
   @Column(name="origin")

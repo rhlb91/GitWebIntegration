@@ -5,13 +5,14 @@ import com.teammerge.dao.CompanyDetailDao;
 import com.teammerge.entity.Company;
 import com.teammerge.utils.HibernateUtils;
 
-public class CompanyDetailDaoImpl implements CompanyDetailDao{
+public class CompanyDetailDaoImpl implements CompanyDetailDao {
 
   @Override
   public Company getCompany(String name) {
 
     HibernateUtils.openCurrentSessionwithTransaction();
     Company company = (Company) HibernateUtils.getCurrentSession().get(Company.class, name);
+    HibernateUtils.closeCurrentSessionwithTransaction();
     return company;
   }
 
