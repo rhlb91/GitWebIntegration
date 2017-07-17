@@ -1,30 +1,33 @@
 package com.teammerge.services.impl;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.teammerge.dao.CompanyDetailDao;
-import com.teammerge.dao.RepoCredentialDao;
+import com.teammerge.dao.BaseDao;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.services.RepoCredentialService;
 
 @Service("repoCredentialService")
 public class RepoCredentialServiceImpl implements RepoCredentialService {
 
-  @Resource(name = "repoCredentialDao")
-  private RepoCredentialDao repoCredentialDao;
-  
+  private BaseDao<RepoCredentials> baseDao;
+
   @Override
   public RepoCredentials getCredentialDetails(String name) {
-   RepoCredentials repoCredentials=repoCredentialDao.getCredentials(name);
+    RepoCredentials repoCredentials = baseDao.fetchEntity(name);
     return repoCredentials;
   }
 
   @Override
   public int saveCredential(RepoCredentials repoCredential) {
-    repoCredentialDao.saveCredentials(repoCredential);
+    baseDao.saveEntity(repoCredential);
     return 0;
   }
 
+
+  @Autowired
+  public void setBaseDao(BaseDao<RepoCredentials> baseDao) {
+    baseDao.setClazz(RepoCredentials.class);
+    this.baseDao = baseDao;
+  }
 }

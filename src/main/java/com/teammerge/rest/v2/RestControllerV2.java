@@ -9,15 +9,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.teammerge.form.RepoForm;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
+import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
-import com.teammerge.utils.HibernateUtils;
 import com.teammerge.utils.JacksonUtils;
 
 @Component

@@ -6,10 +6,12 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MapKeyClass;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "company")
@@ -20,14 +22,14 @@ public class Company implements java.io.Serializable {
   @Id
   @Column(name = "name", unique = true, nullable = false)
   private String name;
-  @ElementCollection(targetClass=String.class)
+
   @Column(name = "ownedRepositories")
-  @ElementCollection(targetClass=String.class)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> ownedRepositories;
 
-  @ElementCollection(targetClass = String.class) 
-  @MapKeyClass(String.class) 
   @Column(name = "remoteRepoUrls")
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @MapKeyClass(String.class)
   private Map<String, String> remoteRepoUrls;
 
   public String getName() {
