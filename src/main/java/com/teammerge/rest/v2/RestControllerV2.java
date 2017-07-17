@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.entity.Company;
-import com.teammerge.entity.RepoCredentials;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.rest.AbstractController;
@@ -57,7 +56,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
+
   @GET
   @Path("/company/{id}")
   public Response getCompanyDetails(@PathParam("id") String name) {
@@ -67,33 +66,12 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
+
   @POST
   @Path("/company")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCompanyDetails(Company company) {
-    getCompanyDetailService().saveDetails(company);
-    String finalOutput = "true";
-
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
-  }
-  
-  @GET
-  @Path("/credentials/{user}")
-  public Response getCredentialsDetails(@PathParam("user") String name) {
-    RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(name);
-    String jsonOutput = JacksonUtils.toCredentialDetailJson(repoCredentials);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
-  }
-  
-  @POST
-  @Path("/credential")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveCredentialDetails(RepoCredentials repoCredentials) {
-    getRepoCredentialService().saveCredential(repoCredentials);
+    getCompanyDetailService().saveCompanyDetails(company);
     String finalOutput = "true";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -104,11 +82,10 @@ public class RestControllerV2 extends AbstractController {
   @Path("/addRepo")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addRepo(RepoForm repoForm) {
-    // TODO take form parameters and add new repository in DB
+    getCompanyDetailService().saveOrUpdateCompanyDetails(repoForm);
+    getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
 
-    
-    return Response.status(200).entity("Application Dir: " + "")
+    return Response.status(200).entity("Saved successfully!!")
         .header("Access-Control-Allow-Origin", "*").build();
   }
-
 }

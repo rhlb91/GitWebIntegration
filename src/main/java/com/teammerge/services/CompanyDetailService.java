@@ -1,12 +1,15 @@
 package com.teammerge.services;
 
 import com.teammerge.entity.Company;
+import com.teammerge.form.RepoForm;
 
 
 public interface CompanyDetailService {
-  
-  public Company getCompanyDetails(String name);
 
-  public int saveDetails(Company name);
+  Company getCompanyDetails(String name);
+
+  int saveCompanyDetails(Company name);
+
+  void saveOrUpdateCompanyDetails(final RepoForm repoForm);
 
 }

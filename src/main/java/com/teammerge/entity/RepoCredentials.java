@@ -1,8 +1,8 @@
 package com.teammerge.entity;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
@@ -10,16 +10,10 @@ import javax.persistence.Table;
 public class RepoCredentials implements java.io.Serializable {
 
   private static final long serialVersionUID = -6344513471738441090L;
- 
-  @Id
-  @Column(name = "company", nullable = false)
-  private String company;
-  
-  @Id
-  @Column(name = "repoName", nullable = false)
-  private String repoName;
 
-  @Id
+  @EmbeddedId
+  private RepoCredentialsKey repoCredentialsKey;
+
   @Column(name = "username", nullable = false)
   private String username;
 
@@ -27,19 +21,31 @@ public class RepoCredentials implements java.io.Serializable {
   private String password;
 
   public String getCompany() {
-    return company;
+    if (repoCredentialsKey != null)
+      return repoCredentialsKey.getCompany();
+    else
+      return null;
   }
 
   public void setCompany(String company) {
-    this.company = company;
+    if (repoCredentialsKey == null) {
+      this.repoCredentialsKey = new RepoCredentialsKey();
+    }
+    this.repoCredentialsKey.setCompany(company);
   }
 
   public String getRepoName() {
-    return repoName;
+    if (repoCredentialsKey != null)
+      return repoCredentialsKey.getRepoName();
+    else
+      return null;
   }
 
   public void setRepoName(String repoName) {
-    this.repoName = repoName;
+    if (this.repoCredentialsKey == null) {
+      this.repoCredentialsKey = new RepoCredentialsKey();
+    }
+    this.repoCredentialsKey.setRepoName(repoName);
   }
 
   public String getUsername() {

@@ -2,11 +2,14 @@ package com.teammerge.services;
 
 
 import com.teammerge.entity.RepoCredentials;
+import com.teammerge.form.RepoForm;
 
 public interface RepoCredentialService {
-  
-  public RepoCredentials getCredentialDetails(String name);
 
-  public int saveCredential(RepoCredentials name);
+  RepoCredentials getCredentialDetails(String name);
+
+  int saveCredential(RepoCredentials name);
+
+  void saveOrUpdateRepoCredentials(final RepoForm repoForm);
 
 }
