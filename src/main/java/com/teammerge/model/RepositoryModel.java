@@ -9,6 +9,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.MapKeyClass;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 import com.teammerge.Constants.AccessRestrictionType;
 import com.teammerge.Constants.AuthorizationControl;
 import com.teammerge.Constants.CommitMessageRenderer;
@@ -23,24 +32,45 @@ import com.teammerge.utils.StringUtils;
  *
  *
  */
+
+@Entity
+@Table(name="repository")
 public class RepositoryModel implements Serializable, Comparable<RepositoryModel> {
 
   private static final long serialVersionUID = 1L;
 
   // field names are reflectively mapped in EditRepository page
+  @Id
+  @Column(name="name")
   private String name;
+  
+  @Column(name="description")
   private String description;
+  
+  @Column(name="owners")
+  @ElementCollection(targetClass=String.class)
   private List<String> owners;
+  
+  @Column(name="lastChange")
   private Date lastChange;
+  
+  @Column(name="lastChangeAuthor")
   private String lastChangeAuthor;
+  
+  @Column(name="hasCommits")
   private boolean hasCommits;
+  
   private boolean showRemoteBranches;
+  
   private boolean useIncrementalPushTags;
+  
   private String incrementalPushTagPrefix;
   private AccessRestrictionType accessRestriction;
   private AuthorizationControl authorizationControl;
   private boolean allowAuthenticated;
   private boolean isFrozen;
+  
+  @ElementCollection(targetClass=String.class)
   private List<String> federationSets;
   private boolean isFederated;
   private boolean skipSizeCalculation;
@@ -48,34 +78,97 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private String frequency;
   private boolean isBare;
   private boolean isMirror;
+  
+  @Column(name="origin")
   private String origin;
+  
+  @Column(name="HEAD")
   private String HEAD;
-  private List<String> availableRefs;
-  private List<String> indexedBranches;
+  
+  @Column(name="size")
   private String size;
+  
+  @Column(name="availableRefs",nullable=true)
+  @ElementCollection(targetClass=String.class)
+  private List<String> availableRefs;
+  
+  @Column(name="indexedBranches",nullable=true)
+  @ElementCollection(targetClass=String.class)
+  private List<String> indexedBranches;
+  
+  @Column(name="preReceiveScripts",nullable=true)
+  @ElementCollection(targetClass=String.class)
   private List<String> preReceiveScripts;
+  
+  @Column(name="postReceiveScripts",nullable=true)
+  @ElementCollection(targetClass=String.class)
   private List<String> postReceiveScripts;
+  
+  @Column(name="mailingLists",nullable=true)
+  @ElementCollection(targetClass=String.class)
   private List<String> mailingLists;
+  
+  @Column(name="customFields",nullable=true)
+  @ElementCollection(targetClass = String.class)
+  @MapKeyClass(String.class)
   private Map<String, String> customFields;
+  
+  @Column(name="projectPath",nullable=true)
   private String projectPath;
+  
+  @Column(name="displayName")
   private String displayName;
+  
   private boolean allowForks;
+ 
+  @Column(name="forks",nullable=true) 
+  @ElementCollection(targetClass=String.class)
   private Set<String> forks;
+  
+  @Column(name="originRepository")
   private String originRepository;
+  
+  @Column(name="verifyCommitter",nullable=true)
   private boolean verifyCommitter;
+  
+  @Column(name="gcThreshold",nullable=true)
   private String gcThreshold;
+  
+  @Column(name="gcPeriod",nullable=true)
   private int gcPeriod;
+  
+  @Column(name="maxActivityCommits",nullable=true)
   private int maxActivityCommits;
+  
+  @Column(name="metricAuthorExclusions",nullable=true)
+  @ElementCollection(targetClass=String.class)
   private List<String> metricAuthorExclusions;
+  
+  @Column(name="commitMessageRenderer",nullable=true)
   private CommitMessageRenderer commitMessageRenderer;
+  
+  @Column(name="acceptNewPatchsets",nullable=true)
   private boolean acceptNewPatchsets;
+  
+  @Column(name="acceptNewTickets",nullable=true)
   private boolean acceptNewTickets;
+  
+  @Column(name="requireApproval",nullable=true)
   private boolean requireApproval;
+  
+  @Column(name="mergeTo",nullable=true)
   private String mergeTo;
+  
+  @Column(name="mergeType",nullable=true)
   private MergeType mergeType;
-
+  
+  @Column(name="isCollectingGarbage",nullable=true)
   private transient boolean isCollectingGarbage;
+  
+  @Column(name="lastGC",nullable=true)
   private Date lastGC;
+  
+  @Column(name="sparkleshareId",nullable=true)
   private String sparkleshareId;
 
   public RepositoryModel() {
