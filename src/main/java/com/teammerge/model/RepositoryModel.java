@@ -34,148 +34,148 @@ import com.teammerge.utils.StringUtils;
  */
 
 @Entity
-@Table(name="repository")
+@Table(name = "repository")
 public class RepositoryModel implements Serializable, Comparable<RepositoryModel> {
 
   private static final long serialVersionUID = 1L;
 
   // field names are reflectively mapped in EditRepository page
   @Id
-  @Column(name="name")
+  @Column(name = "name")
   private String name;
-  
-  @Column(name="description")
+
+  @Column(name = "description")
   private String description;
-  
-  @Column(name="owners")
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "owners")
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> owners;
-  
-  @Column(name="lastChange")
+
+  @Column(name = "lastChange")
   private Date lastChange;
-  
-  @Column(name="lastChangeAuthor")
+
+  @Column(name = "lastChangeAuthor")
   private String lastChangeAuthor;
-  
-  @Column(name="hasCommits")
+
+  @Column(name = "hasCommits")
   private boolean hasCommits;
-  
+
   private boolean showRemoteBranches;
-  
+
   private boolean useIncrementalPushTags;
-  
+
   private String incrementalPushTagPrefix;
   private AccessRestrictionType accessRestriction;
   private AuthorizationControl authorizationControl;
   private boolean allowAuthenticated;
-  
+
   private boolean isFrozen;
-  
-  @ElementCollection(targetClass=String.class)
+
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> federationSets;
-  
+
   private boolean isFederated;
-  
+
   private boolean skipSizeCalculation;
-  
+
   private boolean skipSummaryMetrics;
-  
+
   private String frequency;
-  
+
   private boolean isBare;
-  
+
   private boolean isMirror;
-  
-  @Column(name="origin")
+
+  @Column(name = "origin")
   private String origin;
-  
-  @Column(name="HEAD")
+
+  @Column(name = "HEAD")
   private String HEAD;
-  
-  @Column(name="size")
+
+  @Column(name = "size")
   private String size;
-  
-  @Column(name="availableRefs",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "availableRefs", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> availableRefs;
-  
-  @Column(name="indexedBranches",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "indexedBranches", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> indexedBranches;
-  
-  @Column(name="preReceiveScripts",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "preReceiveScripts", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> preReceiveScripts;
-  
-  @Column(name="postReceiveScripts",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "postReceiveScripts", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> postReceiveScripts;
-  
-  @Column(name="mailingLists",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "mailingLists", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> mailingLists;
-  
-  @Column(name="customFields",nullable=true)
-  @ElementCollection(targetClass = String.class)
+
+  @Column(name = "customFields", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   @MapKeyClass(String.class)
   private Map<String, String> customFields;
-  
-  @Column(name="projectPath",nullable=true)
+
+  @Column(name = "projectPath", nullable = true)
   private String projectPath;
-  
-  @Column(name="displayName")
+
+  @Column(name = "displayName")
   private String displayName;
-  
+
   private boolean allowForks;
- 
-  @Column(name="forks",nullable=true) 
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "forks", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private Set<String> forks;
-  
-  @Column(name="originRepository")
+
+  @Column(name = "originRepository")
   private String originRepository;
-  
-  @Column(name="verifyCommitter",nullable=true)
+
+  @Column(name = "verifyCommitter", nullable = true)
   private boolean verifyCommitter;
-  
-  @Column(name="gcThreshold",nullable=true)
+
+  @Column(name = "gcThreshold", nullable = true)
   private String gcThreshold;
-  
-  @Column(name="gcPeriod",nullable=true)
+
+  @Column(name = "gcPeriod", nullable = true)
   private int gcPeriod;
-  
-  @Column(name="maxActivityCommits",nullable=true)
+
+  @Column(name = "maxActivityCommits", nullable = true)
   private int maxActivityCommits;
-  
-  @Column(name="metricAuthorExclusions",nullable=true)
-  @ElementCollection(targetClass=String.class)
+
+  @Column(name = "metricAuthorExclusions", nullable = true)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   private List<String> metricAuthorExclusions;
-  
-  @Column(name="commitMessageRenderer",nullable=true)
+
+  @Column(name = "commitMessageRenderer", nullable = true)
   private CommitMessageRenderer commitMessageRenderer;
-  
-  @Column(name="acceptNewPatchsets",nullable=true)
+
+  @Column(name = "acceptNewPatchsets", nullable = true)
   private boolean acceptNewPatchsets;
-  
-  @Column(name="acceptNewTickets",nullable=true)
+
+  @Column(name = "acceptNewTickets", nullable = true)
   private boolean acceptNewTickets;
-  
-  @Column(name="requireApproval",nullable=true)
+
+  @Column(name = "requireApproval", nullable = true)
   private boolean requireApproval;
-  
-  @Column(name="mergeTo",nullable=true)
+
+  @Column(name = "mergeTo", nullable = true)
   private String mergeTo;
-  
-  @Column(name="mergeType",nullable=true)
+
+  @Column(name = "mergeType", nullable = true)
   private MergeType mergeType;
-  
-  @Column(name="isCollectingGarbage",nullable=true)
+
+  @Column(name = "isCollectingGarbage", nullable = true)
   private transient boolean isCollectingGarbage;
-  
-  @Column(name="lastGC",nullable=true)
+
+  @Column(name = "lastGC", nullable = true)
   private Date lastGC;
-  
-  @Column(name="sparkleshareId",nullable=true)
+
+  @Column(name = "sparkleshareId", nullable = true)
   private String sparkleshareId;
 
   public RepositoryModel() {

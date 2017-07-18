@@ -16,12 +16,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.teammerge.form.RepoForm;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
-import com.teammerge.model.ExtCommitModel;
+import com.teammerge.model.CommitModel;
 import com.teammerge.model.TimeUtils;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
@@ -107,9 +105,9 @@ public class RestController extends AbstractController {
   @Path("/ticket/{ticketid}")
   public Response getTickets(@PathParam("ticketid") String ticket) {
 
-    List<ExtCommitModel> commits = new ArrayList<>();
+    List<CommitModel> commits = new ArrayList<>();
 
-    Map<String, List<ExtCommitModel>> commitsPerBranch =
+    Map<String, List<CommitModel>> commitsPerBranch =
         getCommitService().getDetailsForBranchName(ticket);
 
     for (String branchStr : commitsPerBranch.keySet()) {
@@ -128,7 +126,7 @@ public class RestController extends AbstractController {
   public Response getCommitAndBranchCount(@PathParam("ticketid") String ticket) {
     String finalOutput = "";
 
-    Map<String, List<ExtCommitModel>> commitsPerBranch =
+    Map<String, List<CommitModel>> commitsPerBranch =
         getCommitService().getDetailsForBranchName(ticket);
 
     int commitCount = 0;
