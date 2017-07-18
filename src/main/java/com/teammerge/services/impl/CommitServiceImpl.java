@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
-import com.teammerge.model.ExtCommitModel;
+import com.teammerge.model.CommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
@@ -50,11 +50,11 @@ public class CommitServiceImpl implements CommitService {
    * 
    * Thus branch name should be same as ticket id
    */
-  public Map<String, List<ExtCommitModel>> getDetailsForBranchName(String branchName) {
+  public Map<String, List<CommitModel>> getDetailsForBranchName(String branchName) {
 
-    Map<String, List<ExtCommitModel>> commitsPerMatchedBranch = new HashMap<>();
+    Map<String, List<CommitModel>> commitsPerMatchedBranch = new HashMap<>();
     List<RepositoryCommit> repoCommits = new ArrayList<>();
-    List<ExtCommitModel> commits = new ArrayList<ExtCommitModel>();
+    List<CommitModel> commits = new ArrayList<CommitModel>();
     int numOfMatchedBranches = 0;
     Date minimumDate = TimeUtils.getInceptionDate();
 
@@ -99,12 +99,12 @@ public class CommitServiceImpl implements CommitService {
     return commitsPerMatchedBranch;
   }
 
-  public List<ExtCommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
+  public List<CommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
       RefModel branch) {
-    List<ExtCommitModel> populatedCommits = new ArrayList<ExtCommitModel>();
+    List<CommitModel> populatedCommits = new ArrayList<CommitModel>();
 
     for (RepositoryCommit commit : commits) {
-      ExtCommitModel commitModel = new ExtCommitModel();
+      CommitModel commitModel = new CommitModel();
       commitModel.setCommitAuthor(commit.getAuthorIdent());
       // short message
       String shortMessage = commit.getShortMessage();

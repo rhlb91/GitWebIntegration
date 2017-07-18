@@ -18,6 +18,10 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   private Date commitDate;
   private String commitTimeFormatted;
 
+  private String repositoryName;
+
+  private String branchName;
+
   @Override
   public String toString() {
     String str = "";
@@ -104,6 +108,22 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
 
   public void setCommitTimeFormatted(String commitTimeFormatted) {
     this.commitTimeFormatted = commitTimeFormatted;
+  }
+
+  public String getRepositoryName() {
+  	return repositoryName;
+  }
+
+  public void setRepositoryName(String repositoryName) {
+  	this.repositoryName = repositoryName;
+  }
+
+  public String getBranchName() {
+  	return branchName;
+  }
+
+  public void setBranchName(String branchName) {
+  	this.branchName = branchName;
   }
 
 

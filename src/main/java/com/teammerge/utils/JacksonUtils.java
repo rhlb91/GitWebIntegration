@@ -9,7 +9,7 @@ import com.teammerge.entity.RepoCredentials;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.BranchModel;
-import com.teammerge.model.ExtCommitModel;
+import com.teammerge.model.CommitModel;
 
 public class JacksonUtils {
   public static String convertActivitiestoJson(List<ActivityModel> activities) {
@@ -26,7 +26,7 @@ public class JacksonUtils {
   }
 
 
-  public static String toTicketCommitsJson(List<ExtCommitModel> commits) {
+  public static String toTicketCommitsJson(List<CommitModel> commits) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;
@@ -92,7 +92,7 @@ public class JacksonUtils {
 
     return jsonInString;
   }
-  
+
   public static String toCredentialDetailJson(RepoCredentials credential) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -106,5 +106,16 @@ public class JacksonUtils {
     return jsonInString;
   }
 
+  public static String toJson(Object object) {
 
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
 }

@@ -1,5 +1,7 @@
 package com.teammerge.rest.v2;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.teammerge.entity.Company;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchDetailModel;
+import com.teammerge.model.RepositoryModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
@@ -87,5 +90,15 @@ public class RestControllerV2 extends AbstractController {
 
     return Response.status(200).entity("Saved successfully!!")
         .header("Access-Control-Allow-Origin", "*").build();
+  }
+
+  @GET
+  @Path("/allRepos/")
+  public Response getAllRepoModels() {
+    List<RepositoryModel> repos = getRepositoryService().getRepositoryModelsFromDB();
+    String jsonOutput = JacksonUtils.toJson(repos);
+    String finalOutput = convertToFinalOutput(jsonOutput);
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
   }
 }
