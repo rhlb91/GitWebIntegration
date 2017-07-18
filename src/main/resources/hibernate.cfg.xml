@@ -17,5 +17,7 @@
 		<mapping class="com.teammerge.model.RepositoryModel"/>
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
+		<mapping class="com.teammerge.model.CommitModel"/>
+		<mapping class="com.teammerge.model.ExtCommitModel"/>
 	</session-factory>
 </hibernate-configuration>

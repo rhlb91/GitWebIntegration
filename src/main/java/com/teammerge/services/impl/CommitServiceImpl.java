@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +30,18 @@ import com.teammerge.utils.StringUtils;
 
 @Service("commitService")
 public class CommitServiceImpl implements CommitService {
-  private static final Logger LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
+  private static final Logger     LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
+
+  private BaseDao<CommitModel> baseDao;
 
   @Resource(name = "repositoryService")
-  RepositoryService repositoryService;
+  RepositoryService               repositoryService;
 
   @Value("${git.commit.timeFormat}")
-  private String commitTimeFormat;
+  private String                  commitTimeFormat;
 
   @Value("${app.debug}")
-  private String debug;
+  private String                  debug;
 
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -80,9 +83,8 @@ public class CommitServiceImpl implements CommitService {
 
 
             if (repository != null && repoModel.isHasCommits()) {
-              List<RepositoryCommit> commitsPerBranch =
-                  CommitCache.instance().getCommits(repoModel.getName(), repository,
-                      branch.getName(), minimumDate);
+              List<RepositoryCommit> commitsPerBranch = CommitCache.instance()
+                  .getCommits(repoModel.getName(), repository, branch.getName(), minimumDate);
 
               commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
             }
@@ -122,7 +124,7 @@ public class CommitServiceImpl implements CommitService {
       if (commit.getName() != null) {
         commitModel.setCommitHash(commit.getName().substring(0, hashLen));
       }
-      commitModel.setName(commit.getName());
+      commitModel.setCommitId(commit.getName());
       if (commitModel.getShortMessage().startsWith("Merge")) {
         commitModel.setIsMergeCommit(true);
       } else {
@@ -130,13 +132,32 @@ public class CommitServiceImpl implements CommitService {
       }
 
       commitModel.setCommitDate(commit.getCommitDate());
-      commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(),
-          commitTimeFormat));
+      commitModel.setCommitTimeFormatted(
+          TimeUtils.convertToDateFormat(commit.getCommitDate(), commitTimeFormat));
       commitModel.setBranchName(branch.displayName);
       commitModel.setRepositoryName(repoName);
 
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
+  }
+
+
+
+  @Override
+  public CommitModel getBranchesbyCommit(String commitId) {
+    CommitModel commitModel = getBaseDao().fetchEntity(commitId);
+    return commitModel;
+
+  }
+
+  public BaseDao<CommitModel> getBaseDao() {
+    return baseDao;
+  }
+
+  @Autowired
+  public void setBaseDao(BaseDao<CommitModel> baseDao) {
+    baseDao.setClazz(CommitModel.class);
+    this.baseDao = baseDao;
   }
 }

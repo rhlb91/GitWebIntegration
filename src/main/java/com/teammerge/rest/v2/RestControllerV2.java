@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.entity.Company;
+import com.teammerge.entity.RepoCredentials;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.RepositoryModel;
@@ -74,13 +75,35 @@ public class RestControllerV2 extends AbstractController {
   @Path("/company")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCompanyDetails(Company company) {
+
     getCompanyDetailService().saveCompanyDetails(company);
     String finalOutput = "true";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
+  
+  @GET
+  @Path("/ticketss/{ticketid}")
+  public Response getTicketCommitDetails(@PathParam("ticketid") String ticket) {
+    CommitModel commitModel=getCommitService().getBranchesbyCommit(ticket);
+    String jsonOutput = JacksonUtils.toBranchCommitDetailJson(commitModel);
+    String finalOutput = convertToFinalOutput(jsonOutput);
 
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
+  @GET
+  @Path("/credentials/{user}")
+  public Response getCredentialsDetails(@PathParam("user") String name) {
+    RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(name);
+    String jsonOutput = JacksonUtils.toCredentialDetailJson(repoCredentials);
+    String finalOutput = convertToFinalOutput(jsonOutput);
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
   @POST
   @Path("/addRepo")
   @Consumes(MediaType.APPLICATION_JSON)

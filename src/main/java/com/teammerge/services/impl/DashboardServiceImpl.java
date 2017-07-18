@@ -315,7 +315,7 @@ public class DashboardServiceImpl implements DashBoardService {
       if (commit.getName() != null) {
         commitModel.setCommitHash(commit.getName().substring(0, hashLen));
       }
-      commitModel.setName(commit.getName());
+      commitModel.setCommitId(commit.getName());
 
       if (commitModel.getShortMessage().startsWith("Merge")) {
         commitModel.setIsMergeCommit(true);

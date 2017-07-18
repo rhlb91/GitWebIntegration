@@ -39,6 +39,20 @@ public class JacksonUtils {
     return jsonInString;
   }
 
+  public static String toCommitsDetailJson(List<CommitDetailModel> commits) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commits);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
+
+  
   public static String toCommitsCountJson(int commits) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -73,6 +87,19 @@ public class JacksonUtils {
     String jsonInString = null;
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchDetailModel);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
+
+  public static String toBranchCommitDetailJson(CommitModel commitModel) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
