@@ -39,7 +39,7 @@ public class JacksonUtils {
     return jsonInString;
   }
 
-  public static String toCommitsDetailJson(List<CommitDetailModel> commits) {
+  public static String toCommitsDetailJson(List<CommitModel> commits) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;

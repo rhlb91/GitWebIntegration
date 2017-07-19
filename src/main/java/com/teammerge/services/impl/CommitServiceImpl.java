@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
+import com.teammerge.dao.BaseDao;
+import com.teammerge.form.CommitForm;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
@@ -30,18 +33,21 @@ import com.teammerge.utils.StringUtils;
 
 @Service("commitService")
 public class CommitServiceImpl implements CommitService {
-  private static final Logger     LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
 
   private BaseDao<CommitModel> baseDao;
 
   @Resource(name = "repositoryService")
-  RepositoryService               repositoryService;
+  RepositoryService repositoryService;
 
   @Value("${git.commit.timeFormat}")
-  private String                  commitTimeFormat;
+  private String commitTimeFormat;
+
+  @Value("${app.dateFormat}")
+  private String commitDateFormat;
 
   @Value("${app.debug}")
-  private String                  debug;
+  private String debug;
 
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -148,6 +154,10 @@ public class CommitServiceImpl implements CommitService {
   public CommitModel getBranchesbyCommit(String commitId) {
     CommitModel commitModel = getBaseDao().fetchEntity(commitId);
     return commitModel;
+  }
+
+  public void saveCommit(CommitModel commit) {
+    getBaseDao().saveEntity(commit);
 
   }
 
@@ -159,5 +169,33 @@ public class CommitServiceImpl implements CommitService {
   public void setBaseDao(BaseDao<CommitModel> baseDao) {
     baseDao.setClazz(CommitModel.class);
     this.baseDao = baseDao;
+  }
+
+
+
+  /**
+   * This method is used to save/update commitdetails in Dao, Using CommitForm to populate the data
+   * for binding in Json format at the times parsing data from CommitModel to databases
+   */
+  @Override
+  public void saveOrUpdateCommitDetails(CommitForm commitForm) {
+    // TODO Auto-generated method stub
+    CommitModel model = new CommitModel();
+    // getBaseDao().fetchEntity(commitForm);
+
+    model.setCommitId(commitForm.getCommitId());
+    model.setCommitAuthor(new PersonIdent(commitForm.getAuthorName(), commitForm.getAuthorEmail(),
+        Long.valueOf(commitForm.getWhen()), Integer.valueOf(commitForm.getTimezone())));
+    model.setBranchName(commitForm.getBranchName());
+    model.setCommitDate(TimeUtils.convertToDateFormat(Long.valueOf(commitForm.getCommitDate())));
+    model.setCommitHash(commitForm.getCommitHash());
+    model.setCommitTimeFormatted(commitForm.getFormattedTime());
+    model.setIsMergeCommit(Boolean.valueOf(commitForm.getIsMergeCommit()));
+    model.setRepositoryName(commitForm.getRepoName());
+    model.setShortMessage(commitForm.getShortMsg());
+    model.setTrimmedMessage(commitForm.getTrimmedMsg());
+
+    getBaseDao().saveEntity(model);
+
   }
 }
