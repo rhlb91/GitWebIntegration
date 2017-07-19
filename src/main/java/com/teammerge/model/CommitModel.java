@@ -38,13 +38,13 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   @Column(name = "commit_Date")
   private Date commitDate;
   
-  @Column(name = "commitTimeFormatted")
+  @Column(name = "commit_time_formatted")
   private String commitTimeFormatted;
-
-
-
+ 
+  @Column(name = "repository_name")
   private String repositoryName;
 
+  @Column(name = "branch_name")
   private String branchName;
 
   @Override

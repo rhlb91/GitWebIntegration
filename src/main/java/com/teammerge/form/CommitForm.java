@@ -17,6 +17,8 @@ public class CommitForm implements Serializable {
   private String isMergeCommit;
   private String repoName;
   private String branchName;
+  private String commitDate;
+  private String formattedTime;
 
   public String getCommitId() {
     return commitId;
@@ -121,10 +123,5 @@ public class CommitForm implements Serializable {
   public void setFormattedTime(String formattedTime) {
     this.formattedTime = formattedTime;
   }
-
-  private String commitDate;
-  private String formattedTime;
-
-
-
 }
+
