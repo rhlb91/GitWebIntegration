@@ -13,11 +13,10 @@
 		<property name="show_sql">true</property>
 		<property name="hibernate.current_session_context_class">thread</property>
 		<mapping class="com.teammerge.model.BranchDetailModel" />
-		<mapping class="com.teammerge.model.CommitDetailModel" />
 		<mapping class="com.teammerge.model.RepositoryModel"/>
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
 		<mapping class="com.teammerge.model.CommitModel"/>
-		<mapping class="com.teammerge.model.ExtCommitModel"/>
+		
 	</session-factory>
 </hibernate-configuration>

@@ -7,39 +7,44 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
 @Entity
-@Table(name="commit_details")
+@Table(name = "commit_details")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
- 
+
   private static final long serialVersionUID = 6471094113056162919L;
-  
+
   @Id
   @Column(name = "commit_id")
   private String commitId;
+  
   @Column(name = "commit_author")
   private PersonIdent commitAuthor;
+
   @Column(name = "short_Message")
   private String shortMessage;
+
   @Column(name = "trimmed_Message")
   private String trimmedMessage;
+  
   @Column(name = "commit_Hash")
   private String commitHash;
+  
   @Column(name = "isMerge_Commit")
   private Boolean isMergeCommit;
+  
   @Column(name = "commit_Date")
   private Date commitDate;
-  @Column(name = "commitTimeFormatted")
-  private String commitTimeFormatted;
   
-
-
+  @Column(name = "commit_time_formatted")
+  private String commitTimeFormatted;
+ 
+  @Column(name = "repository_name")
   private String repositoryName;
 
+  @Column(name = "branch_name")
   private String branchName;
 
   @Override
@@ -55,7 +60,7 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
     return str;
   }
 
-  
+
   public String getShortMessage() {
     return shortMessage;
   }
@@ -132,19 +137,19 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   }
 
   public String getRepositoryName() {
-  	return repositoryName;
+    return repositoryName;
   }
 
   public void setRepositoryName(String repositoryName) {
-  	this.repositoryName = repositoryName;
+    this.repositoryName = repositoryName;
   }
 
   public String getBranchName() {
-  	return branchName;
+    return branchName;
   }
 
   public void setBranchName(String branchName) {
-  	this.branchName = branchName;
+    this.branchName = branchName;
   }
 
 
