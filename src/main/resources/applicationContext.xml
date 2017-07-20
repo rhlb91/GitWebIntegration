@@ -39,5 +39,4 @@
 		<property name="remoteRepoPath" value="${git.remote.repository.path}" /> 
 		<property name="gitService" ref="gitService"></property> </bean> -->
 
-	<bean id="branchDetailDao" class="com.teammerge.dao.impl.BranchDetailDaoImpl" />
 </beans>

@@ -1,6 +1,7 @@
 package com.teammerge.model;
 
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,17 +83,16 @@ public class TimeUtils {
    */
   public String duration(int days) {
     if (days <= 60) {
-      return (days > 1 ? translate(days, "gb.duration.days", "{0} days") : translate(
-          "gb.duration.oneDay", "1 day"));
+      return (days > 1 ? translate(days, "gb.duration.days", "{0} days")
+          : translate("gb.duration.oneDay", "1 day"));
     } else if (days < 365) {
       int rem = days % 30;
       return translate(((days / 30) + (rem >= 15 ? 1 : 0)), "gb.duration.months", "{0} months");
     } else {
       int years = days / 365;
       int rem = days % 365;
-      String yearsString =
-          (years > 1 ? translate(years, "gb.duration.years", "{0} years") : translate(
-              "gb.duration.oneYear", "1 year"));
+      String yearsString = (years > 1 ? translate(years, "gb.duration.years", "{0} years")
+          : translate("gb.duration.oneYear", "1 year"));
       if (rem < 30) {
         if (rem == 0) {
           return yearsString;
@@ -107,10 +107,8 @@ public class TimeUtils {
           months++;
         }
         String monthsString =
-            yearsString
-                + ", "
-                + (months > 1 ? translate(months, "gb.duration.months", "{0} months") : translate(
-                    "gb.duration.oneMonth", "1 month"));
+            yearsString + ", " + (months > 1 ? translate(months, "gb.duration.months", "{0} months")
+                : translate("gb.duration.oneMonth", "1 month"));
         return monthsString;
       }
     }
@@ -371,5 +369,14 @@ public class TimeUtils {
     SimpleDateFormat localDateFormat = new SimpleDateFormat(commitTimeFormat);
     String formattedTime = localDateFormat.format(commitDate);
     return formattedTime;
+  }
+
+  /**
+   * This method is used convert the format of the Date into long
+   * @param date
+   * @return
+   */
+  public static Date convertToDateFormat(long date) {
+    return new Date(date);
   }
 }

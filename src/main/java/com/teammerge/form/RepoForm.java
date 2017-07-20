@@ -3,6 +3,7 @@ package com.teammerge.form;
 public class RepoForm {
   private String companyName;
   private String repoRemoteURL;
+  private String repoName;
   private String username;
   private String password;
 
@@ -36,6 +37,14 @@ public class RepoForm {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getRepoName() {
+    return repoName;
+  }
+
+  public void setRepoName(String repoName) {
+    this.repoName = repoName;
   }
 
 }

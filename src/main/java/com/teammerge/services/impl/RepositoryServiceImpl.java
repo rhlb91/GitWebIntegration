@@ -37,6 +37,7 @@ import com.teammerge.Constants.CommitMessageRenderer;
 import com.teammerge.Constants.MergeType;
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
+import com.teammerge.dao.RepositoryDao;
 import com.teammerge.manager.IManager;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
@@ -86,6 +87,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Resource(name = "gitService")
   private GitService gitService;
 
+  private RepositoryDao repositoryDao;
 
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -960,5 +962,16 @@ public class RepositoryServiceImpl implements RepositoryService {
    */
   private boolean isValidRepositoryList() {
     return false;
+  }
+
+  @Override
+  public List<RepositoryModel> getRepositoryModelsFromDB() {
+    return repositoryDao.fetchAllRepositories();
+  }
+ 
+  @Autowired
+  public void setRepositoryDao(RepositoryDao repositoryDao) {
+    repositoryDao.setClazz(RepositoryModel.class);
+    this.repositoryDao = repositoryDao;
   }
 }
