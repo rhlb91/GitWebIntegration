@@ -14,19 +14,19 @@ public class BranchDetailModel implements Serializable {
   private static final long serialVersionUID = 1100490355473736524L;
 
   @Id
-  @Column(name = "branchId")
+  @Column(name = "branch_Id")
   private String branchId;
 
-  @Column(name = "numOfCommits")
+  @Column(name = "num_Of_Commits")
   private int numOfCommits;
 
-  @Column(name = "numOfPull")
+  @Column(name = "num_Of_Pull")
   private int numOfPull;
 
-  @Column(name = "lastModifiedDate")
+  @Column(name = "last_Modified_Date")
   private String lastModifiedDate;
 
-  @Column(name = "repositoryId")
+  @Column(name = "repository_Id")
   private String repositoryId;
 
   @Override
