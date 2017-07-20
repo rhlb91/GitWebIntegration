@@ -37,7 +37,7 @@ public class QuartzListener implements ServletContextListener {
                         Trigger trigger = newTrigger()
                         .withIdentity("Job", "Group")
                          .startNow()
-                        .withSchedule(CronScheduleBuilder.cronSchedule("0/120 * * * * ?"))
+                        .withSchedule(CronScheduleBuilder.cronSchedule("0 0/5 * * * ?"))
                         .build();
 
                         // Setup the Job and Trigger with Scheduler & schedule jobs
