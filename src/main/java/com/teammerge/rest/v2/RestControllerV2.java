@@ -43,7 +43,7 @@ public class RestControllerV2 extends AbstractController {
 
 
   @GET
-  @Path("/branchDetails/{id}")
+  @Path("/branch/{id}")
   public Response getBranchDetails(@PathParam("id") String branchId) {
     BranchDetailModel branchDetailModel = getBranchDetailService().getBranchDetails(branchId);
     String jsonOutput = JacksonUtils.toBranchDetailJson(branchDetailModel);
@@ -56,7 +56,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/branch")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveBranchDetails(BranchDetailModel branch) {
-    getBranchDetailService().createBranch(branch);
+    getBranchDetailService().saveBranch(branch);
     String finalOutput = "Saved successfully!!";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -96,10 +96,26 @@ public class RestControllerV2 extends AbstractController {
   }
 
   @GET
-  @Path("/commitDetail/{id}")
+  @Path("/commit/{id}")
   public Response getTicketCommitDetails(@PathParam("id") String commitId) {
     CommitModel commitModel = getCommitService().getCommitDetails(commitId);
     String jsonOutput = JacksonUtils.toBranchCommitDetailJson(commitModel);
+    String finalOutput = convertToFinalOutput(jsonOutput);
+
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+  
+/**
+ * This method is used get all commits Detail list from Dao layer
+ * @return list of commits list in Json format
+ */
+  
+  @GET
+  @Path("/commitDetails")
+  public Response getAllTicketCommitDetails() {
+    List<CommitModel> commitModel = getCommitService().getCommitDetailsAll();
+    String jsonOutput = JacksonUtils.toAllCommitDetailJson(commitModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")

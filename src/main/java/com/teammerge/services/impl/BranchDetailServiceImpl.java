@@ -19,7 +19,7 @@ public class BranchDetailServiceImpl implements BranchDetailService {
   }
 
   @Override
-  public int createBranch(BranchDetailModel branch) {
+  public int saveBranch(BranchDetailModel branch) {
     getBaseDao().saveEntity(branch);
     return 0;
   }

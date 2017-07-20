@@ -197,4 +197,9 @@ public class CommitServiceImpl implements CommitService {
     getBaseDao().saveEntity(model);
 
   }
+
+  @Override
+  public List<CommitModel> getCommitDetailsAll() {
+    return getBaseDao().getEntityList();
+  }
 }
