@@ -6,5 +6,5 @@ public interface BranchDetailService {
 
   public BranchDetailModel getBranchDetails(String branchId);
 
-  public int createBranch(BranchDetailModel branch);
+  public int saveBranch(BranchDetailModel branch);
 }
