@@ -115,7 +115,6 @@ public class CommitServiceImpl implements CommitService {
 
     return commitsPerMatchedBranch;
   }
-
   public List<CommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
       RefModel branch) {
     List<CommitModel> populatedCommits = new ArrayList<CommitModel>();
@@ -160,7 +159,7 @@ public class CommitServiceImpl implements CommitService {
 
 
   @Override
-  public CommitModel getBranchesbyCommit(String commitId) {
+  public CommitModel getCommitDetails(String commitId) {
     CommitModel commitModel = getBaseDao().fetchEntity(commitId);
     return commitModel;
   }
@@ -206,5 +205,10 @@ public class CommitServiceImpl implements CommitService {
 
     getBaseDao().saveEntity(model);
 
+  }
+
+  @Override
+  public List<CommitModel> getCommitDetailsAll() {
+    return getBaseDao().getEntityList();
   }
 }

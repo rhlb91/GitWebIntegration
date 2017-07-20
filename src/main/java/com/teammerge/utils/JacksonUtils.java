@@ -107,6 +107,19 @@ public class JacksonUtils {
     return jsonInString;
   }
 
+  public static String toAllCommitDetailJson(List<CommitModel> commitModel) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonInString = null;
+    try {
+      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+
+    return jsonInString;
+  }
+  
   public static String toCompanyDetailJson(Company company) {
 
     ObjectMapper mapper = new ObjectMapper();
