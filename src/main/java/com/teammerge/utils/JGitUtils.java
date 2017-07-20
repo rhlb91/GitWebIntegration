@@ -1846,6 +1846,8 @@ public class JGitUtils {
     return getRefs(repository, Constants.R_REMOTES, fullName, maxCount);
   }
 
+  
+ 
   /**
    * Returns the list of note branches. If repository does not exist or is empty, an empty list is
    * returned.

@@ -24,7 +24,7 @@ public class BranchDetailModel implements Serializable {
   private int numOfPull;
 
   @Column(name = "lastModifiedDate")
-  private String lastModifiedDate;
+  private Date lastModifiedDate;
 
   @Column(name = "repositoryId")
   private String repositoryId;
@@ -64,11 +64,11 @@ public class BranchDetailModel implements Serializable {
     this.numOfPull = numOfPull;
   }
 
-  public String getLastModifiedDate() {
+  public Date getLastModifiedDate() {
     return lastModifiedDate;
   }
 
-  public void setLastModifiedDate(String lastModifiedDate) {
+  public void setLastModifiedDate(Date lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
   }
 

@@ -65,8 +65,10 @@ public class CommitServiceImpl implements CommitService {
     List<RepositoryCommit> repoCommits = new ArrayList<>();
     List<CommitModel> commits = new ArrayList<CommitModel>();
     int numOfMatchedBranches = 0;
+    
     Date minimumDate = TimeUtils.getInceptionDate();
-
+    
+    
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
     if (CollectionUtils.isEmpty(repositories) || StringUtils.isEmpty(branchName)) {
@@ -80,6 +82,13 @@ public class CommitServiceImpl implements CommitService {
 
       Repository repository = repositoryService.getRepository(repoModel.getName());
       List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
+      
+      
+     // GetBranchModels dd = new GetBranchModels();
+	  //List<RefModel> branchModels = dd.getBranchModels();
+      
+      
+      
 
       if (CollectionUtils.isNotEmpty(branchModels)) {
         for (RefModel branch : branchModels) {
