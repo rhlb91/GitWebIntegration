@@ -3,6 +3,7 @@ package com.teammerge.dao.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
@@ -43,7 +44,21 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   }
 
   @Override
+  public List<T> fetchAll() {
+    final String queryStr = "from " + clazz.getSimpleName();
+
+    HibernateUtils.openCurrentSessionwithTransaction();
+    Query query = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    List<T> result = query.list();
+    HibernateUtils.closeCurrentSessionwithTransaction();
+
+    return result;
+  }
+
+  @Override
   public void setClazz(Class<T> clazz) {
     this.clazz = clazz;
   }
+
+
 }

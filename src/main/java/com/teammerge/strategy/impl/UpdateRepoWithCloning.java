@@ -49,6 +49,7 @@ public class UpdateRepoWithCloning implements CloneStrategy {
       File repoDir = new File(gitDir, repositoryName);
       try {
         FileUtils.deleteDirectory(repoDir);
+        LOG.info("Deleted the old repo " + repoDir);
       } catch (IOException e) {
         LOG.error("Unable to delete Repo dir-" + repoDir, e);
       }

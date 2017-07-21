@@ -9,6 +9,8 @@ public interface BaseDao<T extends Serializable> {
 
   T fetchEntity(String entityId);
 
+  List<T> fetchAll();
+
   void saveEntity(T entity);
 
   List<T> getEntityList();

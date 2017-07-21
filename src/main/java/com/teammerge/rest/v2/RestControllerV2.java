@@ -1,7 +1,9 @@
 package com.teammerge.rest.v2;
 
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,17 +17,23 @@ import org.springframework.stereotype.Component;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.form.CommitForm;
+import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.rest.AbstractController;
+import com.teammerge.services.GitService;
+import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
 
 @Component
 @Path("/v2")
 public class RestControllerV2 extends AbstractController {
+
+  @Resource(name = "gitService")
+  private GitService gitService;
 
   @GET
   @Path("/")
@@ -166,4 +174,27 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
+
+  @POST
+  @Path("/createBranch")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response createBranch(final CreateNewBranchForm form) {
+    String output = "";
+
+    Map<String, Object> result =
+        getRepositoryService().createBranch(form.getCompanyId(),form.getProjectId(), form.getBranchName());
+
+    if (RepositoryService.Result.FAILURE.equals(result.get("result"))) {
+      output += " { \"result\": " + RepositoryService.Result.FAILURE;
+      output += ", \"reason\": " + result.get("reason");
+      output += ", \"detailedReason\": " + result.get("completeError");
+      output += "}";
+    } else {
+      output += " { \"result\": " + RepositoryService.Result.SUCCESS;
+      output += "}";
+    }
+
+    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
+  }
+
 }

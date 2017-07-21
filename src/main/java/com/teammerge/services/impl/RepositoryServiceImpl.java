@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
@@ -37,13 +40,19 @@ import com.teammerge.Constants.CommitMessageRenderer;
 import com.teammerge.Constants.MergeType;
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
+import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.dao.RepositoryDao;
+import com.teammerge.entity.Company;
+import com.teammerge.entity.RepoCredentials;
+import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.manager.IManager;
+import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
+import com.teammerge.services.CompanyDetailService;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CloneStrategy;
@@ -88,6 +97,12 @@ public class RepositoryServiceImpl implements RepositoryService {
   private GitService gitService;
 
   private RepositoryDao repositoryDao;
+
+  @Resource(name = "companyDetailService")
+  private CompanyDetailService companyDetailService;
+
+  @Resource(name = "repoCredentialDao")
+  private RepoCredentialDao repoCredentialDao;
 
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -178,7 +193,6 @@ public class RepositoryServiceImpl implements RepositoryService {
    * @return
    */
   private Repository getUpdatedRepository(String repoName, boolean updateRequired) {
-    long start = System.currentTimeMillis();
     Repository repo = null;
     boolean toUpdate = false;
 
@@ -964,11 +978,74 @@ public class RepositoryServiceImpl implements RepositoryService {
     return false;
   }
 
+  public Map<String, Object> createBranch(final String companyId, final String projectId,
+      final String branchName) {
+    Map<String, Object> result = new HashMap<>();
+
+    // setting default to failure, updating in case of success
+    result.put("result", RepositoryService.Result.FAILURE);
+    result.put("branch", null);
+
+    Ref branch = null;
+
+    String remoteRepoUrl =
+        companyDetailService.getRemoteUrlForCompanyAndProject(companyId, projectId);
+
+    if (remoteRepoUrl == null) {
+      result.put("reason", "Remote url not found with companyId: " + companyId + ", projectId: "
+          + projectId);
+      return result;
+    }
+
+    RepoCredentials repoCreds =
+        repoCredentialDao.fetchEntity(new RepoCredentialsKey(companyId, projectId));
+
+    if (repoCreds == null) {
+      result.put("reason", "Credentails not found for companyId: " + companyId + ", projectId: "
+          + projectId);
+      return result;
+    }
+
+    CreateBranchOptions branchOptions = new CreateBranchOptions();
+    branchOptions.setBranchName(branchName);
+    branchOptions.setCompanyName(companyId);
+    branchOptions.setRemoteURL(remoteRepoUrl);
+    branchOptions.setUserName(repoCreds.getUsername());
+    branchOptions.setPassword(repoCreds.getPassword());
+
+    try (Repository r = getRepository(projectId, false)) {
+      branchOptions.setRepo(r);
+      branch = gitService.createBranch(branchOptions);
+
+      if (branch != null) {
+        result.put("result", RepositoryService.Result.SUCCESS);
+        result.put("branch", branch);
+        LOG.info("Branch created with name: " + branchName + ", for repo: " + projectId
+            + ", with Id: " + branch.getObjectId());
+      } else {
+        result.put("reason", "unknown");
+
+        LOG.error("Could not create branch with name: " + branchName + ", for repo " + projectId);
+      }
+
+    } catch (GitAPIException e) {
+      result.put("reason", e.getMessage());
+      result.put("completeError", e);
+      LOG.error("Could not create branch with name: " + branchName, e);
+    } catch (Exception e) {
+      result.put("reason", e.getMessage());
+      result.put("completeError", e);
+      LOG.error("Could not create branch with name: " + branchName, e);
+    }
+
+    return result;
+  }
+
   @Override
   public List<RepositoryModel> getRepositoryModelsFromDB() {
     return repositoryDao.fetchAllRepositories();
   }
- 
+
   @Autowired
   public void setRepositoryDao(RepositoryDao repositoryDao) {
     repositoryDao.setClazz(RepositoryModel.class);

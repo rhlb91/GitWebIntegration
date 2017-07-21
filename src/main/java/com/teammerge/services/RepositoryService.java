@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
 import com.teammerge.manager.IManager;
@@ -171,12 +173,12 @@ public interface RepositoryService extends IManager {
   /**
    * Returns the JGit repository for the specified name.
    *
-   * @param repositoryName
-   * @param logError to log errors or not, by default true
+   * @param repositoryName aka projectId or projectName
+   * @param updated should the returned repository should be up-to-date before returning
    * @return repository or null
    * @since 1.4.0
    */
-  Repository getRepository(String repositoryName, boolean logError);
+  Repository getRepository(String repositoryName, boolean updated);
 
   /**
    * Returns the list of all repository models.
@@ -453,4 +455,12 @@ public interface RepositoryService extends IManager {
   boolean isIdle(Repository repository);
 
   List<RepositoryModel> getRepositoryModelsFromDB();
+
+  Map<String, Object> createBranch(final String companyId, final String projectId,
+      final String branchName);
+
+  public static enum Result {
+    SUCCESS, FAILURE;
+  }
+
 }

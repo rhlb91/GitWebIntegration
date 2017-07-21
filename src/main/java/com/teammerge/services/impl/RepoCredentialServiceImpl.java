@@ -31,12 +31,12 @@ public class RepoCredentialServiceImpl implements RepoCredentialService {
   public void saveOrUpdateRepoCredentials(final RepoForm repoForm) {
 
     RepoCredentials repoCredentials =
-        repoCredentialDao.fetchEntity(repoForm.getCompanyName(), repoForm.getRepoName());
+        repoCredentialDao.fetchEntity(repoForm.getCompanyName(), repoForm.getProjectName());
 
     if (repoCredentials == null) {
       repoCredentials = new RepoCredentials();
       repoCredentials.setCompany(repoForm.getCompanyName());
-      repoCredentials.setRepoName(repoForm.getRepoName());
+      repoCredentials.setRepoName(repoForm.getProjectName());
     }
 
     repoCredentials.setUsername(repoForm.getUsername());

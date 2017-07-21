@@ -1,6 +1,5 @@
 package com.teammerge.entity;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -11,8 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyClass;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
 @Table(name = "company")
 public class Company implements java.io.Serializable {
@@ -21,12 +18,12 @@ public class Company implements java.io.Serializable {
 
   @Id
   @Column(name = "name", unique = true, nullable = false)
-  private String name;
-
-  @Column(name = "ownedRepositories")
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-  private List<String> ownedRepositories;
-
+  public String name;
+ 
+  /**
+   * Map of ProjectId and Remote repo url<br><br>
+   * E.g. [Teamerge -> https://123.124.11.1/teamerge.git ]
+   */
   @Column(name = "remoteRepoUrls")
   @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
   @MapKeyClass(String.class)
@@ -40,14 +37,6 @@ public class Company implements java.io.Serializable {
     this.name = name;
   }
 
-  public List<String> getOwnedRepositories() {
-    return ownedRepositories;
-  }
-
-  public void setOwnedRepositories(List<String> ownedRepositories) {
-    this.ownedRepositories = ownedRepositories;
-  }
-
   public Map<String, String> getRemoteRepoUrls() {
     return remoteRepoUrls;
   }
@@ -55,6 +44,5 @@ public class Company implements java.io.Serializable {
   public void setRemoteRepoUrls(Map<String, String> remoteRepoUrls) {
     this.remoteRepoUrls = remoteRepoUrls;
   }
-
 
 }
