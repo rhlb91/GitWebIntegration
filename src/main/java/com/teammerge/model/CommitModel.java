@@ -9,9 +9,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "commit_details")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
 
   private static final long serialVersionUID = 6471094113056162919L;

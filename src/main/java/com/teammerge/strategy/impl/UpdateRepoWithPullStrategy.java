@@ -19,13 +19,14 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
+import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.StringUtils;
 
-public class UpdateRepoWithPull implements CloneStrategy {
+public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
-  private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithPull.class);
+  private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithPullStrategy.class);
 
   private String remoteRepoPath;
 
@@ -40,15 +41,16 @@ public class UpdateRepoWithPull implements CloneStrategy {
 
   @Override
   public Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
-    String repositoryName = repoName;
-    Git git = null;
-    long start = System.currentTimeMillis();
-    Repository repo = null;
-
-
     if (repoName == null) {
-      repositoryName = getRepoNamesFromConfigFile();
+      LOG.error("Error cloning/upadting repository from path " + remoteRepoPath
+          + ", Reason: RepoName is null");
+      return null;
     }
+
+    Git git = null;
+    Repository repo = null;
+    String repositoryName = repoName;
+    long start = System.currentTimeMillis();
 
     if (!isRepoExists) {
       LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
@@ -77,6 +79,7 @@ public class UpdateRepoWithPull implements CloneStrategy {
         PullResult pr = pc.call();
         MergeResult mergeResult = pr.getMergeResult();
 
+
         if (isDebugOn()) {
           LOG.debug("Result of repo pull of " + repositoryName + ": "
               + mergeResult.getMergeStatus());
@@ -94,14 +97,14 @@ public class UpdateRepoWithPull implements CloneStrategy {
     }
   }
 
-  private String getRepoNamesFromConfigFile() {
-    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
-      String reponameWithDotGit =
-          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
-      return StringUtils.stripDotGit(reponameWithDotGit);
-    }
-    return null;
-  }
+//  private String getRepoNamesFromConfigFile() {
+//    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
+//      String reponameWithDotGit =
+//          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
+//      return StringUtils.stripDotGit(reponameWithDotGit);
+//    }
+//    return null;
+//  }
 
   private Repository loadRepository(final File repoDir, final String repoName) {
 

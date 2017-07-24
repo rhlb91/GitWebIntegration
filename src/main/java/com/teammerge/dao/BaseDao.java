@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface BaseDao<T extends Serializable> {
 
-  void setClazz(Class<T> clazz);
+  public void setClazz(Class<T> clazz);
 
   T fetchEntity(String entityId);
 
@@ -13,5 +13,4 @@ public interface BaseDao<T extends Serializable> {
 
   void saveEntity(T entity);
 
-  List<T> getEntityList();
 }

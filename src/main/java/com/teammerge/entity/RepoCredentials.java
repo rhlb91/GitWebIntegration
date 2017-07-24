@@ -5,8 +5,12 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 @Entity
 @Table(name = "repo_credentials")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class RepoCredentials implements java.io.Serializable {
 
   private static final long serialVersionUID = -6344513471738441090L;

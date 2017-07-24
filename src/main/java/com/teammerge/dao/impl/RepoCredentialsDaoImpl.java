@@ -13,10 +13,10 @@ public class RepoCredentialsDaoImpl extends BaseDaoImpl<RepoCredentials> impleme
 
   @Override
   public RepoCredentials fetchEntity(RepoCredentialsKey key) {
-    HibernateUtils.openCurrentSessionwithTransaction();
+    HibernateUtils.openCurrentSession();
     RepoCredentials entity =
         (RepoCredentials) HibernateUtils.getCurrentSession().get(RepoCredentials.class, key);
-    HibernateUtils.closeCurrentSessionwithTransaction();
+    HibernateUtils.closeCurrentSession();
     return entity;
   }
 

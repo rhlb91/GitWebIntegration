@@ -16,11 +16,12 @@ import com.teammerge.utils.HibernateUtils;
 public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   private Class<T> clazz;
 
+ 
   @Override
   public T fetchEntity(String entityId) {
-    HibernateUtils.openCurrentSessionwithTransaction();
+    HibernateUtils.openCurrentSession();
     T entity = (T) HibernateUtils.getCurrentSession().get(clazz, entityId);
-    HibernateUtils.closeCurrentSessionwithTransaction();
+    HibernateUtils.closeCurrentSession();
     return entity;
   }
 
@@ -31,26 +32,17 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
     HibernateUtils.closeCurrentSessionwithTransaction();
   }
   
-/**
- * The below method is only used to fetch all list of Data, based on Model Class name using HibernateUtils.
- */
-  @Override
-  public List<T> getEntityList(){
-    HibernateUtils.openCurrentSessionwithTransaction();
-    List<T> Tlist = HibernateUtils.getCurrentSession().createCriteria(clazz).list();   
-    HibernateUtils.closeCurrentSessionwithTransaction();
-    return Tlist;
-    
-  }
-
+  /**
+   * The below method is only used to fetch all list of Data, based on Model Class name using HibernateUtils.
+   */
   @Override
   public List<T> fetchAll() {
     final String queryStr = "from " + clazz.getSimpleName();
 
-    HibernateUtils.openCurrentSessionwithTransaction();
+    HibernateUtils.openCurrentSession();
     Query query = HibernateUtils.getCurrentSession().createQuery(queryStr);
     List<T> result = query.list();
-    HibernateUtils.closeCurrentSessionwithTransaction();
+    HibernateUtils.closeCurrentSession();
 
     return result;
   }

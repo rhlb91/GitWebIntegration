@@ -12,6 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.entity.Company;
@@ -113,12 +114,13 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
-/**
- * This method is used get all commits Detail list from Dao layer
- * @return list of commits list in Json format
- */
-  
+
+  /**
+   * This method is used get all commits Detail list from Dao layer
+   * 
+   * @return list of commits list in Json format
+   */
+
   @GET
   @Path("/commitDetails")
   public Response getAllTicketCommitDetails() {
@@ -129,20 +131,31 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
+
   @GET
-  @Path("/count/{commitId}")
-  public Response getCommitAndBranchCount(@PathParam("commitId") String commits) {
+  @Path("/count/{ticketId}")
+  public Response getCommitAndBranchCount(@PathParam("ticketId") String ticketId) {
     String finalOutput = "";
-    BranchDetailModel branchDetailModel = getBranchDetailService().getBranchDetails(commits);
-       finalOutput =
-        convertToFinalOutput("{\"numOfPull\": " + branchDetailModel.getNumOfPull() + ","
-            + "\"numOfCommits\": " + branchDetailModel.getNumOfCommits() + "}");
+    int numOfBranches = 0;
+    int numOfCommits = 0;
+
+    List<BranchDetailModel> branchDetailModel =
+        getBranchDetailService().getBranchDetailsForBranchLike(ticketId);
+
+    if (CollectionUtils.isNotEmpty(branchDetailModel)) {
+      numOfBranches = branchDetailModel.size();
+      for (BranchDetailModel model : branchDetailModel) {
+        numOfCommits += model.getNumOfCommits();
+      }
+    }
+
+    finalOutput =
+        convertToFinalOutput("{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": "
+            + numOfCommits + "}");
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-
 
   @GET
   @Path("/credentials/{user}")
@@ -182,7 +195,8 @@ public class RestControllerV2 extends AbstractController {
     String output = "";
 
     Map<String, Object> result =
-        getRepositoryService().createBranch(form.getCompanyId(),form.getProjectId(), form.getBranchName());
+        getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
+            form.getBranchName());
 
     if (RepositoryService.Result.FAILURE.equals(result.get("result"))) {
       output += " { \"result\": " + RepositoryService.Result.FAILURE;

@@ -10,8 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyClass;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 @Entity
 @Table(name = "company")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class Company implements java.io.Serializable {
 
   private static final long serialVersionUID = 6705919882734212383L;
@@ -19,9 +23,10 @@ public class Company implements java.io.Serializable {
   @Id
   @Column(name = "name", unique = true, nullable = false)
   public String name;
- 
+
   /**
-   * Map of ProjectId and Remote repo url<br><br>
+   * Map of ProjectId and Remote repo url<br>
+   * <br>
    * E.g. [Teamerge -> https://123.124.11.1/teamerge.git ]
    */
   @Column(name = "remoteRepoUrls")

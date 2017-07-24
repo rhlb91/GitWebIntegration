@@ -17,6 +17,9 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyClass;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.teammerge.Constants.AccessRestrictionType;
 import com.teammerge.Constants.AuthorizationControl;
 import com.teammerge.Constants.CommitMessageRenderer;
@@ -34,6 +37,7 @@ import com.teammerge.utils.StringUtils;
 
 @Entity
 @Table(name = "repository")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class RepositoryModel implements Serializable, Comparable<RepositoryModel> {
 
   private static final long serialVersionUID = 1L;
@@ -44,7 +48,7 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
 
   @Column(name = "companyId")
   private String companyId;
-  
+
   @Column(name = "description")
   private String description;
 

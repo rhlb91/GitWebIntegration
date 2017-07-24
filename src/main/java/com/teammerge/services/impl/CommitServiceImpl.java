@@ -106,6 +106,7 @@ public class CommitServiceImpl implements CommitService {
 
     return commitsPerMatchedBranch;
   }
+  
   public List<CommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
       RefModel branch) {
     List<CommitModel> populatedCommits = new ArrayList<CommitModel>();
@@ -147,8 +148,6 @@ public class CommitServiceImpl implements CommitService {
     return populatedCommits;
   }
 
-
-
   @Override
   public CommitModel getCommitDetails(String commitId) {
     CommitModel commitModel = getBaseDao().fetchEntity(commitId);
@@ -169,8 +168,6 @@ public class CommitServiceImpl implements CommitService {
     baseDao.setClazz(CommitModel.class);
     this.baseDao = baseDao;
   }
-
-
 
   /**
    * This method is used to save/update commitdetails in Dao, Using CommitForm to populate the data
@@ -200,6 +197,6 @@ public class CommitServiceImpl implements CommitService {
 
   @Override
   public List<CommitModel> getCommitDetailsAll() {
-    return getBaseDao().getEntityList();
+    return getBaseDao().fetchAll();
   }
 }

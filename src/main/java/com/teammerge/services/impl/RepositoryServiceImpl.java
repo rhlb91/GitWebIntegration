@@ -115,10 +115,10 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   public List<RepositoryModel> getRepositoryModels() {
     long methodStart = System.currentTimeMillis();
-    List<String> list = getRepositoryList();
+    List<String> list = getRepositoryListFromDB();
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
-    for (String repo : list) {
-      RepositoryModel model = getRepositoryModel(repo);
+    for (String repoName : list) {
+      RepositoryModel model = getRepositoryModel(repoName);
       if (model != null) {
         repositories.add(model);
       }
@@ -251,7 +251,9 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   /**
    * No need to update repository from remote, as it is only printing the list of repositories
-   * Available in local
+   * Available in local <br>
+   * <br>
+   * This should be used only with RestController V1
    */
   public List<String> getRepositoryList() {
     List<String> repositories = null;
@@ -263,14 +265,80 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
       long startTime = System.currentTimeMillis();
 
-      getUpdatedRepository(null, false);
-
       repositories =
           JGitUtils.getRepositoryList(getRepositoriesFolder(),
               getSettings().getBoolean(Keys.git.onlyAccessBareRepositories, false), getSettings()
                   .getBoolean(Keys.git.searchRepositoriesSubfolders, true), getSettings()
                   .getInteger(Keys.git.searchRecursionDepth, -1),
               getSettings().getStrings(Keys.git.searchExclusions));
+
+      if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
+        // we are not caching
+        StringUtils.sortRepositorynames(repositories);
+        return repositories;
+      } else {
+        // we are caching this list
+        String msg = "{0} repositories identified in {1}";
+        if (getSettings().getBoolean(Keys.web.showRepositorySizes, true)) {
+          // optionally (re)calculate repository sizes
+          msg = "{0} repositories identified with calculated folder sizes in {1}";
+        }
+
+        for (String repository : repositories) {
+          getRepositoryModel(repository);
+        }
+
+        // rebuild fork networks
+        for (RepositoryModel model : repositoryListCache.values()) {
+          if (!StringUtils.isEmpty(model.getOriginRepository())) {
+            String originKey = getRepositoryKey(model.getOriginRepository());
+            if (repositoryListCache.containsKey(originKey)) {
+              RepositoryModel origin = repositoryListCache.get(originKey);
+              origin.addFork(model.getName());
+            }
+          }
+        }
+
+        LOG.info(MessageFormat.format(msg, repositories.size(),
+            LoggerUtils.getTimeInSecs(startTime, System.currentTimeMillis())));
+      }
+    }
+
+    // return sorted copy of cached list
+    List<String> list = new ArrayList<String>();
+    for (RepositoryModel model : repositoryListCache.values()) {
+      Repository r = getRepository(model.getName());
+      if (r == null) {
+        // repository is missing
+        removeFromCachedRepositoryList(model.getName());
+        LOG.warn(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+            model.getName()));
+        continue;
+      }
+      list.add(model.getName());
+    }
+
+    StringUtils.sortRepositorynames(list);
+
+    return list;
+  }
+
+  /**
+   * This function is responsible for fetching repositories list from DB. This function is better to
+   * use with Rest Controller version V2
+   * 
+   * @return
+   */
+  public List<String> getRepositoryListFromDB() {
+    List<String> repositories = null;
+
+    if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
+      // we are not caching OR we have not yet cached OR the cached list
+      // is invalid
+
+      long startTime = System.currentTimeMillis();
+
+      repositories = repositoryDao.fetchAllRepositoryNames();
 
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
@@ -460,7 +528,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Override
   public List<RepositoryModel> getRepositoryModels(UserModel user) {
     long methodStart = System.currentTimeMillis();
-    List<String> list = getRepositoryList();
+    List<String> list = getRepositoryListFromDB();
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
     for (String repo : list) {
       RepositoryModel model = getRepositoryModel(repo);
@@ -1051,4 +1119,5 @@ public class RepositoryServiceImpl implements RepositoryService {
     repositoryDao.setClazz(RepositoryModel.class);
     this.repositoryDao = repositoryDao;
   }
+
 }

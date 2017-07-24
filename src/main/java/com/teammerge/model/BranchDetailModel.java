@@ -7,8 +7,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 @Entity
 @Table(name = "branch_details")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class BranchDetailModel implements Serializable {
 
   private static final long serialVersionUID = 1100490355473736524L;
