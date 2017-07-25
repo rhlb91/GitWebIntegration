@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -116,7 +117,13 @@ public class RepositoryServiceImpl implements RepositoryService {
   public List<RepositoryModel> getRepositoryModels() {
     long methodStart = System.currentTimeMillis();
     List<String> list = getRepositoryListFromDB();
+    
+    if(CollectionUtils.isEmpty(list)){
+  	  return null;
+    }
+            
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
+    
     for (String repoName : list) {
       RepositoryModel model = getRepositoryModel(repoName);
       if (model != null) {
@@ -339,7 +346,13 @@ public class RepositoryServiceImpl implements RepositoryService {
       long startTime = System.currentTimeMillis();
 
       repositories = repositoryDao.fetchAllRepositoryNames();
+      
+      System.out.println("repositories Name--->"+repositories);
 
+      if(CollectionUtils.isEmpty(repositories)){
+    	  return null;
+      }
+      
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
         StringUtils.sortRepositorynames(repositories);
