@@ -1,5 +1,6 @@
 package com.teammerge.rest.v2;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.entity.Company;
@@ -39,6 +41,12 @@ public class RestControllerV2 extends AbstractController {
   @GET
   @Path("/")
   public Response hello() {
+    try {
+      getRepositoryService().commitDiff();
+    } catch (RevisionSyntaxException | IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return Response.status(200).entity("Hi Rest Working working fine!!").build();
   }
 

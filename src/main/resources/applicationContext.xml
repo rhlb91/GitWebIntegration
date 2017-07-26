@@ -31,12 +31,12 @@
 	</bean>
 
 	<!-- <bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithCloningStrategy"> 
-		<property name="remoteRepoPath" value="${git.remote.repository.path}" /> 
-		<property name="gitService" ref="gitService"></property> </bean> -->
+		<property name="gitService" ref="gitService"/> <property name="companyDao" 
+		ref="companyDao" /> </bean> -->
 
 	<bean id="cloneStrategy" class="com.teammerge.strategy.impl.UpdateRepoWithPullStrategy">
-		<property name="remoteRepoPath" value="${git.remote.repository.path}" />
 		<property name="gitService" ref="gitService" />
+		<property name="companyDao" ref="companyDao" />
 	</bean>
 
 </beans>

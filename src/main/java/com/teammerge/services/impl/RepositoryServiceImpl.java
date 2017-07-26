@@ -1,6 +1,8 @@
 package com.teammerge.services.impl;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -20,12 +22,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +52,6 @@ import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.dao.RepositoryDao;
-import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.manager.IManager;
@@ -77,9 +86,6 @@ public class RepositoryServiceImpl implements RepositoryService {
   private final ObjectCache<Long> repositorySizeCache = new ObjectCache<Long>();
 
   private final ObjectCache<List<Metric>> repositoryMetricsCache = new ObjectCache<List<Metric>>();
-
-  @Value("${git.remote.repository.path}")
-  private String remoteRepoPath;
 
   @Value("${git.repository.folderName}")
   private String repoFolderName;
@@ -218,35 +224,19 @@ public class RepositoryServiceImpl implements RepositoryService {
   boolean isRepoExists(File repoFolder, String repoName) {
     boolean isRepoExists = false;
 
-    if (StringUtils.isEmpty(repoName)) {
-      return checkIfRepoExistsInGitDirectory(repoFolder);
+    if (repoFolder == null || StringUtils.isEmpty(repoName)) {
+      return false;
     }
 
-    if (repoFolder != null && !StringUtils.isEmpty(repoName)) {
-      if (repoFolder.list().length > 0) {
-        for (String fName : repoFolder.list()) {
-          if (repoName.equals(fName)) {
-            isRepoExists = true;
-            break;
-          }
+    if (repoFolder.list().length > 0) {
+      for (String fName : repoFolder.list()) {
+        if (repoName.equals(fName)) {
+          isRepoExists = true;
+          break;
         }
       }
     }
     return isRepoExists;
-  }
-
-  private boolean checkIfRepoExistsInGitDirectory(File repoFolder) {
-
-    File destDir = new File(repoFolder.getAbsolutePath(), getRepoNamesFromConfigFile());
-    return destDir.exists() && destDir.isDirectory();
-  }
-
-  private String getRepoNamesFromConfigFile() {
-    if (!StringUtils.isEmpty(remoteRepoPath)) {
-      String reponameWithDotGit = remoteRepoPath.substring(remoteRepoPath.lastIndexOf("/") + 1);
-      return StringUtils.stripDotGit(reponameWithDotGit);
-    }
-    return null;
   }
 
   /**
@@ -811,7 +801,7 @@ public class RepositoryServiceImpl implements RepositoryService {
    */
   private RepositoryModel loadRepositoryModel(String repositoryName) {
     IStoredSettings settings = getSettings();
-    Repository r = getRepository(repositoryName);
+    Repository r = getRepository(repositoryName, false);
     if (r == null) {
       return null;
     }
@@ -1107,6 +1097,39 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
 
     return result;
+  }
+
+
+  public void commitDiff() throws RevisionSyntaxException, AmbiguousObjectException,
+      IncorrectObjectTypeException, IOException {
+    Repository r = getRepository("Japan Jindal");
+
+
+
+    ObjectReader reader = r.newObjectReader();
+    CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+    ObjectId oldTree = r.resolve("HEAD^{tree}"); // equals newCommit.getTree()
+    oldTreeIter.reset(reader, oldTree);
+    CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+    ObjectId newTree = r.resolve("HEAD~1^{tree}"); // equals oldCommit.getTree()
+    newTreeIter.reset(reader, newTree);
+
+    /*
+     * DiffFormatter df = new DiffFormatter(new ByteArrayOutputStream());
+     * df.setRepository(getRepository("Japan Jindal")); List<DiffEntry> entries =
+     * df.scan(oldTreeIter, newTreeIter); df.close();
+     * 
+     * for (DiffEntry entry : entries) { System.out.println(entry); }
+     */
+
+    FileOutputStream stdout = new FileOutputStream(FileDescriptor.out);
+    try (DiffFormatter diffFormatter = new DiffFormatter(stdout)) {
+      diffFormatter.setRepository(r);
+      for (DiffEntry entry : diffFormatter.scan(oldTreeIter, newTreeIter)) {
+        diffFormatter.format(diffFormatter.toFileHeader(entry));
+        System.out.println("\n--------------------------------------\n");
+      }
+    }
   }
 
   @Override

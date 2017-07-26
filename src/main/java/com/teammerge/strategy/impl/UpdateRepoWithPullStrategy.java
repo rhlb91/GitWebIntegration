@@ -3,6 +3,7 @@ package com.teammerge.strategy.impl;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
@@ -17,9 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.teammerge.dao.CompanyDao;
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
-import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.StringUtils;
@@ -28,9 +29,11 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
   private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithPullStrategy.class);
 
-  private String remoteRepoPath;
+  private static final String GIT_FOLDER_NAME = ".git";
 
   private GitService gitService;
+
+  private CompanyDao companyDao;
 
   @Value("${app.debug}")
   private String debug;
@@ -40,17 +43,22 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
   }
 
   @Override
-  public Repository createOrUpdateRepo(File f, String repoName, boolean isRepoExists) {
-    if (repoName == null) {
-      LOG.error("Error cloning/upadting repository from path " + remoteRepoPath
-          + ", Reason: RepoName is null");
+  public Repository createOrUpdateRepo(File f, String repositoryName, boolean isRepoExists) {
+    if (repositoryName == null) {
+      LOG.error("Cannot clone or update repository from path, Reason: RepoName is null");
       return null;
     }
 
-    Git git = null;
     Repository repo = null;
-    String repositoryName = repoName;
     long start = System.currentTimeMillis();
+
+    String remoteRepoPath = companyDao.getRemoteUrlForProject(repositoryName);
+
+    if (StringUtils.isEmpty(remoteRepoPath)) {
+      LOG.error("Cannot clone or update repository, Reason: remoteRepoPath is null for repo "
+          + repositoryName);
+      return null;
+    }
 
     if (!isRepoExists) {
       LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
@@ -62,23 +70,22 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       gitOptions.setIncludeSubModule(Boolean.TRUE);
       gitOptions.setBare(Boolean.FALSE);
 
-      try {
-        git = gitService.cloneRepository(gitOptions);
+      try (Git git = gitService.cloneRepository(gitOptions);) {
         repo = git.getRepository();
       } catch (GitAPIException e) {
         LOG.error("Error cloning repository from path " + remoteRepoPath, e);
       }
+
       return repo;
     } else {
+
       // check for updates
       repo = loadRepository(f, repositoryName);
 
-      git = new Git(repo);
-      PullCommand pc = git.pull();
-      try {
+      try (Git git = new Git(repo);) {
+        PullCommand pc = git.pull();
         PullResult pr = pc.call();
         MergeResult mergeResult = pr.getMergeResult();
-
 
         if (isDebugOn()) {
           LOG.debug("Result of repo pull of " + repositoryName + ": "
@@ -86,9 +93,28 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
         }
       } catch (GitAPIException e) {
         LOG.error("Error in updating repository " + repositoryName, e);
-      } finally {
-        git.close();
       }
+
+      // To do delete files except .git dir
+      File repoDir = new File(f, repositoryName);
+      try {
+        File[] files = repoDir.listFiles();
+        if (files != null) {
+          for (File fe : files) {
+            if (fe.isFile()) {
+              fe.delete();
+            } else {
+              if (GIT_FOLDER_NAME.equalsIgnoreCase(fe.getName())) {
+                continue;
+              }
+              FileUtils.deleteDirectory(fe);
+            }
+          }
+        }
+      } catch (IOException e) {
+        LOG.error("Error occured removing the repsositry folders " + repoDir, e);
+      }
+
       if (isDebugOn()) {
         LOG.debug("Updated repository " + repositoryName + " in "
             + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
@@ -97,17 +123,7 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
     }
   }
 
-//  private String getRepoNamesFromConfigFile() {
-//    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
-//      String reponameWithDotGit =
-//          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
-//      return StringUtils.stripDotGit(reponameWithDotGit);
-//    }
-//    return null;
-//  }
-
   private Repository loadRepository(final File repoDir, final String repoName) {
-
     File dir = FileKey.resolve(new File(repoDir, repoName), FS.DETECTED);
     if (dir == null)
       return null;
@@ -122,22 +138,14 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
     return r;
   }
 
-  public String getRemoteRepoPath() {
-    return remoteRepoPath;
-  }
-
-  @Required
-  public void setRemoteRepoPath(String remoteRepoPath) {
-    this.remoteRepoPath = remoteRepoPath;
-  }
-
-  public GitService getGitService() {
-    return gitService;
-  }
-
   @Required
   public void setGitService(GitService gitService) {
     this.gitService = gitService;
+  }
+
+  @Required
+  public void setCompanyDao(CompanyDao companyDao) {
+    this.companyDao = companyDao;
   }
 
 

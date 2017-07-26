@@ -1,11 +1,15 @@
 package com.teammerge.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
@@ -463,4 +467,6 @@ public interface RepositoryService extends IManager {
     SUCCESS, FAILURE;
   }
 
+  void commitDiff() throws RevisionSyntaxException, AmbiguousObjectException,
+      IncorrectObjectTypeException, IOException;
 }

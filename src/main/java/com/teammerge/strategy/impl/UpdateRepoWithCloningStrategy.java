@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.teammerge.dao.CompanyDao;
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
@@ -21,9 +22,9 @@ public class UpdateRepoWithCloningStrategy implements CloneStrategy {
 
   private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithCloningStrategy.class);
 
-  private String remoteRepoPath;
-
   private GitService gitService;
+
+  private CompanyDao companyDao;
 
   @Value("${app.debug}")
   private String debug;
@@ -35,8 +36,7 @@ public class UpdateRepoWithCloningStrategy implements CloneStrategy {
   @Override
   public Repository createOrUpdateRepo(File gitDir, String repoName, boolean isRepoExists) {
     if (repoName == null) {
-      LOG.error("Error cloning/upadting repository from path " + remoteRepoPath
-          + ", Reason: RepoName is null");
+      LOG.error("Error cloning/upadting repository from path, Reason: RepoName is null");
       return null;
     }
 
@@ -44,8 +44,15 @@ public class UpdateRepoWithCloningStrategy implements CloneStrategy {
     Git git = null;
     Repository repo = null;
 
-    // clone the new repo for the first time - the repo name should be mentioned in the config
-    // file
+    String remoteRepoPath = companyDao.getRemoteUrlForProject(repoName);
+
+    if (StringUtils.isEmpty(remoteRepoPath)) {
+      LOG.error("Cannot clone or update repository, Reason: remoteRepoPath is null for repo "
+          + repoName);
+      return null;
+    }
+
+    // If repository exists, delete the old repository
     if (isRepoExists) {
       File repoDir = new File(gitDir, repositoryName);
       try {
@@ -74,31 +81,13 @@ public class UpdateRepoWithCloningStrategy implements CloneStrategy {
     return repo;
   }
 
-//  private String getRepoNamesFromConfigFile() {
-//    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
-//      String reponameWithDotGit =
-//          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
-//      return StringUtils.stripDotGit(reponameWithDotGit);
-//    }
-//    return null;
-//  }
-
-  public String getRemoteRepoPath() {
-    return remoteRepoPath;
-  }
-
-  @Required
-  public void setRemoteRepoPath(String remoteRepoPath) {
-    this.remoteRepoPath = remoteRepoPath;
-  }
-
-  public GitService getGitService() {
-    return gitService;
-  }
-
   @Required
   public void setGitService(GitService gitService) {
     this.gitService = gitService;
   }
 
+  @Required
+  public void setCompanyDao(CompanyDao companyDao) {
+    this.companyDao = companyDao;
+  }
 }
