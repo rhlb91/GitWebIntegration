@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
@@ -37,13 +40,19 @@ import com.teammerge.Constants.CommitMessageRenderer;
 import com.teammerge.Constants.MergeType;
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
+import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.dao.RepositoryDao;
+import com.teammerge.entity.Company;
+import com.teammerge.entity.RepoCredentials;
+import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.manager.IManager;
+import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
+import com.teammerge.services.CompanyDetailService;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CloneStrategy;
@@ -89,6 +98,12 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   private RepositoryDao repositoryDao;
 
+  @Resource(name = "companyDetailService")
+  private CompanyDetailService companyDetailService;
+
+  @Resource(name = "repoCredentialDao")
+  private RepoCredentialDao repoCredentialDao;
+
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
   }
@@ -100,10 +115,10 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   public List<RepositoryModel> getRepositoryModels() {
     long methodStart = System.currentTimeMillis();
-    List<String> list = getRepositoryList();
+    List<String> list = getRepositoryListFromDB();
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
-    for (String repo : list) {
-      RepositoryModel model = getRepositoryModel(repo);
+    for (String repoName : list) {
+      RepositoryModel model = getRepositoryModel(repoName);
       if (model != null) {
         repositories.add(model);
       }
@@ -178,7 +193,6 @@ public class RepositoryServiceImpl implements RepositoryService {
    * @return
    */
   private Repository getUpdatedRepository(String repoName, boolean updateRequired) {
-    long start = System.currentTimeMillis();
     Repository repo = null;
     boolean toUpdate = false;
 
@@ -237,7 +251,9 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   /**
    * No need to update repository from remote, as it is only printing the list of repositories
-   * Available in local
+   * Available in local <br>
+   * <br>
+   * This should be used only with RestController V1
    */
   public List<String> getRepositoryList() {
     List<String> repositories = null;
@@ -249,14 +265,80 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
       long startTime = System.currentTimeMillis();
 
-      getUpdatedRepository(null, false);
-
       repositories =
           JGitUtils.getRepositoryList(getRepositoriesFolder(),
               getSettings().getBoolean(Keys.git.onlyAccessBareRepositories, false), getSettings()
                   .getBoolean(Keys.git.searchRepositoriesSubfolders, true), getSettings()
                   .getInteger(Keys.git.searchRecursionDepth, -1),
               getSettings().getStrings(Keys.git.searchExclusions));
+
+      if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
+        // we are not caching
+        StringUtils.sortRepositorynames(repositories);
+        return repositories;
+      } else {
+        // we are caching this list
+        String msg = "{0} repositories identified in {1}";
+        if (getSettings().getBoolean(Keys.web.showRepositorySizes, true)) {
+          // optionally (re)calculate repository sizes
+          msg = "{0} repositories identified with calculated folder sizes in {1}";
+        }
+
+        for (String repository : repositories) {
+          getRepositoryModel(repository);
+        }
+
+        // rebuild fork networks
+        for (RepositoryModel model : repositoryListCache.values()) {
+          if (!StringUtils.isEmpty(model.getOriginRepository())) {
+            String originKey = getRepositoryKey(model.getOriginRepository());
+            if (repositoryListCache.containsKey(originKey)) {
+              RepositoryModel origin = repositoryListCache.get(originKey);
+              origin.addFork(model.getName());
+            }
+          }
+        }
+
+        LOG.info(MessageFormat.format(msg, repositories.size(),
+            LoggerUtils.getTimeInSecs(startTime, System.currentTimeMillis())));
+      }
+    }
+
+    // return sorted copy of cached list
+    List<String> list = new ArrayList<String>();
+    for (RepositoryModel model : repositoryListCache.values()) {
+      Repository r = getRepository(model.getName());
+      if (r == null) {
+        // repository is missing
+        removeFromCachedRepositoryList(model.getName());
+        LOG.warn(MessageFormat.format("Repository \"{0}\" is missing! Removing from cache.",
+            model.getName()));
+        continue;
+      }
+      list.add(model.getName());
+    }
+
+    StringUtils.sortRepositorynames(list);
+
+    return list;
+  }
+
+  /**
+   * This function is responsible for fetching repositories list from DB. This function is better to
+   * use with Rest Controller version V2
+   * 
+   * @return
+   */
+  public List<String> getRepositoryListFromDB() {
+    List<String> repositories = null;
+
+    if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
+      // we are not caching OR we have not yet cached OR the cached list
+      // is invalid
+
+      long startTime = System.currentTimeMillis();
+
+      repositories = repositoryDao.fetchAllRepositoryNames();
 
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
@@ -446,7 +528,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Override
   public List<RepositoryModel> getRepositoryModels(UserModel user) {
     long methodStart = System.currentTimeMillis();
-    List<String> list = getRepositoryList();
+    List<String> list = getRepositoryListFromDB();
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
     for (String repo : list) {
       RepositoryModel model = getRepositoryModel(repo);
@@ -964,14 +1046,78 @@ public class RepositoryServiceImpl implements RepositoryService {
     return false;
   }
 
+  public Map<String, Object> createBranch(final String companyId, final String projectId,
+      final String branchName) {
+    Map<String, Object> result = new HashMap<>();
+
+    // setting default to failure, updating in case of success
+    result.put("result", RepositoryService.Result.FAILURE);
+    result.put("branch", null);
+
+    Ref branch = null;
+
+    String remoteRepoUrl =
+        companyDetailService.getRemoteUrlForCompanyAndProject(companyId, projectId);
+
+    if (remoteRepoUrl == null) {
+      result.put("reason", "Remote url not found with companyId: " + companyId + ", projectId: "
+          + projectId);
+      return result;
+    }
+
+    RepoCredentials repoCreds =
+        repoCredentialDao.fetchEntity(new RepoCredentialsKey(companyId, projectId));
+
+    if (repoCreds == null) {
+      result.put("reason", "Credentails not found for companyId: " + companyId + ", projectId: "
+          + projectId);
+      return result;
+    }
+
+    CreateBranchOptions branchOptions = new CreateBranchOptions();
+    branchOptions.setBranchName(branchName);
+    branchOptions.setCompanyName(companyId);
+    branchOptions.setRemoteURL(remoteRepoUrl);
+    branchOptions.setUserName(repoCreds.getUsername());
+    branchOptions.setPassword(repoCreds.getPassword());
+
+    try (Repository r = getRepository(projectId, false)) {
+      branchOptions.setRepo(r);
+      branch = gitService.createBranch(branchOptions);
+
+      if (branch != null) {
+        result.put("result", RepositoryService.Result.SUCCESS);
+        result.put("branch", branch);
+        LOG.info("Branch created with name: " + branchName + ", for repo: " + projectId
+            + ", with Id: " + branch.getObjectId());
+      } else {
+        result.put("reason", "unknown");
+
+        LOG.error("Could not create branch with name: " + branchName + ", for repo " + projectId);
+      }
+
+    } catch (GitAPIException e) {
+      result.put("reason", e.getMessage());
+      result.put("completeError", e);
+      LOG.error("Could not create branch with name: " + branchName, e);
+    } catch (Exception e) {
+      result.put("reason", e.getMessage());
+      result.put("completeError", e);
+      LOG.error("Could not create branch with name: " + branchName, e);
+    }
+
+    return result;
+  }
+
   @Override
   public List<RepositoryModel> getRepositoryModelsFromDB() {
     return repositoryDao.fetchAllRepositories();
   }
- 
+
   @Autowired
   public void setRepositoryDao(RepositoryDao repositoryDao) {
     repositoryDao.setClazz(RepositoryModel.class);
     this.repositoryDao = repositoryDao;
   }
+
 }

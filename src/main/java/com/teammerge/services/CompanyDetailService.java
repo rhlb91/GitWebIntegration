@@ -12,4 +12,6 @@ public interface CompanyDetailService {
 
   void saveOrUpdateCompanyDetails(final RepoForm repoForm);
 
+  String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId);
+
 }

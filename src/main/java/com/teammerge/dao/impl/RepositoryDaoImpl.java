@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Query;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.teammerge.dao.RepositoryDao;
@@ -25,17 +24,7 @@ public class RepositoryDaoImpl extends BaseDaoImpl<RepositoryModel> implements R
 
   @Override
   public List<RepositoryModel> fetchAllRepositories() {
-    List<String> repoNames = fetchAllRepositoryNames();
-
-    if (CollectionUtils.isEmpty(repoNames)) {
-      return null;
-    }
-
-    List<RepositoryModel> repoModels = new ArrayList<>();
-    for (String repo : repoNames) {
-      repoModels.add(fetchEntity(repo));
-    }
-    return repoModels;
+    return fetchAll();
   }
 
   @Override
@@ -51,7 +40,9 @@ public class RepositoryDaoImpl extends BaseDaoImpl<RepositoryModel> implements R
 
     List<String> repos = new ArrayList<>();
     for (Company company : companies) {
-      repos.addAll(company.getOwnedRepositories());
+      if (CollectionUtils.isNotEmpty(company.getRemoteRepoUrls().keySet())) {
+        repos.addAll(company.getRemoteRepoUrls().keySet());
+      }
     }
 
     HibernateUtils.closeCurrentSessionwithTransaction();

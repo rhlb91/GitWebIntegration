@@ -17,9 +17,9 @@ import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.StringUtils;
 
-public class UpdateRepoWithCloning implements CloneStrategy {
+public class UpdateRepoWithCloningStrategy implements CloneStrategy {
 
-  private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithCloning.class);
+  private final static Logger LOG = LoggerFactory.getLogger(UpdateRepoWithCloningStrategy.class);
 
   private String remoteRepoPath;
 
@@ -34,14 +34,15 @@ public class UpdateRepoWithCloning implements CloneStrategy {
 
   @Override
   public Repository createOrUpdateRepo(File gitDir, String repoName, boolean isRepoExists) {
-    long start = System.currentTimeMillis();
+    if (repoName == null) {
+      LOG.error("Error cloning/upadting repository from path " + remoteRepoPath
+          + ", Reason: RepoName is null");
+      return null;
+    }
+
     String repositoryName = repoName;
     Git git = null;
     Repository repo = null;
-
-    if (repoName == null) {
-      repositoryName = getRepoNamesFromConfigFile();
-    }
 
     // clone the new repo for the first time - the repo name should be mentioned in the config
     // file
@@ -49,6 +50,7 @@ public class UpdateRepoWithCloning implements CloneStrategy {
       File repoDir = new File(gitDir, repositoryName);
       try {
         FileUtils.deleteDirectory(repoDir);
+        LOG.info("Deleted the old repo " + repoDir);
       } catch (IOException e) {
         LOG.error("Unable to delete Repo dir-" + repoDir, e);
       }
@@ -72,14 +74,14 @@ public class UpdateRepoWithCloning implements CloneStrategy {
     return repo;
   }
 
-  private String getRepoNamesFromConfigFile() {
-    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
-      String reponameWithDotGit =
-          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
-      return StringUtils.stripDotGit(reponameWithDotGit);
-    }
-    return null;
-  }
+//  private String getRepoNamesFromConfigFile() {
+//    if (!StringUtils.isEmpty(getRemoteRepoPath())) {
+//      String reponameWithDotGit =
+//          getRemoteRepoPath().substring(getRemoteRepoPath().lastIndexOf("/") + 1);
+//      return StringUtils.stripDotGit(reponameWithDotGit);
+//    }
+//    return null;
+//  }
 
   public String getRemoteRepoPath() {
     return remoteRepoPath;

@@ -772,4 +772,8 @@ public class StringUtils {
   public static String decodeUsername(String name) {
     return name.replace("%40", "@").replace("%20", " ").replace("%5C", "\\");
   }
+
+  public static String toStringWithQuotes(final String str) {
+    return new StringBuilder().append("\"").append(str).append("\"").toString();
+  }
 }

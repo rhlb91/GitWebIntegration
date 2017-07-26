@@ -1,6 +1,7 @@
 package com.teammerge.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 
@@ -19,6 +20,23 @@ public class RepoCredentialsKey implements Serializable {
   public RepoCredentialsKey(String company, String repoName) {
     this.company = company;
     this.repoName = repoName;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(company, repoName);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+
+    if (o == this)
+      return true;
+    if (!(o instanceof RepoCredentialsKey)) {
+      return false;
+    }
+    RepoCredentialsKey key = (RepoCredentialsKey) o;
+    return Objects.equals(repoName, key.repoName) && Objects.equals(company, key.company);
   }
 
   /**

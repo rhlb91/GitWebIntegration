@@ -3,29 +3,57 @@ package com.teammerge.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+@Entity
+@Table(name = "commit_details")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
- 
-  private static final long serialVersionUID = 6471094113056162919L;
-  
-  private PersonIdent commitAuthor;
-  private String shortMessage;
-  private String trimmedMessage;
-  private String commitHash;
-  private String name;
-  private Boolean isMergeCommit;
-  private Date commitDate;
-  private String commitTimeFormatted;
 
+  private static final long serialVersionUID = 6471094113056162919L;
+
+  @Id
+  @Column(name = "commit_id")
+  private String commitId;
+  
+  @Column(name = "commit_author")
+  private PersonIdent commitAuthor;
+
+  @Column(name = "short_Message")
+  private String shortMessage;
+
+  @Column(name = "trimmed_Message")
+  private String trimmedMessage;
+  
+  @Column(name = "commit_Hash")
+  private String commitHash;
+  
+  @Column(name = "isMerge_Commit")
+  private Boolean isMergeCommit;
+  
+  @Column(name = "commit_Date")
+  private Date commitDate;
+  
+  @Column(name = "commit_time_formatted")
+  private String commitTimeFormatted;
+ 
+  @Column(name = "repository_name")
   private String repositoryName;
 
+  @Column(name = "branch_name")
   private String branchName;
 
   @Override
   public String toString() {
     String str = "";
-    str += "Name: " + name;
+    str += "Commit Id: " + commitId;
     str += ", commit Author: " + commitAuthor;
     str += ", short Msg: " + shortMessage;
     str += ", trimmed Msg: " + trimmedMessage;
@@ -34,6 +62,7 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
     str += "<br>";
     return str;
   }
+
 
   public String getShortMessage() {
     return shortMessage;
@@ -67,12 +96,12 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
     this.commitAuthor = commitAuthor;
   }
 
-  public String getName() {
-    return name;
+  public String getCommitId() {
+    return commitId;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setCommitId(String commitId) {
+    this.commitId = commitId;
   }
 
   public Boolean getIsMergeCommit() {
@@ -111,19 +140,19 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   }
 
   public String getRepositoryName() {
-  	return repositoryName;
+    return repositoryName;
   }
 
   public void setRepositoryName(String repositoryName) {
-  	this.repositoryName = repositoryName;
+    this.repositoryName = repositoryName;
   }
 
   public String getBranchName() {
-  	return branchName;
+    return branchName;
   }
 
   public void setBranchName(String branchName) {
-  	this.branchName = branchName;
+    this.branchName = branchName;
   }
 
 
