@@ -14,7 +14,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "commit_details")
+@Table(name = "commit_details",)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
 
