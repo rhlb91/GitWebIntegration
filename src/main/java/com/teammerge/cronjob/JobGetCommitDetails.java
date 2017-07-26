@@ -1,5 +1,5 @@
-package com.teammerge.cronjob; 
- 
+package com.teammerge.cronjob;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -24,123 +24,117 @@ import com.teammerge.model.CommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
+import com.teammerge.services.BranchDetailService;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.HibernateUtils;
 import com.teammerge.utils.JGitUtils;
- 
-@Component 
-public class JobGetCommitDetails implements Job { 
- 
-  private final Logger logger = LoggerFactory.getLogger(getClass()); 
-   
-  @Resource(name = "repositoryService") 
-  private RepositoryService repositoryService; 
- 
-  @Resource(name = "dashBoardService") 
-  private DashBoardService dashBoardService; 
- 
-  @Resource(name = "commitService") 
-  private CommitService commitService; 
- 
-  @Resource(name = "branchService") 
-  private BranchService branchService; 
-  
- 
-   
- 
-  public void execute(JobExecutionContext context)throws JobExecutionException { 
- 
-	  logger.info("JobGetCommitDetails start: " + context.getFireTime());
+
+@Component
+public class JobGetCommitDetails implements Job {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	@Resource(name = "repositoryService")
+	private RepositoryService repositoryService;
+
+
+	@Resource(name = "commitService")
+	private CommitService commitService;
+
+	
+	@Resource(name = "branchDetailService")
+	private BranchDetailService branchDetailService;
+
+		
+	public void execute(JobExecutionContext context)
+			throws JobExecutionException {
+
+		logger.info("JobGetCommitDetails start: " + context.getFireTime());
 
 		getBranchCommitDetails();
 
-		logger.info("JobGetCommitDetails next scheduled time: "	+ context.getNextFireTime());
-	  
-	 
-     } 
-  
-  public synchronized  void getBranchCommitDetails() {
-	  RepositoryService repositoryService = ApplicationContextUtils.getBean(RepositoryService.class); 
-	     
-	     List<RepositoryModel> repositories = repositoryService.getRepositoryModels(); 
-	         
-	        for (RepositoryModel repoModel : repositories) { 
-	          if (repoModel.isCollectingGarbage()) { 
-	            continue; 
-	          } 
-	 
-	       Repository repository = repositoryService.getRepository(repoModel.getName()); 
-	           
-	    
-	       List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);  
-	          
-          Set<RefModel> uniqueSet = new HashSet<RefModel>(branchModels); 
-      
-       if (branchModels.size() > 0) { 
+		logger.info("JobGetCommitDetails next scheduled time: "
+				+ context.getNextFireTime());
 
-           for (RefModel temp : uniqueSet) { 
-         	
-         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-         Date lastmodifieddate = temp.getDate(); 
-         String lastmodified_date = df.format(lastmodifieddate);
-        
-         int num_of_commit = Collections.frequency(branchModels, temp); 
-                 
-         //Data Transferred in BranchDetailModel--Start
-         BranchDetailModel Bmodel = new BranchDetailModel();
-         Bmodel.setBranchId(temp.displayName);
-         Bmodel.setRepositoryId(repoModel.getName());
-         Bmodel.setLastModifiedDate(lastmodified_date);
-         Bmodel.setNumOfCommits(num_of_commit);
-         //Bmodel.setNumOfPull(num_of_pull);
-                   
-         HibernateUtils.openCurrentSessionwithTransaction();
-         HibernateUtils.getCurrentSession().saveOrUpdate(Bmodel);
-         HibernateUtils.closeCurrentSessionwithTransaction();
-         //Data Transferred in BranchDetailModel--End
-          
-         
-         //Code related to Commits---Start
-         List<RevCommit> commits = JGitUtils.getRevLog(repository, temp.displayName, TimeUtils.getInceptionDate()); 
-         
-         if (commits!= null) { 
-            
-                   for (RevCommit commit : commits) { 
-                	   
-                	   //Data Transferred in CommitModel--Start
-                	    CommitModel model = new CommitModel();
-                        model.setCommitId(commit.getShortMessage());
-                	   // model.setCommitAuthor(commit.getAuthorIdent());
-                        model.setCommitAuthor(null);
-                	    model.setBranchName(temp.displayName);
-                	    model.setShortMessage(commit.getShortMessage());
-                	 // model.setTrimmedMessage();
-                	    model.setCommitDate(JGitUtils.getCommitDate(commit));
-                	 // model.setCommitHash(commit.get);
-                	 // model.setCommitTimeFormatted(commit.getCommitTime());
-                	  //model.setIsMergeCommit();
-                	    model.setRepositoryName(repoModel.getName());
-                	    	                       
-                       HibernateUtils.openCurrentSessionwithTransaction();
-                       HibernateUtils.getCurrentSession().saveOrUpdate(model);
-                       HibernateUtils.closeCurrentSessionwithTransaction();   
-                     //Data Transferred in CommitModel--End
-                      
-                   } 
-              
-              }
-       //Code related to Commits---End
-           
-     
-           } //Branch Traverse   
-	 
-           }//BranchModel Size
-       }//Repo
-	        
-     }//Method
-  }//Class
-  
-	
+	}
+
+	public synchronized void getBranchCommitDetails() {
+		
+		
+		repositoryService = ApplicationContextUtils.getBean(RepositoryService.class);
+
+		branchDetailService = ApplicationContextUtils.getBean(BranchDetailService.class);
+		
+		commitService = ApplicationContextUtils.getBean(CommitService.class);
+		
+		
+		List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
+
+		for (RepositoryModel repoModel : repositories) {
+			if (repoModel.isCollectingGarbage()) {
+				continue;
+			}
+
+			Repository repository = repositoryService.getRepository(repoModel.getName());
+
+			List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
+
+			Set<RefModel> uniqueSet = new HashSet<RefModel>(branchModels);
+
+			if (branchModels.size() > 0) {
+
+				for (RefModel temp : uniqueSet) {
+
+					DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+					Date lastmodifieddate = temp.getDate();
+					String lastmodified_date = df.format(lastmodifieddate);
+					List<RevCommit> commits = JGitUtils.getRevLog(repository,temp.displayName, TimeUtils.getInceptionDate());
+
+					// Data Transferred in BranchDetailModel--Start
+					BranchDetailModel Bmodel = new BranchDetailModel();
+					Bmodel.setBranchId(temp.displayName);
+					Bmodel.setLastModifiedDate(lastmodified_date);
+					Bmodel.setNumOfCommits(commits.size());
+					Bmodel.setNumOfPull(1);
+					Bmodel.setRepositoryId(repoModel.getName());
+
+					branchDetailService.saveBranch(Bmodel);
+							
+					// Data Transferred in BranchDetailModel--End
+
+					// Code related to Commits---Start
+
+					if (commits != null) {
+
+						for (RevCommit commit : commits) {
+														
+							CommitModel model = new CommitModel();
+							model.setCommitId(commit.getShortMessage());
+							model.setCommitAuthor(commit.getAuthorIdent());
+							model.setBranchName(temp.displayName);
+							model.setShortMessage(commit.getShortMessage());
+							model.setTrimmedMessage(commit.getShortMessage());
+							model.setCommitDate(JGitUtils.getCommitDate(commit));
+							model.setCommitHash("rtttt");
+							model.setCommitTimeFormatted("1:00 AM");
+							model.setIsMergeCommit(true);
+							model.setRepositoryName(repoModel.getName());
+
+							commitService.saveCommit(model);
+							
+						}
+
+					}
+					// Code related to Commits---End
+
+				} // Branch Traverse
+
+			}// BranchModel Size
+		}// Repo
+
+	}// Method
+}// Class
+

@@ -20,7 +20,6 @@
 
 		<!-- entity mappings -->
 		<mapping class="com.teammerge.model.BranchDetailModel" />
-		<mapping class="com.teammerge.model.CommitDetailModel" />
 		<mapping class="com.teammerge.model.RepositoryModel"/>
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
