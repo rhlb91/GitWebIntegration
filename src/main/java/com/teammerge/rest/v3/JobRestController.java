@@ -20,6 +20,7 @@ import com.teammerge.rest.AbstractController;
 
 
 
+import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.cronjob.CronJob;
 
@@ -27,7 +28,10 @@ import com.teammerge.cronjob.CronJob;
 @Path("/v3")
 public class JobRestController extends  AbstractController{//class
 	
-		  
+	@Resource(name = "cronJob")
+	private CronJob cronJob;
+	
+			  
 	  @GET
 	  @Path("/")
 	  public Response hello() {
@@ -36,17 +40,13 @@ public class JobRestController extends  AbstractController{//class
 	  
   	  
 	  @GET
-	  @Path("/getCronJobForBranch")  
+	  @Path("/UpdateAllBranchs")  
 	  
 	  public Response getCronJobForBranch(){
 		  
-		  //JobGetCommitDetails obj = new JobGetCommitDetails();
+		  //CronJob obj = new CronJob();
 		  
-		  //obj.getBranchCommitDetails();
-		  
-           CronJob obj = new CronJob();
-		  
-		  obj.getCronJobForBranch();
+		  cronJob.getCronJobForBranch();
 		  
 		  
 		  String output = "Get Branch  Details has been run sucessfully";
@@ -56,17 +56,14 @@ public class JobRestController extends  AbstractController{//class
 	  
 	  
 	  @GET
-	  @Path("/getCronJobForCommit")  
+	  @Path("/UpdateAllCommits")  
 	  
 	  public Response getCronJobForCommit(){
 		  
-		  //JobGetCommitDetails obj = new JobGetCommitDetails();
+		 	  
+         //  CronJob obj = new CronJob();
 		  
-		  //obj.getBranchCommitDetails();
-		  
-           CronJob obj = new CronJob();
-		  
-		  obj.getCronJobForCommit();
+		  cronJob.getCronJobForCommit();
 		  
 		  
 		  String output = "Get Commit Details has been run sucessfully";
@@ -74,30 +71,6 @@ public class JobRestController extends  AbstractController{//class
 		return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
 		 }  
 	  
-	  @GET
-	  @Path("/tree/{repository}/{commitId}")
-	  public Response getTreeDetails(@PathParam("repository") String repoName,
-	      @PathParam("commitId") String commitId) {
-		   
-		  
-         CronJob obj = new CronJob();
-		  
-		  obj.getTreeDetails(repoName,commitId);
-		  
-		  
-		  String Output = "call tree job";
-	  
-	    return Response.status(200).entity(Output).build();
-	  }
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	
 }//Class
 
 

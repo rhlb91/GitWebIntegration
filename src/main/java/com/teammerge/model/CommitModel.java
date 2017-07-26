@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.servlet.annotation.MultipartConfig;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
@@ -23,7 +24,7 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   @Column(name = "commit_id")
   private String commitId;
   
-  @Column(name = "commit_author")
+  @Column(name = "commit_author" , nullable = true)
   private PersonIdent commitAuthor;
 
   @Column(name = "short_Message")
