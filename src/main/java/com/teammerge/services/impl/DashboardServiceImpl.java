@@ -67,6 +67,10 @@ public class DashboardServiceImpl implements DashBoardService {
     long start = System.currentTimeMillis();
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
+    if (CollectionUtils.isEmpty(repositories)) {
+      return null;
+    }
+    
     Date minimumDate = null;
     if (daysBack == -1) {
       minimumDate = TimeUtils.getInceptionDate();

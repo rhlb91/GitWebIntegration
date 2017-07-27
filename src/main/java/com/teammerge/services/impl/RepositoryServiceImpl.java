@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.teammerge.Constants;
 import com.teammerge.Constants.AccessRestrictionType;
@@ -123,6 +124,12 @@ public class RepositoryServiceImpl implements RepositoryService {
     long methodStart = System.currentTimeMillis();
     List<String> list = getRepositoryListFromDB();
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
+
+    if (org.apache.commons.collections4.CollectionUtils.isEmpty(list)) {
+      LOG.warn("No repositories found in DB!!");
+      return null;
+    }
+
     for (String repoName : list) {
       RepositoryModel model = getRepositoryModel(repoName);
       if (model != null) {
@@ -329,6 +336,10 @@ public class RepositoryServiceImpl implements RepositoryService {
       long startTime = System.currentTimeMillis();
 
       repositories = repositoryDao.fetchAllRepositoryNames();
+
+      if (CollectionUtils.isEmpty(repositories)) {
+        return null;
+      }
 
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching

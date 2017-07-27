@@ -17,7 +17,7 @@ public class JacksonUtils {
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;
     try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(activities);
+      jsonInString = mapper.writeValueAsString(activities);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
