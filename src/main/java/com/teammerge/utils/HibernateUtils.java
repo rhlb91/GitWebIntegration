@@ -8,6 +8,8 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.stat.Statistics;
 
 public class HibernateUtils {
+	
+	
 
   private static Session currentSession;
 
@@ -16,7 +18,7 @@ public class HibernateUtils {
   private static SessionFactory sessionFactory = null;
 
   private static Statistics stats = null;
-
+ 
   public static SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
       Configuration configuration = new Configuration().configure();
@@ -60,6 +62,7 @@ public class HibernateUtils {
    * @return
    */
   public static Session getCurrentSession() {
+	  System.out.println("Enter in HU for getCurrentSession");
     return currentSession;
   }
 
