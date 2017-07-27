@@ -1,30 +1,18 @@
 package com.teammerge.utils;
 
+import java.io.IOException;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
-import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchDetailModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
 
 public class JacksonUtils {
-  public static String convertActivitiestoJson(List<ActivityModel> activities) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writeValueAsString(activities);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
 
   public static String toTicketCommitsJson(List<CommitModel> commits) {
 
@@ -33,6 +21,9 @@ public class JacksonUtils {
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commits);
     } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
@@ -47,12 +38,15 @@ public class JacksonUtils {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commits);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     return jsonInString;
   }
 
-  
+
   public static String toCommitsCountJson(int commits) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -61,25 +55,13 @@ public class JacksonUtils {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commits);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
-  public static String toBrachNamesJson(List<BranchModel> branchs) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchs);
-    } catch (JsonProcessingException e) {
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
     return jsonInString;
   }
-
-
 
   public static String toBranchDetailJson(BranchDetailModel branchDetailModel) {
 
@@ -88,6 +70,9 @@ public class JacksonUtils {
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchDetailModel);
     } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
@@ -102,6 +87,9 @@ public class JacksonUtils {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     return jsonInString;
@@ -115,11 +103,14 @@ public class JacksonUtils {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     return jsonInString;
   }
-  
+
   public static String toCompanyDetailJson(Company company) {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -127,6 +118,9 @@ public class JacksonUtils {
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(company);
     } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
@@ -141,6 +135,9 @@ public class JacksonUtils {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(credential);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
     return jsonInString;
@@ -153,6 +150,9 @@ public class JacksonUtils {
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
     } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 

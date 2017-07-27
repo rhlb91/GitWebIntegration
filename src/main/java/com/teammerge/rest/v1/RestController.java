@@ -40,6 +40,7 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/repositories")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getRepositoriesName() {
     List<String> list = getRepositoryService().getRepositoryList();
     String output = "";
@@ -52,6 +53,7 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/{repository}/commit/{branch}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getAllCommits(@PathParam("repository") String repoName,
       @PathParam("branch") String branch) {
     Repository repo = getRepositoryService().getRepository(repoName, true);
@@ -71,9 +73,10 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/branches/{branchName}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getAllBranches(@PathParam("branchName") String branchName) {
     List<BranchModel> branches = getBranchService().getBranchName(branchName);
-    String jsonOutput = JacksonUtils.toBrachNamesJson(branches);
+    String jsonOutput = JacksonUtils.toJson(branches);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -82,6 +85,7 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/activities")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getActivities() {
     List<ActivityModel> activities = getDashBoardService().populateActivities(true, -1);
     String str = "";
@@ -93,11 +97,12 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/activitiesInJson")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getActivitiesInJson(@DefaultValue("true") @QueryParam("cached") boolean cached,
       @DefaultValue("-1") @QueryParam("daysBack") int daysBack) {
 
     List<ActivityModel> activities = getDashBoardService().populateActivities(cached, daysBack);
-    String jsonOutput = JacksonUtils.convertActivitiestoJson(activities);
+    String jsonOutput = JacksonUtils.toJson(activities);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -105,6 +110,7 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/ticket/{ticketid}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getTickets(@PathParam("ticketid") String ticket) {
 
     List<CommitModel> commits = new ArrayList<>();
@@ -116,7 +122,7 @@ public class RestController extends AbstractController {
       commits.addAll(commitsPerBranch.get(branchStr));
     }
 
-    String jsonOutput = JacksonUtils.toTicketCommitsJson(commits);
+    String jsonOutput = JacksonUtils.toJson(commits);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -125,6 +131,7 @@ public class RestController extends AbstractController {
 
   @GET
   @Path("/count/{ticketid}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getCommitAndBranchCount(@PathParam("ticketid") String ticket) {
     String finalOutput = "";
 
