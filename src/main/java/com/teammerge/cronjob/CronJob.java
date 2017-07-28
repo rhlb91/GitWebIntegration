@@ -139,7 +139,7 @@ public class CronJob {
 
 							CommitModel model = new CommitModel();
 
-							model.setCommitId(commit.getShortMessage());
+							model.setCommitId(commit.getName());
 							model.setCommitAuthor(commit.getAuthorIdent());
 							model.setBranchName(temp.displayName);
 							model.setShortMessage(commit.getShortMessage());

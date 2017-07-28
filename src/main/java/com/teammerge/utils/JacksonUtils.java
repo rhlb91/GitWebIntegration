@@ -59,80 +59,15 @@ public class JacksonUtils {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
     return jsonInString;
   }
-
-  public static String toBranchDetailJson(BranchDetailModel branchDetailModel) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(branchDetailModel);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
+  
   public static String toBranchCommitDetailJson(CommitModel commitModel) {
 
     ObjectMapper mapper = new ObjectMapper();
     String jsonInString = null;
     try {
       jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
-  public static String toAllCommitDetailJson(List<CommitModel> commitModel) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(commitModel);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
-  public static String toCompanyDetailJson(Company company) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(company);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return jsonInString;
-  }
-
-  public static String toCredentialDetailJson(RepoCredentials credential) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonInString = null;
-    try {
-      jsonInString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(credential);
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     } catch (IOException e) {

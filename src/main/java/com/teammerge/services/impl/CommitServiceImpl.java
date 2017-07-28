@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
 import com.teammerge.dao.BaseDao;
+import com.teammerge.dao.CommitDetailDao;
 import com.teammerge.form.CommitForm;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RefModel;
@@ -36,7 +37,9 @@ public class CommitServiceImpl implements CommitService {
   private static final Logger LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
 
   private BaseDao<CommitModel> baseDao;
-
+  
+  private CommitDetailDao commitDao;
+    
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
 
@@ -149,8 +152,8 @@ public class CommitServiceImpl implements CommitService {
   }
 
   @Override
-  public CommitModel getCommitDetails(String commitId) {
-    CommitModel commitModel = getBaseDao().fetchEntity(commitId);
+  public List<CommitModel> getCommitDetails(String branchName) {
+    List<CommitModel> commitModel = commitDao.fetchEntityLike(branchName);
     return commitModel;
   }
 
@@ -199,4 +202,11 @@ public class CommitServiceImpl implements CommitService {
   public List<CommitModel> getCommitDetailsAll() {
     return getBaseDao().fetchAll();
   }
+  
+  @Autowired
+  public void setCommitDao(CommitDetailDao commitDao) {
+    commitDao.setClazz(CommitModel.class);
+    this.commitDao = commitDao;
+  }
+
 }

@@ -11,7 +11,7 @@ public interface CommitService {
 
   public Map<String, List<CommitModel>> getDetailsForBranchName(String branchName);
   public List<CommitModel> getCommitDetailsAll();
-  public CommitModel getCommitDetails(String commitId);
+  public List<CommitModel> getCommitDetails(String commitId);
   void saveCommit(CommitModel commit);
   void saveOrUpdateCommitDetails(final CommitForm commitForm);
 }

@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -61,9 +62,10 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/branch/{id}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getBranchDetails(@PathParam("id") String branchId) {
     BranchDetailModel branchDetailModel = getBranchDetailService().getBranchDetails(branchId);
-    String jsonOutput = JacksonUtils.toBranchDetailJson(branchDetailModel);
+    String jsonOutput = JacksonUtils.toJson(branchDetailModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -82,9 +84,10 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/company/{id}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getCompanyDetails(@PathParam("id") String name) {
     Company company = getCompanyDetailService().getCompanyDetails(name);
-    String jsonOutput = JacksonUtils.toCompanyDetailJson(company);
+    String jsonOutput = JacksonUtils.toJson(company);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -114,9 +117,10 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/commit/{id}")
-  public Response getTicketCommitDetails(@PathParam("id") String commitId) {
-    CommitModel commitModel = getCommitService().getCommitDetails(commitId);
-    String jsonOutput = JacksonUtils.toBranchCommitDetailJson(commitModel);
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response getTicketCommitDetails(@PathParam("id") String branchName) {
+    List<CommitModel> commitModel = getCommitService().getCommitDetails(branchName);
+    String jsonOutput = JacksonUtils.toJson(commitModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -131,9 +135,10 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/commitDetails")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getAllTicketCommitDetails() {
     List<CommitModel> commitModel = getCommitService().getCommitDetailsAll();
-    String jsonOutput = JacksonUtils.toAllCommitDetailJson(commitModel);
+    String jsonOutput = JacksonUtils.toJson(commitModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -167,9 +172,10 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/credentials/{user}")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getCredentialsDetails(@PathParam("user") String name) {
     RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(name);
-    String jsonOutput = JacksonUtils.toCredentialDetailJson(repoCredentials);
+    String jsonOutput = JacksonUtils.toJson(repoCredentials);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();

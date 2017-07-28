@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.teammerge.Constants;
 import com.teammerge.Constants.AccessRestrictionType;
@@ -345,17 +344,11 @@ public class RepositoryServiceImpl implements RepositoryService {
       
       System.out.println("repositories Name--->"+repositories);
 
-<<<<<<<
+
       if (CollectionUtils.isEmpty(repositories)) {
         return null;
       }
-
-=======
-      if(CollectionUtils.isEmpty(repositories)){
-    	  return null;
-      }
       
->>>>>>>
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
         StringUtils.sortRepositorynames(repositories);
