@@ -25,7 +25,7 @@ import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
-import com.teammerge.services.BranchDetailService;
+import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.CommitCache;
@@ -44,8 +44,8 @@ public class JobGetCommitDetails implements Job {
 	private CommitService commitService;
 
 	
-	@Resource(name = "branchDetailService")
-	private BranchDetailService branchDetailService;
+	@Resource(name = "branchService")
+	private BranchService branchService;
 
 	@Value("${git.commit.timeFormat}")
 	  private String commitTimeFormat;
@@ -70,7 +70,7 @@ public class JobGetCommitDetails implements Job {
 		
 		repositoryService = ApplicationContextUtils.getBean(RepositoryService.class);
 
-		branchDetailService = ApplicationContextUtils.getBean(BranchDetailService.class);
+		branchService = ApplicationContextUtils.getBean(BranchService.class);
 		
 		commitService = ApplicationContextUtils.getBean(CommitService.class);
 		
@@ -108,7 +108,7 @@ public class JobGetCommitDetails implements Job {
 					Bmodel.setNumOfPull(1);
 					Bmodel.setRepositoryId(repoModel.getName());
 
-					branchDetailService.saveBranch(Bmodel);
+					branchService.saveBranch(Bmodel);
 							
 					// Data Transferred in BranchDetailModel--End
 

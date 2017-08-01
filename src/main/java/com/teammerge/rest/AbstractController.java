@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import com.teammerge.services.BranchDetailService;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.CompanyDetailService;
@@ -28,9 +27,6 @@ public abstract class AbstractController {
   @Resource(name = "branchService")
   private BranchService branchService;
 
-  @Resource(name = "branchDetailService")
-  private BranchDetailService branchDetailService;
-  
   @Resource(name = "companyDetailService")
   private CompanyDetailService companyDetailService;
 
@@ -93,11 +89,5 @@ public abstract class AbstractController {
     return "{ \"data\":" + output + "}";
   }
 
-  public BranchDetailService getBranchDetailService() {
-    return branchDetailService;
-  }
 
-  public void setBranchDetailService(BranchDetailService branchDetailService) {
-    this.branchDetailService = branchDetailService;
-  }
 }

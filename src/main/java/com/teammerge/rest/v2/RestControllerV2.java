@@ -66,7 +66,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/branch/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response getBranchDetails(@PathParam("id") String branchId) {
-    BranchModel branchDetailModel = getBranchDetailService().getBranchDetails(branchId);
+    BranchModel branchDetailModel = getBranchService().getBranchDetails(branchId);
     String jsonOutput = JacksonUtils.toJson(branchDetailModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -77,7 +77,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/branch")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveBranchDetails(BranchModel branch) {
-    getBranchDetailService().saveBranch(branch);
+    getBranchService().saveBranch(branch);
     String finalOutput = "Saved successfully!!";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -155,7 +155,7 @@ public class RestControllerV2 extends AbstractController {
     int numOfCommits = 0;
 
     List<BranchModel> branchDetailModel =
-        getBranchDetailService().getBranchDetailsForBranchLike(ticketId);
+        getBranchService().getBranchDetailsForBranchLike(ticketId);
 
     if (CollectionUtils.isNotEmpty(branchDetailModel)) {
       numOfBranches = branchDetailModel.size();
