@@ -53,7 +53,7 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private String description;
 
   @Column(name = "owners")
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> owners;
 
   @Column(name = "lastChange")
@@ -76,7 +76,7 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
 
   private boolean isFrozen;
 
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> federationSets;
 
   private boolean isFederated;
@@ -105,23 +105,23 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private List<String> availableRefs;
 
   @Column(name = "indexedBranches", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> indexedBranches;
 
   @Column(name = "preReceiveScripts", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> preReceiveScripts;
 
   @Column(name = "postReceiveScripts", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> postReceiveScripts;
 
   @Column(name = "mailingLists", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> mailingLists;
 
   @Column(name = "customFields", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   @MapKeyClass(String.class)
   private Map<String, String> customFields;
 
@@ -134,7 +134,7 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private boolean allowForks;
 
   @Column(name = "forks", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private Set<String> forks;
 
   @Column(name = "originRepository")
@@ -153,7 +153,7 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   private int maxActivityCommits;
 
   @Column(name = "metricAuthorExclusions", nullable = true)
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> metricAuthorExclusions;
 
   @Column(name = "commitMessageRenderer", nullable = true)

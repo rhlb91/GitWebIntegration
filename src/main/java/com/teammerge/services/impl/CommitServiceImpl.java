@@ -1,5 +1,6 @@
 package com.teammerge.services.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,8 +10,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,7 @@ import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.strategy.CommitDiffStrategy;
 import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.StringUtils;
@@ -39,6 +45,9 @@ public class CommitServiceImpl implements CommitService {
 
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
+
+  @Resource(name = "commitDiffStrategy")
+  private CommitDiffStrategy commitDiffStrategy;
 
   @Value("${git.commit.timeFormat}")
   private String commitTimeFormat;
@@ -89,8 +98,9 @@ public class CommitServiceImpl implements CommitService {
 
 
             if (repository != null && repoModel.isHasCommits()) {
-              List<RepositoryCommit> commitsPerBranch = CommitCache.instance()
-                  .getCommits(repoModel.getName(), repository, branch.getName(), minimumDate);
+              List<RepositoryCommit> commitsPerBranch =
+                  CommitCache.instance().getCommits(repoModel.getName(), repository,
+                      branch.getName(), minimumDate);
 
               commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
             }
@@ -106,7 +116,7 @@ public class CommitServiceImpl implements CommitService {
 
     return commitsPerMatchedBranch;
   }
-  
+
   public List<CommitModel> populateCommits(List<RepositoryCommit> commits, String repoName,
       RefModel branch) {
     List<CommitModel> populatedCommits = new ArrayList<CommitModel>();
@@ -138,14 +148,28 @@ public class CommitServiceImpl implements CommitService {
       }
 
       commitModel.setCommitDate(commit.getCommitDate());
-      commitModel.setCommitTimeFormatted(
-          TimeUtils.convertToDateFormat(commit.getCommitDate(), commitTimeFormat));
+      commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(),
+          commitTimeFormat));
       commitModel.setBranchName(branch.displayName);
       commitModel.setRepositoryName(repoName);
+
+      setParent(commitModel, commit.getParents());
+      commitModel.setParentCount(commit.getParentCount());
 
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
+  }
+
+  private void setParent(CommitModel commitModel, RevCommit[] parentCommits) {
+    List<String> parents = new ArrayList<>();
+
+    if (parents != null) {
+      for (RevCommit commit : parentCommits) {
+        parents.add(commit.getName());
+      }
+      commitModel.setParents(parents);
+    }
   }
 
   @Override
@@ -193,6 +217,13 @@ public class CommitServiceImpl implements CommitService {
 
     getBaseDao().saveEntity(model);
 
+  }
+
+  public List<String> getCommitDiff(String repoName, String branch, String commitId)
+      throws RevisionSyntaxException, AmbiguousObjectException, IncorrectObjectTypeException,
+      IOException {
+    Repository r = repositoryService.getRepository(repoName);
+    return commitDiffStrategy.getCommitDif(r, null, commitId);
   }
 
   @Override

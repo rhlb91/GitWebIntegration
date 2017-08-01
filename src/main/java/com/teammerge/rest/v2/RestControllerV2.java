@@ -1,6 +1,7 @@
 package com.teammerge.rest.v2;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
+import com.teammerge.form.CommitDiffRequestForm;
 import com.teammerge.form.CommitForm;
 import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
@@ -30,6 +32,9 @@ import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
+import com.teammerge.validator.BaseValidator.FieldError;
+import com.teammerge.validator.BaseValidator.ValidationResult;
+import com.teammerge.validator.impl.CommitDiffValidator;
 
 @Component
 @Path("/v2")
@@ -38,15 +43,12 @@ public class RestControllerV2 extends AbstractController {
   @Resource(name = "gitService")
   private GitService gitService;
 
+  @Resource(name = "commitDiffValidator")
+  private CommitDiffValidator diffValidator;
+
   @GET
   @Path("/")
   public Response hello() {
-    try {
-      getRepositoryService().commitDiff();
-    } catch (RevisionSyntaxException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
     return Response.status(200).entity("Hi Rest Working working fine!!").build();
   }
 
@@ -218,5 +220,39 @@ public class RestControllerV2 extends AbstractController {
 
     return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
+
+  @POST
+  @Path("/commitDiff")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response getCommitDiff(final CommitDiffRequestForm form) {
+    Map<String, Object> result = new HashMap<>();
+    ValidationResult vr = diffValidator.validate(form);
+
+    if (vr.hasErrors()) {
+
+      result.put("result", "Validation error");
+      String errors = "";
+      for (FieldError e : vr.getErrors()) {
+        errors += "[" + e.fieldName + "]-[" + e.fieldError + "]";
+      }
+      result.put("reason", errors);
+      return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    try {
+      List<String> diffResult =
+          getCommitService().getCommitDiff(form.getRepositoryName(), null,
+              form.getCommitId());
+
+      result.put("result", "success");
+      result.put("output", diffResult);
+    } catch (RevisionSyntaxException | IOException e) {
+      result.put("result", "error");
+      result.put("reason", e.getMessage());
+      result.put("detailedReason", e);
+    }
+    return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+  }
+
 
 }

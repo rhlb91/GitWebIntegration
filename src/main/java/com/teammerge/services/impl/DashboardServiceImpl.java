@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +71,7 @@ public class DashboardServiceImpl implements DashBoardService {
     if (CollectionUtils.isEmpty(repositories)) {
       return null;
     }
-    
+
     Date minimumDate = null;
     if (daysBack == -1) {
       minimumDate = TimeUtils.getInceptionDate();
@@ -331,9 +332,23 @@ public class DashboardServiceImpl implements DashBoardService {
       commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(),
           commitTimeFormat));
 
+      setParent(commitModel, commit.getParents());
+      commitModel.setParentCount(commit.getParentCount());
+
       populatedCommits.add(commitModel);
     }
     return populatedCommits;
+  }
+
+  private void setParent(CommitModel commitModel, RevCommit[] parentCommits) {
+    List<String> parents = new ArrayList<>();
+
+    if (parents != null) {
+      for (RevCommit commit : parentCommits) {
+        parents.add(commit.getName());
+      }
+      commitModel.setParents(parents);
+    }
   }
 
 

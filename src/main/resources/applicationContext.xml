@@ -39,4 +39,8 @@
 		<property name="companyDao" ref="companyDao" />
 	</bean>
 
+	<bean id="commitDiffStrategy"
+		class="com.teammerge.strategy.impl.CommitDiffStrategyWithByteStream" />
+
+	<bean id="commitDiffValidator" class="com.teammerge.validator.impl.CommitDiffValidator" />
 </beans>

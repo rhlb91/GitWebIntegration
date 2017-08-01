@@ -1,8 +1,6 @@
 package com.teammerge.services.impl;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -22,20 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +83,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Resource(name = "cloneStrategy")
   private CloneStrategy cloneStrategy;
-
+  
   @Value("${app.debug}")
   private String debug;
 
@@ -1108,39 +1098,6 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
 
     return result;
-  }
-
-
-  public void commitDiff() throws RevisionSyntaxException, AmbiguousObjectException,
-      IncorrectObjectTypeException, IOException {
-    Repository r = getRepository("Japan Jindal");
-
-
-
-    ObjectReader reader = r.newObjectReader();
-    CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-    ObjectId oldTree = r.resolve("HEAD^{tree}"); // equals newCommit.getTree()
-    oldTreeIter.reset(reader, oldTree);
-    CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-    ObjectId newTree = r.resolve("HEAD~1^{tree}"); // equals oldCommit.getTree()
-    newTreeIter.reset(reader, newTree);
-
-    /*
-     * DiffFormatter df = new DiffFormatter(new ByteArrayOutputStream());
-     * df.setRepository(getRepository("Japan Jindal")); List<DiffEntry> entries =
-     * df.scan(oldTreeIter, newTreeIter); df.close();
-     * 
-     * for (DiffEntry entry : entries) { System.out.println(entry); }
-     */
-
-    FileOutputStream stdout = new FileOutputStream(FileDescriptor.out);
-    try (DiffFormatter diffFormatter = new DiffFormatter(stdout)) {
-      diffFormatter.setRepository(r);
-      for (DiffEntry entry : diffFormatter.scan(oldTreeIter, newTreeIter)) {
-        diffFormatter.format(diffFormatter.toFileHeader(entry));
-        System.out.println("\n--------------------------------------\n");
-      }
-    }
   }
 
   @Override

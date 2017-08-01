@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.teammerge.Constants.MergeType;
-import com.teammerge.GitBlitException;
+import com.teammerge.GitWebException;
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
 import com.teammerge.git.PatchsetCommand;
@@ -2455,7 +2455,7 @@ public class JGitUtils {
           break;
         default:
           mergeResult = new MergeResult(MergeStatus.FAILED, null);
-          throw new GitBlitException(MessageFormat.format(
+          throw new GitWebException(MessageFormat.format(
               "Unexpected result \"{0}\" when {1} in {2}", rc.name(),
               strategy.getOperationMessage(), repository.getDirectory()));
       }

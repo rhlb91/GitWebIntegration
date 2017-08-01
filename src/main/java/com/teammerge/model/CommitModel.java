@@ -2,13 +2,18 @@ package com.teammerge.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonBackReference;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -22,7 +27,7 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   @Id
   @Column(name = "commit_id")
   private String commitId;
-  
+
   @Column(name = "commit_author")
   private PersonIdent commitAuthor;
 
@@ -31,25 +36,33 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
 
   @Column(name = "trimmed_Message")
   private String trimmedMessage;
-  
+
   @Column(name = "commit_Hash")
   private String commitHash;
-  
+
   @Column(name = "isMerge_Commit")
   private Boolean isMergeCommit;
-  
+
   @Column(name = "commit_Date")
   private Date commitDate;
-  
+
   @Column(name = "commit_time_formatted")
   private String commitTimeFormatted;
- 
+
   @Column(name = "repository_name")
   private String repositoryName;
 
   @Column(name = "branch_name")
   private String branchName;
 
+  @Column(name = "parents")
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  private List<String> parents;
+
+  @Column(name = "parentCount")
+  private int parentCount;
+
+  
   @Override
   public String toString() {
     String str = "";
@@ -155,5 +168,24 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
     this.branchName = branchName;
   }
 
+
+  public List<String> getParents() {
+    return parents;
+  }
+
+
+  public void setParents(List<String> parents) {
+    this.parents = parents;
+  }
+
+
+  public int getParentCount() {
+    return parentCount;
+  }
+
+
+  public void setParentCount(int parentCount) {
+    this.parentCount = parentCount;
+  }
 
 }

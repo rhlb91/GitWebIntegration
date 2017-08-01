@@ -467,6 +467,4 @@ public interface RepositoryService extends IManager {
     SUCCESS, FAILURE;
   }
 
-  void commitDiff() throws RevisionSyntaxException, AmbiguousObjectException,
-      IncorrectObjectTypeException, IOException;
 }
