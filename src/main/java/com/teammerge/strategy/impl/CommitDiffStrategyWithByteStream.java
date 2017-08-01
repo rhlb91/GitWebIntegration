@@ -61,7 +61,8 @@ public class CommitDiffStrategyWithByteStream implements CommitDiffStrategy {
     }
 
     CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-    ObjectId oldTree = commit.getParent(0).getTree(); // equals oldCommit.getTree()
+    //ObjectId oldTree = commit.getParent(0).getTree(); // equals oldCommit.getTree()
+    ObjectId oldTree = r.resolve(commit.getParent(0).getName() + "^{tree}");
     oldTreeIter.reset(reader, oldTree);
 
     int linesDeleted = 0, linesAdded = 0;

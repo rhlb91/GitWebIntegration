@@ -11,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -224,6 +225,7 @@ public class RestControllerV2 extends AbstractController {
   @POST
   @Path("/commitDiff")
   @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.TEXT_PLAIN)
   public Response getCommitDiff(final CommitDiffRequestForm form) {
     Map<String, Object> result = new HashMap<>();
     ValidationResult vr = diffValidator.validate(form);
