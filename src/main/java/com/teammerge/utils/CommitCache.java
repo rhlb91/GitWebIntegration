@@ -172,8 +172,8 @@ public class CommitCache {
             commits = get(repositoryName, repository, branch, cacheCutoffDate);
             repoCache.updateObject(branchKey, tipDate, commits);
             logger.debug(MessageFormat.format(
-                "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
-                commits.size(), repositoryName, branch, cacheCutoffDate,
+                "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", commits.size(),
+                repositoryName, branch, cacheCutoffDate,
                 LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
           } else {
             // incrementally update cache since the last cached commit
@@ -181,8 +181,8 @@ public class CommitCache {
             List<RepositoryCommit> incremental =
                 get(repositoryName, repository, branch, sinceCommit);
             logger.info(MessageFormat.format(
-                "incrementally added {0} commits to cache for {1}:{2} in {3}",
-                incremental.size(), repositoryName, branch,
+                "incrementally added {0} commits to cache for {1}:{2} in {3}", incremental.size(),
+                repositoryName, branch,
                 LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
             incremental.addAll(commits);
             repoCache.updateObject(branchKey, tipDate, incremental);
@@ -218,6 +218,41 @@ public class CommitCache {
           LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
     }
     return list;
+  }
+
+
+  public RepositoryCommit getCommit(String repositoryName, String branch, String commitId) {
+    String repoKey = repositoryName.toLowerCase();
+    ObjectCache<List<RepositoryCommit>> repoCache;
+    String branchKey = branch.toLowerCase();
+    List<RepositoryCommit> commits = null;
+    RepositoryCommit commit = null;
+
+    if (StringUtils.isEmpty(commitId)) {
+      return null;
+    }
+
+    synchronized (cache) {
+      repoCache = cache.get(repoKey);
+    }
+    synchronized (repoCache) {
+      if (!repoCache.hasCurrent(branchKey, new Date())) {
+        commits = repoCache.getObject(branchKey);
+      }
+    }
+
+    if (ArrayUtils.isEmpty(commits)) {
+      return null;
+    }
+
+    for (RepositoryCommit c : commits) {
+      if (commitId.equals(c.getName())) {
+        commit = c;
+        break;
+      }
+    }
+
+    return commit;
   }
 
   /**

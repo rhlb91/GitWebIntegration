@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.codehaus.jackson.annotate.JsonManagedReference;
 
 public class ActivityModel {
   private Date pushDate;
