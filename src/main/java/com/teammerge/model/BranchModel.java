@@ -13,24 +13,28 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "branch_details")
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
-public class BranchDetailModel implements Serializable {
+public class BranchModel implements Serializable {
 
   private static final long serialVersionUID = 1100490355473736524L;
 
   @Id
-  @Column(name = "branch_Id")
+  @Column(name = "branch_id")
   private String branchId;
 
-  @Column(name = "num_Of_Commits")
+  @Id
+  @Column(name = "short_name")
+  private String shortName;
+  
+  @Column(name = "num_Of_commits")
   private int numOfCommits;
 
-  @Column(name = "num_Of_Pull")
+  @Column(name = "num_Of_pulls")
   private int numOfPull;
 
-  @Column(name = "last_Modified_Date")
+  @Column(name = "last_modified_date")
   private String lastModifiedDate;
 
-  @Column(name = "repository_Id")
+  @Column(name = "repository_id")
   private String repositoryId;
 
   @Override
@@ -82,5 +86,13 @@ public class BranchDetailModel implements Serializable {
 
   public void setRepositoryId(String repositaryId) {
     this.repositoryId = repositaryId;
+  }
+
+  public String getShortName() {
+    return shortName;
+  }
+
+  public void setShortName(String shortName) {
+    this.shortName = shortName;
   }
 }
