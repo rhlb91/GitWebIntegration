@@ -5,20 +5,20 @@ import java.util.List;
 import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
-import com.teammerge.model.BranchDetailModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.utils.HibernateUtils;
 
 @Repository("branchDao")
-public class BranchDaoImpl extends BaseDaoImpl<BranchDetailModel> implements BranchDao {
+public class BranchDaoImpl extends BaseDaoImpl<BranchModel> implements BranchDao {
 
   @SuppressWarnings("unchecked")
-  public List<BranchDetailModel> fetchEntityLike(String entityId) {
+  public List<BranchModel> fetchEntityLike(String entityId) {
     final String queryStr = "From BranchDetailModel as b where b.branchId like :branchId";
 
     HibernateUtils.openCurrentSession();
     Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
     qry.setString("branchId", "%" + entityId + "%");
-    List<BranchDetailModel> result = qry.list();
+    List<BranchModel> result = qry.list();
 
     HibernateUtils.closeCurrentSession();
     return result;

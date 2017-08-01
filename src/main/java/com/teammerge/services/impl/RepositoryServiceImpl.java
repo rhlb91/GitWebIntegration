@@ -47,8 +47,10 @@ import com.teammerge.entity.RepoCredentials;
 import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.manager.IManager;
 import com.teammerge.model.CreateBranchOptions;
+import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
+import com.teammerge.model.RefModel;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
@@ -83,7 +85,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Resource(name = "cloneStrategy")
   private CloneStrategy cloneStrategy;
-  
+
   @Value("${app.debug}")
   private String debug;
 
@@ -113,11 +115,11 @@ public class RepositoryServiceImpl implements RepositoryService {
   public List<RepositoryModel> getRepositoryModels() {
     long methodStart = System.currentTimeMillis();
     List<String> list = getRepositoryListFromDB();
-    
-    if(CollectionUtils.isEmpty(list)){
-  	  return null;
+
+    if (CollectionUtils.isEmpty(list)) {
+      return null;
     }
-            
+
     List<RepositoryModel> repositories = new ArrayList<RepositoryModel>();
 
     if (org.apache.commons.collections4.CollectionUtils.isEmpty(list)) {
@@ -331,14 +333,14 @@ public class RepositoryServiceImpl implements RepositoryService {
       long startTime = System.currentTimeMillis();
 
       repositories = repositoryDao.fetchAllRepositoryNames();
-      
-      System.out.println("repositories Name--->"+repositories);
+
+      System.out.println("repositories Name--->" + repositories);
 
 
       if (CollectionUtils.isEmpty(repositories)) {
         return null;
       }
-      
+
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
         StringUtils.sortRepositorynames(repositories);
@@ -1106,6 +1108,41 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
 
     return result;
+  }
+
+
+  public List<CustomRefModel> getCustomRefModels() {
+    List<CustomRefModel> customRefModels = new ArrayList<>();
+    Repository repository = null;
+
+    List<RepositoryModel> repositories = getRepositoryModels();
+
+    if (CollectionUtils.isEmpty(repositories)) {
+      LOG.error("No repositories found in Database!!");
+      return null;
+    }
+
+    for (RepositoryModel repoModel : repositories) {
+      if (repoModel.isCollectingGarbage()) {
+        continue;
+      }
+      repository = getRepository(repoModel.getName());
+      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
+
+      if (CollectionUtils.isNotEmpty(branchModels)) {
+        for (RefModel model : branchModels) {
+
+          // TODO cache CustomRefModel as it will be called from many places at many times
+          CustomRefModel extModel = new CustomRefModel();
+          extModel.setRepository(repository);
+          extModel.setRepositoryName(repoModel.getDisplayName());
+          extModel.setRefModel(model);
+
+          customRefModels.add(extModel);
+        }
+      }
+    }
+    return customRefModels;
   }
 
   @Override

@@ -75,7 +75,7 @@ public class RestController extends AbstractController {
   @Path("/branches/{branchName}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response getAllBranches(@PathParam("branchName") String branchName) {
-    List<BranchModel> branches = getBranchService().getBranchName(branchName);
+    List<BranchModel> branches = getBranchService().getBranchesWithMinimumDetails(branchName);
     String jsonOutput = JacksonUtils.toJson(branches);
     String finalOutput = convertToFinalOutput(jsonOutput);
 

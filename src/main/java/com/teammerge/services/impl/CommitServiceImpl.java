@@ -27,15 +27,14 @@ import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.CommitDetailDao;
 import com.teammerge.form.CommitForm;
 import com.teammerge.model.CommitModel;
+import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
-import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.TimeUtils;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CommitDiffStrategy;
 import com.teammerge.utils.CommitCache;
-import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.StringUtils;
 
 @Service("commitService")
@@ -79,36 +78,22 @@ public class CommitServiceImpl implements CommitService {
     int numOfMatchedBranches = 0;
     Date minimumDate = TimeUtils.getInceptionDate();
 
-    List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
+      List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels();
 
-    if (CollectionUtils.isEmpty(repositories) || StringUtils.isEmpty(branchName)) {
-      return commitsPerMatchedBranch;
-    }
-
-    for (RepositoryModel repoModel : repositories) {
-      if (repoModel.isCollectingGarbage()) {
-        continue;
-      }
-
-      Repository repository = repositoryService.getRepository(repoModel.getName());
-      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
-
-      if (CollectionUtils.isNotEmpty(branchModels)) {
-        for (RefModel branch : branchModels) {
+      if (CollectionUtils.isNotEmpty(customRefModels)) {
+        for (CustomRefModel branch : customRefModels) {
           repoCommits.clear();
-          if (branch.getName().contains(branchName)) {
+          if (branch.getRefModel().getName().contains(branchName)) {
             ++numOfMatchedBranches;
 
-
-            if (repository != null && repoModel.isHasCommits()) {
+            if (branch.getRepository() != null) {
               List<RepositoryCommit> commitsPerBranch =
-                  CommitCache.instance().getCommits(repoModel.getName(), repository,
-                      branch.getName(), minimumDate);
+                  CommitCache.instance().getCommits(branch.getRepositoryName(), branch.getRepository(),
+                      branch.getRefModel().getName(), minimumDate);
 
-              commits.addAll(populateCommits(commitsPerBranch, repoModel.getName(), branch));
+              commits.addAll(populateCommits(commitsPerBranch, branch.getRepositoryName(), branch.getRefModel()));
             }
-            commitsPerMatchedBranch.put(branch.displayName, commits);
-          }
+            commitsPerMatchedBranch.put(branch.getRefModel().getName(), commits);
         }
       }
     }
@@ -202,9 +187,7 @@ public class CommitServiceImpl implements CommitService {
    */
   @Override
   public void saveOrUpdateCommitDetails(CommitForm commitForm) {
-    // TODO Auto-generated method stub
     CommitModel model = new CommitModel();
-    // getBaseDao().fetchEntity(commitForm);
 
     model.setCommitId(commitForm.getCommitId());
     model.setCommitAuthor(new PersonIdent(commitForm.getAuthorName(), commitForm.getAuthorEmail(),

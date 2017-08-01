@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.Constants;
-import com.teammerge.model.BranchDetailModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
@@ -101,7 +101,7 @@ public class JobGetCommitDetails implements Job {
 					List<RepositoryCommit> commits = CommitCache.instance().getCommits(repoModel.getName(), repository, branch.getName(), minimumDate);
 					
 					// Data Transferred in BranchDetailModel--Start
-					BranchDetailModel Bmodel = new BranchDetailModel();
+					BranchModel Bmodel = new BranchModel();
 					Bmodel.setBranchId(branch.getName());
 					Bmodel.setLastModifiedDate(lastmodified_date);
 					Bmodel.setNumOfCommits(commits.size());

@@ -25,7 +25,7 @@ import com.teammerge.form.CommitDiffRequestForm;
 import com.teammerge.form.CommitForm;
 import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
-import com.teammerge.model.BranchDetailModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.rest.AbstractController;
@@ -66,7 +66,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/branch/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response getBranchDetails(@PathParam("id") String branchId) {
-    BranchDetailModel branchDetailModel = getBranchDetailService().getBranchDetails(branchId);
+    BranchModel branchDetailModel = getBranchDetailService().getBranchDetails(branchId);
     String jsonOutput = JacksonUtils.toJson(branchDetailModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -76,7 +76,7 @@ public class RestControllerV2 extends AbstractController {
   @POST
   @Path("/branch")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveBranchDetails(BranchDetailModel branch) {
+  public Response saveBranchDetails(BranchModel branch) {
     getBranchDetailService().saveBranch(branch);
     String finalOutput = "Saved successfully!!";
 
@@ -154,12 +154,12 @@ public class RestControllerV2 extends AbstractController {
     int numOfBranches = 0;
     int numOfCommits = 0;
 
-    List<BranchDetailModel> branchDetailModel =
+    List<BranchModel> branchDetailModel =
         getBranchDetailService().getBranchDetailsForBranchLike(ticketId);
 
     if (CollectionUtils.isNotEmpty(branchDetailModel)) {
       numOfBranches = branchDetailModel.size();
-      for (BranchDetailModel model : branchDetailModel) {
+      for (BranchModel model : branchDetailModel) {
         numOfCommits += model.getNumOfCommits();
       }
     }

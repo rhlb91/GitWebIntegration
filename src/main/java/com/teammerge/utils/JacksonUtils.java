@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
-import com.teammerge.model.BranchDetailModel;
+import com.teammerge.model.BranchModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
 

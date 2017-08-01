@@ -14,6 +14,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
 import com.teammerge.manager.IManager;
+import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
 import com.teammerge.model.RegistrantAccessPermission;
@@ -462,6 +463,17 @@ public interface RepositoryService extends IManager {
 
   Map<String, Object> createBranch(final String companyId, final String projectId,
       final String branchName);
+
+
+  /**
+   * Gets all remote branches from all the repostitories saved in database
+   * <p>
+   * This function is mainly created to be used in Cron Job
+   * </p>
+   * 
+   * @return
+   */
+  List<CustomRefModel> getCustomRefModels();
 
   public static enum Result {
     SUCCESS, FAILURE;

@@ -46,7 +46,7 @@ public class JobRestController extends  AbstractController{//class
 		  
 		  //CronJob obj = new CronJob();
 		  
-		  cronJob.getCronJobForBranch();
+		  cronJob.runJobSavingForBranchDetails();
 		  
 		  
 		  String output = "Get Branch  Details has been run sucessfully";
@@ -63,7 +63,7 @@ public class JobRestController extends  AbstractController{//class
 		 	  
          //  CronJob obj = new CronJob();
 		  
-		  cronJob.getCronJobForCommit();
+		  cronJob.runJobSavingForCommitDetails();
 		  
 		  
 		  String output = "Get Commit Details has been run sucessfully";
