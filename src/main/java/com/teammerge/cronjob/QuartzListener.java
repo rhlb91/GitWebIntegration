@@ -33,7 +33,7 @@ public class QuartzListener implements ServletContextListener {
                      // Setup the Job class and the Job group
                         JobDetail job = newJob(JobGetCommitDetails.class).withIdentity("Job", "Group").build();
 
-                        // Create a Trigger that fires every 2 minutes.
+                        // Create a Trigger that fires every 5 minutes.
                         Trigger trigger = newTrigger()
                         .withIdentity("Job", "Group")
                          .startNow()
@@ -44,9 +44,7 @@ public class QuartzListener implements ServletContextListener {
                         scheduler = new StdSchedulerFactory().getScheduler();
                         scheduler.start();
                         scheduler.scheduleJob(job, trigger);
-                        
-                       
-       
+                      
                }
                 catch (SchedulerException e) {
                         e.printStackTrace();
@@ -66,33 +64,7 @@ public class QuartzListener implements ServletContextListener {
                 }
         }
                
-        public  void refresh() {
-                System.out.println("Enter in refresh job");
-                try 
-                {
-                        scheduler.shutdown();
-                        
-                     // Setup the Job class and the Job group
-                        JobDetail job = newJob(JobGetCommitDetails.class).withIdentity("Job", "Group").build();
-
-                        // Create a Trigger that fires every 2 minutes.
-                        Trigger trigger = newTrigger()
-                        .withIdentity("Job", "Group")
-                         .startNow()
-                        .withSchedule(CronScheduleBuilder.cronSchedule("0/120 * * * * ?"))
-                        .build();
-
-                        // Setup the Job and Trigger with Scheduler & schedule jobs
-                        scheduler = new StdSchedulerFactory().getScheduler();
-                        scheduler.start();
-                        scheduler.scheduleJob(job, trigger);     
-                        
-                } 
-                catch (SchedulerException e) 
-                {
-                        e.printStackTrace();
-                }
-        }
+      
         
         
 }
