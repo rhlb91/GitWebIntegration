@@ -17,7 +17,7 @@ public interface BaseValidator<T> {
     public ValidationResult() {}
 
     public boolean hasErrors() {
-      if (!CollectionUtils.isEmpty(errors)) {
+      if (CollectionUtils.isEmpty(errors)) {
         return false;
       }
       return true;
