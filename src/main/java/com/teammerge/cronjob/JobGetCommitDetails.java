@@ -1,10 +1,16 @@
 package com.teammerge.cronjob;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -58,15 +64,77 @@ public class JobGetCommitDetails implements Job {
 	public void execute(JobExecutionContext context)throws JobExecutionException {
 
 		logger.info("JobGetCommitDetails start: " + context.getFireTime());
+		
+		Properties prop = new Properties();
+		InputStream input = null;
+		OutputStream output = null;
 
-		getBranchCommitDetails();
+		try {
 
+			input = new FileInputStream("/home/reflex/Documents/config.properties");
+
+			// load a properties file
+			prop.load(input);
+
+	// get the property value and print it out
+		//String lastjobruntime = prop.getProperty("LastJobRunTime");
+		String lrj = prop.getProperty("LastJobRunTime");
+		
+		System.out.println("LastJobRunTime--->"+lrj);
+		
+		//Job Method
+		getBranchCommitDetails(lrj);
+			
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		//Date lr = context.getPreviousFireTime();
+		//String lrj = lr.toString();
+		
+		
+		//For set LastJobRunTime
+		try {
+
+			output = new FileOutputStream("/home/reflex/Documents/config.properties");
+
+			// set the properties value
+			
+			Date FireTime = context.getFireTime();
+			String LastJobRunTime = FireTime.toString();
+			prop.setProperty("LastJobRunTime",LastJobRunTime);
+			
+			// save properties to project root folder
+			prop.store(output, null);
+
+		} catch (IOException io) {
+			io.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		
 		logger.info("JobGetCommitDetails next scheduled time:"	+ context.getNextFireTime());
 
 	}
 
-	public synchronized void getBranchCommitDetails() {
+	public synchronized void getBranchCommitDetails(String lrj) {
 		
+		System.out.println("LastJobRunTime--->"+lrj);
 		
 		repositoryService = ApplicationContextUtils.getBean(RepositoryService.class);
 
@@ -117,7 +185,12 @@ public class JobGetCommitDetails implements Job {
 					if (commits != null) {
 
 						for (RepositoryCommit commit : commits) {
-														
+					
+					//To Compare Last Run Job time with Commit Date.
+					Date commitdate = commit.getCommitDate();
+					String cdate = commitdate.toString();
+					if (lrj.compareTo(cdate) < 0) {
+			          								
 							CommitModel commitModel = new CommitModel();
 							
 							 commitModel.setCommitAuthor(commit.getAuthorIdent());
@@ -132,19 +205,19 @@ public class JobGetCommitDetails implements Job {
 						      commitModel.setShortMessage(shortMessage);
 						      commitModel.setTrimmedMessage(trimmedMessage);
 
-						      // commit hash link
-						      int hashLen = 6;
-						      if (commit.getName() != null) {
-						        commitModel.setCommitHash(commit.getName().substring(0, hashLen));
+					      // commit hash link
+					      int hashLen = 6;
+					      if (commit.getName() != null) {
+					        commitModel.setCommitHash(commit.getName().substring(0, hashLen));
 						      }
-						      commitModel.setCommitId(commit.getName());
-						      if (commitModel.getShortMessage().startsWith("Merge")) {
-						        commitModel.setIsMergeCommit(true);
+					      commitModel.setCommitId(commit.getName());
+					      if (commitModel.getShortMessage().startsWith("Merge")) {
+					        commitModel.setIsMergeCommit(true);
 						      } else {
 						        commitModel.setIsMergeCommit(false);
 						      }
 
-						      commitModel.setCommitDate(commit.getCommitDate());
+					      commitModel.setCommitDate(commit.getCommitDate());
 						     // commitModel.setCommitTimeFormatted(TimeUtils.convertToDateFormat(commit.getCommitDate(), commitTimeFormat));
 						      commitModel.setCommitTimeFormatted("1:00 AM");
 						      
@@ -152,10 +225,10 @@ public class JobGetCommitDetails implements Job {
 						      commitModel.setRepositoryName(repoModel.getName());
 					
 							commitService.saveCommit(commitModel);
-							
+					 }
 						}
 
-					}
+				}
 					// Code related to Commits---End
 
 				} // Branch Traverse
