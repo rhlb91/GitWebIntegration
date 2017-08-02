@@ -1111,7 +1111,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
 
-  public List<CustomRefModel> getCustomRefModels() {
+  public List<CustomRefModel> getCustomRefModels(final boolean updated) {
     List<CustomRefModel> customRefModels = new ArrayList<>();
     Repository repository = null;
 
@@ -1126,8 +1126,13 @@ public class RepositoryServiceImpl implements RepositoryService {
       if (repoModel.isCollectingGarbage()) {
         continue;
       }
-      repository = getRepository(repoModel.getName());
-      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, true, -1);
+
+      if (updated) {
+        repository = getRepository(repoModel.getName(), true);
+      } else {
+        repository = getRepository(repoModel.getName(), false);
+      }
+      List<RefModel> branchModels = JGitUtils.getRemoteBranches(repository, false, -1);
 
       if (CollectionUtils.isNotEmpty(branchModels)) {
         for (RefModel model : branchModels) {
@@ -1135,7 +1140,10 @@ public class RepositoryServiceImpl implements RepositoryService {
           // TODO cache CustomRefModel as it will be called from many places at many times
           CustomRefModel extModel = new CustomRefModel();
           extModel.setRepository(repository);
-          extModel.setRepositoryName(repoModel.getDisplayName());
+          if (StringUtils.isEmpty(repoModel.getName())) {
+            System.out.println("Blank repo Name for " + model.displayName);
+          }
+          extModel.setRepositoryName(repoModel.getName());
           extModel.setRefModel(model);
 
           customRefModels.add(extModel);

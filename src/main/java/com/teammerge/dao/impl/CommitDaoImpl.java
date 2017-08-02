@@ -7,13 +7,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 
-import com.teammerge.dao.CommitDetailDao;
+import com.teammerge.dao.CommitDao;
 import com.teammerge.model.CommitModel;
 import com.teammerge.utils.HibernateUtils;
 
 @Repository("commitDao")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class CommitDetailDaoImpl extends BaseDaoImpl<CommitModel> implements CommitDetailDao {
+public class CommitDaoImpl extends BaseDaoImpl<CommitModel> implements CommitDao {
 
   @SuppressWarnings("unchecked")
   public List<CommitModel> fetchEntityLike(String branchName) {

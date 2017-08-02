@@ -10,17 +10,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.servlet.annotation.MultipartConfig;
 
-import org.codehaus.jackson.annotate.JsonBackReference;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "commit_details")
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "entity")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
 
   private static final long serialVersionUID = 6471094113056162919L;

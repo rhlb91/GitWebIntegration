@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
-import com.teammerge.model.TimeUtils;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.JacksonUtils;
+import com.teammerge.utils.TimeUtils;
 
 @Component
 @Path("/v1")

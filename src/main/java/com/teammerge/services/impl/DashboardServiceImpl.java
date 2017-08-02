@@ -30,13 +30,13 @@ import com.teammerge.model.CommitModel;
 import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
-import com.teammerge.model.TimeUtils;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.RefLogUtils;
 import com.teammerge.utils.StringUtils;
+import com.teammerge.utils.TimeUtils;
 
 @Service("dashBoardService")
 public class DashboardServiceImpl implements DashBoardService {

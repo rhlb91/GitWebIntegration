@@ -31,7 +31,7 @@ public class BranchServiceImpl implements BranchService {
   @Override
   public List<BranchModel> getBranchesWithMinimumDetails(String branchName) {
     List<BranchModel> branches = new ArrayList<>();
-    List<CustomRefModel> branchModels = repositoryService.getCustomRefModels();
+    List<CustomRefModel> branchModels = repositoryService.getCustomRefModels(false);
 
     if (CollectionUtils.isNotEmpty(branchModels)) {
       for (CustomRefModel branch : branchModels) {

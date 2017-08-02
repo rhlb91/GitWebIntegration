@@ -1,6 +1,5 @@
 package com.teammerge;
 
-import java.io.IOException;
 
 
 /**
@@ -8,7 +7,7 @@ import java.io.IOException;
  *
  *
  */
-public class GitWebException extends IOException {
+public class GitWebException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
@@ -66,6 +65,19 @@ public class GitWebException extends IOException {
     private static final long serialVersionUID = 1L;
 
     public UnknownRequestException(String message) {
+      super(message);
+    }
+  }
+
+  /**
+   * Exception to indicate that the requested action can not be executed by the server because
+   * argument provided is/are not valid.
+   */
+  public static class InvalidArgumentsException extends GitWebException {
+
+    private static final long serialVersionUID = 1L;
+
+    public InvalidArgumentsException(String message) {
       super(message);
     }
   }

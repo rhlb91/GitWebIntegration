@@ -1,4 +1,4 @@
-package com.teammerge.model;
+package com.teammerge.utils;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -7,8 +7,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
-
-import com.teammerge.utils.StringUtils;
 
 /**
  * Utility class of time functions.
@@ -365,9 +363,9 @@ public class TimeUtils {
     return c.getTime();
   }
 
-  public static String convertToDateFormat(Date commitDate, String commitTimeFormat) {
-    SimpleDateFormat localDateFormat = new SimpleDateFormat(commitTimeFormat);
-    String formattedTime = localDateFormat.format(commitDate);
+  public static String convertToDateFormat(Date commitDate, String datePattern) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+    String formattedTime = dateFormat.format(commitDate);
     return formattedTime;
   }
 

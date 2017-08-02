@@ -24,18 +24,18 @@ import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
 import com.teammerge.dao.BaseDao;
-import com.teammerge.dao.CommitDetailDao;
+import com.teammerge.dao.CommitDao;
 import com.teammerge.form.CommitForm;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
-import com.teammerge.model.TimeUtils;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CommitDiffStrategy;
 import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.StringUtils;
+import com.teammerge.utils.TimeUtils;
 
 @Service("commitService")
 public class CommitServiceImpl implements CommitService {
@@ -43,7 +43,7 @@ public class CommitServiceImpl implements CommitService {
 
   private BaseDao<CommitModel> baseDao;
   
-  private CommitDetailDao commitDao;
+  private CommitDao commitDao;
     
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
@@ -78,7 +78,7 @@ public class CommitServiceImpl implements CommitService {
     int numOfMatchedBranches = 0;
     Date minimumDate = TimeUtils.getInceptionDate();
 
-      List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels();
+      List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(false);
 
       if (CollectionUtils.isNotEmpty(customRefModels)) {
         for (CustomRefModel branch : customRefModels) {
@@ -218,7 +218,7 @@ public class CommitServiceImpl implements CommitService {
   }
   
   @Autowired
-  public void setCommitDao(CommitDetailDao commitDao) {
+  public void setCommitDao(CommitDao commitDao) {
     commitDao.setClazz(CommitModel.class);
     this.commitDao = commitDao;
   }

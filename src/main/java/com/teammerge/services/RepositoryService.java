@@ -473,7 +473,7 @@ public interface RepositoryService extends IManager {
    * 
    * @return
    */
-  List<CustomRefModel> getCustomRefModels();
+  List<CustomRefModel> getCustomRefModels(final boolean updated);
 
   public static enum Result {
     SUCCESS, FAILURE;

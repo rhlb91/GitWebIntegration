@@ -12,6 +12,7 @@
 	<context:component-scan base-package="com.teammerge.rest" />
 	<context:component-scan base-package="com.teammerge.manager" />
 	<context:component-scan base-package="com.teammerge.cronjob" />
+	<context:component-scan base-package="com.teammerge.populator" />
 
 	<!-- For Config properties -->
 	<bean
@@ -44,4 +45,20 @@
 		class="com.teammerge.strategy.impl.CommitDiffStrategyWithByteStream" />
 
 	<bean id="commitDiffValidator" class="com.teammerge.validator.impl.CommitDiffValidator" />
+
+	<bean id="dataInsertionJob" class="com.teammerge.cronjob.DataInsertionJob">
+		<property name="commitService" ref="commitService" />
+		<property name="branchService" ref="branchService" />
+		<property name="repositoryService" ref="repositoryService" />
+		<property name="commitPopulator" ref="commitPopulator" />
+		<property name="branchPopulator" ref="branchPopulator" />
+	</bean>
+
+	<bean id="mannualDataInsertionCronJob" class="com.teammerge.cronjob.MannualDataInsertionCronJob">
+		<property name="commitService" ref="commitService" />
+		<property name="branchService" ref="branchService" />
+		<property name="repositoryService" ref="repositoryService" />
+		<property name="commitPopulator" ref="commitPopulator" />
+		<property name="branchPopulator" ref="branchPopulator" />
+	</bean>
 </beans>

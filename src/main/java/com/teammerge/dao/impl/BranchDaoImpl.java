@@ -13,7 +13,7 @@ public class BranchDaoImpl extends BaseDaoImpl<BranchModel> implements BranchDao
 
   @SuppressWarnings("unchecked")
   public List<BranchModel> fetchEntityLike(String entityId) {
-    final String queryStr = "From BranchDetailModel as b where b.branchId like :branchId";
+    final String queryStr = "From BranchModel as b where b.branchId like :branchId";
 
     HibernateUtils.openCurrentSession();
     Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);

@@ -2459,7 +2459,7 @@ public class JGitUtils {
               "Unexpected result \"{0}\" when {1} in {2}", rc.name(),
               strategy.getOperationMessage(), repository.getDirectory()));
       }
-    } catch (IOException e) {
+    } catch (GitWebException | IOException e) {
       LOGGER.error("Failed to merge", e);
     }
 
