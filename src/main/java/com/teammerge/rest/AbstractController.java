@@ -10,6 +10,7 @@ import com.teammerge.services.CompanyDetailService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepoCredentialService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.services.ScheduleService;
 
 public abstract class AbstractController {
   @Value("${app.debug}")
@@ -26,7 +27,10 @@ public abstract class AbstractController {
 
   @Resource(name = "branchService")
   private BranchService branchService;
-
+  
+  @Resource(name = "scheduleService")
+  private ScheduleService scheduleService;
+    
   @Resource(name = "companyDetailService")
   private CompanyDetailService companyDetailService;
 
@@ -40,6 +44,14 @@ public abstract class AbstractController {
   public void setRepoCredentialService(RepoCredentialService repoCredentialService) {
     this.repoCredentialService = repoCredentialService;
   }
+
+  public ScheduleService getScheduleService() {
+		return scheduleService;
+	}
+
+	public void setScheduleService(ScheduleService scheduleService) {
+		this.scheduleService = scheduleService;
+	}
 
   protected boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -84,10 +96,8 @@ public abstract class AbstractController {
   public void setBranchService(BranchService branchService) {
     this.branchService = branchService;
   }
-
-  protected String convertToFinalOutput(final String output) {
+    protected String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
   }
-
 
 }

@@ -12,7 +12,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "branch_details")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "entity")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
 public class BranchModel implements Serializable {
 
   private static final long serialVersionUID = 1100490355473736524L;
