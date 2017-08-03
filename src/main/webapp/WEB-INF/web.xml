@@ -11,14 +11,14 @@
 	</context-param>
 	
 	<listener>
-<listener-class>com.teammerge.cronjob.QuartzListener</listener-class>
-</listener>
-
-	<listener>
 		<listener-class>
 			org.springframework.web.context.ContextLoaderListener
 		</listener-class>
 	</listener>
+	
+	<listener>
+<listener-class>com.teammerge.cronjob.QuartzListener</listener-class>
+</listener>
 
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
@@ -37,10 +37,13 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
+	
 	<servlet-mapping>
 		<servlet-name>jersey-serlvet</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	
+	
+	
 
 </web-app>

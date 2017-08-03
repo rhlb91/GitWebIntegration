@@ -17,7 +17,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "commit_details")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "entity")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
 public class CommitModel implements Serializable, Comparable<CommitModel> {
 
   private static final long serialVersionUID = 6471094113056162919L;

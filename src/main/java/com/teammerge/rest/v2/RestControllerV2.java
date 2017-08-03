@@ -28,6 +28,7 @@ import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.RepositoryModel;
+import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
@@ -107,6 +108,23 @@ public class RestControllerV2 extends AbstractController {
         .build();
   }
 
+
+  @GET
+  @Path("/schedule/{id}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response getScheduleDetails(@PathParam("id") String jobId) {
+
+    ScheduleJobModel scheduleJobModel=getScheduleService().getSchedule(jobId);
+    
+    String jsonOutput = JacksonUtils.toJson(scheduleJobModel);
+    
+    String finalOutput = convertToFinalOutput(jsonOutput);
+
+    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
+        .build();
+  }
+
+  
   @POST
   @Path("/addCommit")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -116,7 +134,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-
+   
   @GET
   @Path("/commit/{id}")
   @Produces(MediaType.TEXT_PLAIN)

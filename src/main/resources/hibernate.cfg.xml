@@ -24,6 +24,7 @@
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
 		<mapping class="com.teammerge.model.CommitModel"/>
+		<mapping class="com.teammerge.model.ScheduleJobModel"/>
 		
 	</session-factory>
 </hibernate-configuration>
