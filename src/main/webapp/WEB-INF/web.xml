@@ -9,10 +9,10 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:applicationContext.xml</param-value>
 	</context-param>
-	
+
 	<listener>
-<listener-class>com.teammerge.cronjob.QuartzListener</listener-class>
-</listener>
+		<listener-class>com.teammerge.cronjob.QuartzListener</listener-class>
+	</listener>
 
 	<listener>
 		<listener-class>
@@ -30,6 +30,10 @@
 				com.sun.jersey.config.property.packages
 			</param-name>
 			<param-value>com.teammerge</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>com.teammerge.filter.CORSFilter</param-value>
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
