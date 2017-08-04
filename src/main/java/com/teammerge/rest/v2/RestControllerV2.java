@@ -23,6 +23,7 @@ import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.form.CommitDiffRequestForm;
 import com.teammerge.form.CommitForm;
+import com.teammerge.form.CommitTreeRequestForm;
 import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchModel;
@@ -37,6 +38,7 @@ import com.teammerge.utils.JacksonUtils;
 import com.teammerge.validator.BaseValidator.FieldError;
 import com.teammerge.validator.BaseValidator.ValidationResult;
 import com.teammerge.validator.impl.CommitDiffValidator;
+import com.teammerge.validator.impl.CommitTreeRequestValidator;
 
 @Component
 @Path("/v2")
@@ -47,6 +49,9 @@ public class RestControllerV2 extends AbstractController {
 
   @Resource(name = "commitDiffValidator")
   private CommitDiffValidator diffValidator;
+
+  @Resource(name = "treeValidator")
+  private CommitTreeRequestValidator treeValidator;
 
   @GET
   @Path("/")
@@ -114,17 +119,17 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getScheduleDetails(@PathParam("id") String jobId) {
 
-    ScheduleJobModel scheduleJobModel=getScheduleService().getSchedule(jobId);
-    
+    ScheduleJobModel scheduleJobModel = getScheduleService().getSchedule(jobId);
+
     String jsonOutput = JacksonUtils.toJson(scheduleJobModel);
-    
+
     String finalOutput = convertToFinalOutput(jsonOutput);
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
 
-  
+
   @POST
   @Path("/addCommit")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -134,7 +139,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-   
+
   @GET
   @Path("/commit/{id}")
   @Produces(MediaType.TEXT_PLAIN)
@@ -247,27 +252,20 @@ public class RestControllerV2 extends AbstractController {
 
   @POST
   @Path("/commitDiff")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.TEXT_PLAIN)
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response getCommitDiff(final CommitDiffRequestForm form) {
     Map<String, Object> result = new HashMap<>();
     ValidationResult vr = diffValidator.validate(form);
 
     if (vr.hasErrors()) {
-
-      result.put("result", "Validation error");
-      String errors = "";
-      for (FieldError e : vr.getErrors()) {
-        errors += "[" + e.fieldName + "]-[" + e.fieldError + "]";
-      }
-      result.put("reason", errors);
+      diffValidator.putErrorsInMap(result, vr);
       return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
     }
 
     try {
       List<String> diffResult =
-          getCommitService().getCommitDiff(form.getRepositoryName(), null,
-              form.getCommitId());
+          getCommitService().getCommitDiff(form.getRepositoryName(), null, form.getCommitId());
 
       result.put("result", "success");
       result.put("output", diffResult);
@@ -276,8 +274,37 @@ public class RestControllerV2 extends AbstractController {
       result.put("reason", e.getMessage());
       result.put("detailedReason", e);
     }
-    return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
+  @GET
+  @Path("{repo}/tree/{commitId}/{path}")
+  public Response getFilesInACommit(@PathParam("repo") String repo,
+      @PathParam("commitId") String commitId, @PathParam("path") String path) {
+    Map<String, Object> result = new HashMap<>();
+    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, path);
 
+    ValidationResult vr = treeValidator.validate(form);
+
+    if (vr.hasErrors()) {
+      treeValidator.putErrorsInMap(result, vr);
+      return Response.status(200).entity(result).build();
+    }
+
+    try {
+      List<String> treeResult = getRepositoryService().getTree2(repo, path, commitId);
+
+      result.put("result", "success");
+      result.put("output", treeResult);
+
+    } catch (IOException e) {
+      result.put("result", "error");
+      result.put("reason", e.getMessage());
+      result.put("detailedReason", e);
+    }
+
+    return Response.status(200).entity(result).build();
+  }
 }

@@ -44,7 +44,10 @@
 	<bean id="commitDiffStrategy"
 		class="com.teammerge.strategy.impl.CommitDiffStrategyWithByteStream" />
 
+	<!-- Validators Start -->
 	<bean id="commitDiffValidator" class="com.teammerge.validator.impl.CommitDiffValidator" />
+	<bean id="treeValidator" class="com.teammerge.validator.impl.CommitTreeRequestValidator" />
+	<!-- Validators End -->
 
 	<bean id="dataInsertionJob" class="com.teammerge.cronjob.DataInsertionJob">
 		<property name="commitService" ref="commitService" />

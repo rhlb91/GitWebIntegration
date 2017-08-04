@@ -17,7 +17,6 @@ import com.teammerge.utils.JGitUtils;
  * PathModel is a serializable model class that represents a file or a folder, including all its
  * metadata and associated commit id.
  *
- * @author James Moger
  *
  */
 public class PathModel implements Serializable, Comparable<PathModel> {
@@ -110,7 +109,6 @@ public class PathModel implements Serializable, Comparable<PathModel> {
   /**
    * PathChangeModel is a serializable class that represents a file changed in a commit.
    *
-   * @author James Moger
    *
    */
   public static class PathChangeModel extends PathModel {

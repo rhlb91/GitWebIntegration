@@ -2,13 +2,12 @@ package com.teammerge.validator.impl;
 
 import com.teammerge.form.CommitDiffRequestForm;
 import com.teammerge.utils.StringUtils;
-import com.teammerge.validator.BaseValidator;
 
 
-public class CommitDiffValidator implements BaseValidator<CommitDiffRequestForm> {
+public class CommitDiffValidator extends AbstractValidator<CommitDiffRequestForm> {
 
   @Override
-  public com.teammerge.validator.BaseValidator.ValidationResult validate(CommitDiffRequestForm form) {
+  public ValidationResult validate(CommitDiffRequestForm form) {
 
     ValidationResult e = new ValidationResult();
     validate(form, e);
@@ -16,10 +15,10 @@ public class CommitDiffValidator implements BaseValidator<CommitDiffRequestForm>
   }
 
   @Override
-  public void validate(CommitDiffRequestForm form, com.teammerge.validator.BaseValidator.ValidationResult e) {
-//    if (StringUtils.isEmpty(form.getBranchName())) {
-//      e.addError("branchName", "Branch cannot be null or empty");
-//    }
+  public void validate(CommitDiffRequestForm form, ValidationResult e) {
+    // if (StringUtils.isEmpty(form.getBranchName())) {
+    // e.addError("branchName", "Branch cannot be null or empty");
+    // }
 
     if (StringUtils.isEmpty(form.getCommitId())) {
       e.addError("commitId", "CommitId cannot be null or empty");

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -478,5 +479,11 @@ public interface RepositoryService extends IManager {
   public static enum Result {
     SUCCESS, FAILURE;
   }
+
+  List<String> getTree(String commitId) throws MissingObjectException,
+      IncorrectObjectTypeException, IOException;
+
+  List<String> getTree2(String repositoryName, String path, String commitId)
+      throws MissingObjectException, IncorrectObjectTypeException, IOException;
 
 }

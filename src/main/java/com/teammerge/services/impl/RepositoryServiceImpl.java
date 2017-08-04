@@ -21,12 +21,18 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +56,7 @@ import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
+import com.teammerge.model.PathModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
@@ -1164,4 +1171,66 @@ public class RepositoryServiceImpl implements RepositoryService {
     this.repositoryDao = repositoryDao;
   }
 
+  @Override
+  public List<String> getTree(String commitId) throws MissingObjectException, IncorrectObjectTypeException,
+      IOException {
+    
+    List<String> fileTree = new ArrayList<>();
+    
+    Repository r = getRepository("GitWebIntegration", false);
+
+    RevCommit commit = null;
+    RevTree tree = null;
+    try (RevWalk walk = new RevWalk(r)) {
+      commit = walk.parseCommit(r.resolve(commitId));
+
+      tree = walk.parseTree(commit.getTree().getId());
+      System.out.println("Found Tree: " + tree);
+
+      walk.dispose();
+    }
+
+    TreeWalk treeWalk = new TreeWalk(r);
+    treeWalk.reset(tree.getId());
+    treeWalk.setRecursive(true);
+    
+    while (treeWalk.next()) {
+      String path = treeWalk.getPathString();
+      System.out.println("path:" + path);
+      fileTree.add(path);
+    }
+    treeWalk.close();
+    return fileTree;
+        
+  }
+  
+  @Override
+  public List<String> getTree2(String repositoryName,String path,String commitId) throws MissingObjectException, IncorrectObjectTypeException,
+      IOException {
+    
+    List<String> fileTree = new ArrayList<>();
+    
+    Repository r = getRepository(repositoryName, false);
+
+    RevCommit commit = null;
+    RevTree tree = null;
+    try (RevWalk walk = new RevWalk(r)) {
+      commit = walk.parseCommit(r.resolve(commitId));
+
+      tree = walk.parseTree(commit.getTree().getId());
+      System.out.println("Found Tree: " + tree);
+
+      walk.dispose();
+    }
+    List<PathModel> paths = JGitUtils.getFilesInPath2(r, path, commit);
+    
+    
+    
+    System.out.println(paths);
+    
+    return fileTree;
+        
+  }
+  
+ 
 }
