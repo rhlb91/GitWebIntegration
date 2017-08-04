@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
@@ -1205,7 +1206,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
   
   @Override
-  public List<String> getTree2(String repositoryName,String path,String commitId) throws MissingObjectException, IncorrectObjectTypeException,
+  public List<PathModel> getTree2(String repositoryName,String path,String commitId) throws MissingObjectException, IncorrectObjectTypeException,
       IOException {
     
     List<String> fileTree = new ArrayList<>();
@@ -1224,13 +1225,24 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
     List<PathModel> paths = JGitUtils.getFilesInPath2(r, path, commit);
     
+    if (path != null && path.trim().length() > 0) {
+      // add .. parent path entry
+      String parentPath = null;
+      if (path.lastIndexOf('/') > -1) {
+          parentPath = path.substring(0, path.lastIndexOf('/'));
+      }
+      PathModel model = new PathModel("..", parentPath, null, 0, FileMode.TREE.getBits(), null, commitId);
+      model.isParentPath = true;
+      paths.add(0, model);
+  }
     
     
     System.out.println(paths);
     
-    return fileTree;
+    return paths;
         
   }
   
  
+  
 }

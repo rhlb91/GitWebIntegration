@@ -1,6 +1,7 @@
 package com.teammerge.rest.v2;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.BranchModel;
 import com.teammerge.model.CommitModel;
+import com.teammerge.model.PathModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.rest.AbstractController;
@@ -35,6 +37,7 @@ import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
+import com.teammerge.utils.StringUtils;
 import com.teammerge.validator.BaseValidator.FieldError;
 import com.teammerge.validator.BaseValidator.ValidationResult;
 import com.teammerge.validator.impl.CommitDiffValidator;
@@ -281,9 +284,18 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("{repo}/tree/{commitId}/{path}")
+  @Produces({"application/json"})
   public Response getFilesInACommit(@PathParam("repo") String repo,
       @PathParam("commitId") String commitId, @PathParam("path") String path) {
     Map<String, Object> result = new HashMap<>();
+
+    if (path != null)
+      path = path.equals("null") ? null : path;
+
+    if (!StringUtils.isEmpty(path)) {
+      path = path.replace("!", "/");
+    }
+
     CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, path);
 
     ValidationResult vr = treeValidator.validate(form);
@@ -294,7 +306,13 @@ public class RestControllerV2 extends AbstractController {
     }
 
     try {
-      List<String> treeResult = getRepositoryService().getTree2(repo, path, commitId);
+      List<PathModel> treeResult = getRepositoryService().getTree2(repo, path, commitId);
+
+      List<String> treeResultStr = new ArrayList<>();
+      for (PathModel p : treeResult) {
+        treeResultStr.add(p.name + "--" + p.path + "--" + p.mode + "--" + p.size + "--"
+            + p.commitId + "--" + p.objectId + "--" + p.isFile());
+      }
 
       result.put("result", "success");
       result.put("output", treeResult);

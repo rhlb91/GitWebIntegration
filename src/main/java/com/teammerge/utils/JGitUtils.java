@@ -925,7 +925,7 @@ public class JGitUtils {
     try {
 
       tw.addTree(commit.getTree());
-      final boolean isPathEmpty = Strings.isNullOrEmpty(path);
+      final boolean isPathEmpty = StringUtils.isEmpty(path);
 
       if (!isPathEmpty) {
         PathFilter f = PathFilter.create(path);

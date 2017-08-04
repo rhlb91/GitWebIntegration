@@ -18,6 +18,7 @@ import com.teammerge.manager.IManager;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.ForkModel;
 import com.teammerge.model.Metric;
+import com.teammerge.model.PathModel;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
@@ -483,7 +484,7 @@ public interface RepositoryService extends IManager {
   List<String> getTree(String commitId) throws MissingObjectException,
       IncorrectObjectTypeException, IOException;
 
-  List<String> getTree2(String repositoryName, String path, String commitId)
+  List<PathModel> getTree2(String repositoryName, String path, String commitId)
       throws MissingObjectException, IncorrectObjectTypeException, IOException;
 
 }
