@@ -15,7 +15,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "company")
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
 public class Company implements java.io.Serializable {
 
   private static final long serialVersionUID = 6705919882734212383L;

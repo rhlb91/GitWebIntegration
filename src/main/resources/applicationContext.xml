@@ -56,6 +56,9 @@
 	<!-- Validators Start -->
 	<bean id="commitDiffValidator" class="com.teammerge.validator.impl.CommitDiffValidator" />
 	<bean id="treeValidator" class="com.teammerge.validator.impl.CommitTreeRequestValidator" />
+	<bean id="newBranchValidator" class="com.teammerge.validator.impl.CreateNewBranchValidator" />
+	<bean id="repoFormValidator" class="com.teammerge.validator.impl.RepoFormValidator" />
+	<bean id="commitFormValidator" class="com.teammerge.validator.impl.CommitFormValidator" />
 	<!-- Validators End -->
 
 	<bean id="dataInsertionJob" class="com.teammerge.cronjob.DataInsertionJob">

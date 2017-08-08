@@ -14,7 +14,6 @@ import com.teammerge.populator.CommitPopulator;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.services.ScheduleService;
 
 public abstract class AbstractCustomJob {
 
@@ -28,8 +27,6 @@ public abstract class AbstractCustomJob {
 
   protected static RepositoryService repositoryService;
   
-  private static ScheduleService scheduleService;
-
   public AbstractCustomJob() {
     // repositoryService = ApplicationContextUtils.getBean(RepositoryService.class);
     /*
@@ -75,8 +72,8 @@ public abstract class AbstractCustomJob {
   }
 
   @Required
-  public void setBranchPopulator(BranchPopulator branchPopulator) {
-    this.branchPopulator = branchPopulator;
+  public void setBranchPopulator(BranchPopulator branchPopulator1) {
+    branchPopulator = branchPopulator1;
   }
 
 }

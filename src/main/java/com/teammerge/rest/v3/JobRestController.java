@@ -40,5 +40,15 @@ public class JobRestController extends AbstractController {// class
     String output = "Get Commit Details has been run sucessfully";
     return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
+  
+  @GET
+  @Path("/updateAllRepository")
+  public Response getCronJobForRepository() {
+    // CronJob obj = new CronJob();
+    cronJob.runJobSavingForRepository();
+    String output = "Get Repository Details has been run sucessfully";
+    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
+  }
+
 
 }

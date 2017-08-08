@@ -50,6 +50,7 @@ import com.teammerge.Constants.CommitMessageRenderer;
 import com.teammerge.Constants.MergeType;
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
+import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.dao.RepositoryDao;
 import com.teammerge.entity.RepoCredentials;
@@ -1280,4 +1281,10 @@ public class RepositoryServiceImpl implements RepositoryService {
     return result;
   }
 
+
+  @Override
+  public void saveRepository(RepositoryModel repositoryModel) {
+    repositoryDao.saveEntity(repositoryModel);
+  }
+  
 }

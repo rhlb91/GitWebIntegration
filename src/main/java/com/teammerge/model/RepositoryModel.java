@@ -49,10 +49,10 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   @Column(name = "companyId")
   private String companyId;
 
-  @Column(name = "description")
+  @Column(name = "description", nullable = true)
   private String description;
 
-  @Column(name = "owners")
+  @Column(name = "owners", nullable = true)
   @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> owners;
 
@@ -62,42 +62,59 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   @Column(name = "lastChangeAuthor")
   private String lastChangeAuthor;
 
-  @Column(name = "hasCommits")
+  @Column(name = "hasCommits", nullable = true)
   private boolean hasCommits;
 
+  @Column(name = "showRemoteBranches", nullable = true)
   private boolean showRemoteBranches;
 
+  @Column(name = "useIncrementalPushTags", nullable = true)
   private boolean useIncrementalPushTags;
 
+  @Column(name = "incrementalPushTagPrefix", nullable = true)
   private String incrementalPushTagPrefix;
+
+  @Column(name = "accessRestriction", nullable = true)
   private AccessRestrictionType accessRestriction;
+
+  @Column(name = "authorizationControl", nullable = true)
   private AuthorizationControl authorizationControl;
+
+  @Column(name = "allowAuthenticated", nullable = true)
   private boolean allowAuthenticated;
 
+  @Column(name = "isFrozen", nullable = true)
   private boolean isFrozen;
 
+  @Column(name = "showRemoteBranches", nullable = true)
   @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private List<String> federationSets;
 
+  @Column(name = "isFederated", nullable = true)
   private boolean isFederated;
 
+  @Column(name = "skipSizeCalculation", nullable = true)
   private boolean skipSizeCalculation;
 
+  @Column(name = "skipSummaryMetrics", nullable = true)
   private boolean skipSummaryMetrics;
 
+  @Column(name = "frequency", nullable = true)
   private String frequency;
 
+  @Column(name = "isBare", nullable = true)
   private boolean isBare;
 
+  @Column(name = "isMirror", nullable = true)
   private boolean isMirror;
 
-  @Column(name = "origin")
+  @Column(name = "origin", nullable = true)
   private String origin;
 
-  @Column(name = "HEAD")
+  @Column(name = "HEAD", nullable = true)
   private String HEAD;
 
-  @Column(name = "size")
+  @Column(name = "size", nullable = true)
   private String size;
 
   @Column(name = "availableRefs", nullable = true)
@@ -128,16 +145,17 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   @Column(name = "projectPath", nullable = true)
   private String projectPath;
 
-  @Column(name = "displayName")
+  @Column(name = "displayName", nullable = true)
   private String displayName;
 
+  @Column(name = "allowForks", nullable = true)
   private boolean allowForks;
 
   @Column(name = "forks", nullable = true)
   @ElementCollection(targetClass = String.class, fetch = FetchType.LAZY)
   private Set<String> forks;
 
-  @Column(name = "originRepository")
+  @Column(name = "originRepository", nullable = true)
   private String originRepository;
 
   @Column(name = "verifyCommitter", nullable = true)

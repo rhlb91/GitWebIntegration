@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.teammerge.GitWebException.InvalidArgumentsException;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
+import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.TimeUtils;
@@ -65,9 +66,8 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
     }
 
     for (CustomRefModel temp : branchModels) {
-      List<RepositoryCommit> commits =
-          CommitCache.instance().getCommits(temp.getRepositoryName(), temp.getRepository(),
-              temp.getRefModel().getName(), minimumDate);
+      List<RepositoryCommit> commits = CommitCache.instance().getCommits(temp.getRepositoryName(),
+          temp.getRepository(), temp.getRefModel().getName(), minimumDate);
 
 
       if (CollectionUtils.isNotEmpty(commits)) {
@@ -81,7 +81,21 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
         }
       }
     }
-
   }
 
+  public synchronized void runJobSavingForRepository() {
+    System.out.println("Enter in runJobSavingForRepository");
+    List<RepositoryModel> repositoryModels = repositoryService.getRepositoryModels();
+
+    if (CollectionUtils.isEmpty(repositoryModels)) {
+      LOG.warn("No Repository found!!");
+      return;
+    }
+
+    for (RepositoryModel model : repositoryModels) {
+      repositoryService.saveRepository(model);
+    }
+  }
 }
+
+
