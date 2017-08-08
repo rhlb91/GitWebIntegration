@@ -35,6 +35,7 @@ import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.strategy.BlobConversionStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
 import com.teammerge.utils.StringUtils;
@@ -308,16 +309,47 @@ public class RestControllerV2 extends AbstractController {
     try {
       List<PathModel> treeResult = getRepositoryService().getTree2(repo, path, commitId);
 
-      List<String> treeResultStr = new ArrayList<>();
-      for (PathModel p : treeResult) {
-        treeResultStr.add(p.name + "--" + p.path + "--" + p.mode + "--" + p.size + "--"
-            + p.commitId + "--" + p.objectId + "--" + p.isFile());
-      }
-
       result.put("result", "success");
       result.put("output", treeResult);
 
     } catch (IOException e) {
+      result.put("result", "error");
+      result.put("reason", e.getMessage());
+      result.put("detailedReason", e);
+    }
+
+    return Response.status(200).entity(result).build();
+  }
+
+  @GET
+  @Path("{repo}/blob/{commitId}/{path}")
+  @Produces({"application/json"})
+  public Response getSourceCodeOfAFile(@PathParam("repo") String repo,
+      @PathParam("commitId") String commitId, @PathParam("path") String path) {
+    Map<String, Object> result = new HashMap<>();
+
+    if (path != null)
+      path = path.equals("null") ? null : path;
+
+    if (!StringUtils.isEmpty(path)) {
+      path = path.replace("!", "/");
+    }
+
+    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, path);
+
+    ValidationResult vr = treeValidator.validate(form);
+
+    if (vr.hasErrors()) {
+      treeValidator.putErrorsInMap(result, vr);
+      return Response.status(200).entity(result).build();
+    }
+
+    try {
+      Map<String, Object> blobResult = getRepositoryService().getBlob(repo, path, commitId);
+
+      result.put("result", "success");
+      result.put("output", blobResult.get(BlobConversionStrategy.Key.SOURCE.name()));
+    } catch (RevisionSyntaxException | IOException e) {
       result.put("result", "error");
       result.put("reason", e.getMessage());
       result.put("detailedReason", e);

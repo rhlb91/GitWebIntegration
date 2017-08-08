@@ -21,8 +21,10 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -65,6 +67,7 @@ import com.teammerge.model.UserModel;
 import com.teammerge.services.CompanyDetailService;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.strategy.BlobConversionStrategy;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.ArrayUtils;
@@ -93,6 +96,9 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Resource(name = "cloneStrategy")
   private CloneStrategy cloneStrategy;
+
+  @Resource(name = "blobConversionStrategy")
+  BlobConversionStrategy blobStrategy;
 
   @Value("${app.debug}")
   private String debug;
@@ -1173,11 +1179,11 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   @Override
-  public List<String> getTree(String commitId) throws MissingObjectException, IncorrectObjectTypeException,
-      IOException {
-    
+  public List<String> getTree(String commitId) throws MissingObjectException,
+      IncorrectObjectTypeException, IOException {
+
     List<String> fileTree = new ArrayList<>();
-    
+
     Repository r = getRepository("GitWebIntegration", false);
 
     RevCommit commit = null;
@@ -1194,7 +1200,7 @@ public class RepositoryServiceImpl implements RepositoryService {
     TreeWalk treeWalk = new TreeWalk(r);
     treeWalk.reset(tree.getId());
     treeWalk.setRecursive(true);
-    
+
     while (treeWalk.next()) {
       String path = treeWalk.getPathString();
       System.out.println("path:" + path);
@@ -1202,47 +1208,65 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
     treeWalk.close();
     return fileTree;
-        
+
   }
-  
+
   @Override
-  public List<PathModel> getTree2(String repositoryName,String path,String commitId) throws MissingObjectException, IncorrectObjectTypeException,
-      IOException {
-    
-    List<String> fileTree = new ArrayList<>();
-    
+  public List<PathModel> getTree2(String repositoryName, String path, String commitId)
+      throws MissingObjectException, IncorrectObjectTypeException, IOException {
     Repository r = getRepository(repositoryName, false);
 
     RevCommit commit = null;
     RevTree tree = null;
     try (RevWalk walk = new RevWalk(r)) {
       commit = walk.parseCommit(r.resolve(commitId));
-
       tree = walk.parseTree(commit.getTree().getId());
-      System.out.println("Found Tree: " + tree);
-
       walk.dispose();
     }
+
     List<PathModel> paths = JGitUtils.getFilesInPath2(r, path, commit);
-    
+
     if (path != null && path.trim().length() > 0) {
       // add .. parent path entry
       String parentPath = null;
       if (path.lastIndexOf('/') > -1) {
-          parentPath = path.substring(0, path.lastIndexOf('/'));
+        parentPath = path.substring(0, path.lastIndexOf('/'));
       }
-      PathModel model = new PathModel("..", parentPath, null, 0, FileMode.TREE.getBits(), null, commitId);
+      PathModel model =
+          new PathModel("..", parentPath, null, 0, FileMode.TREE.getBits(), null, commitId);
       model.isParentPath = true;
       paths.add(0, model);
-  }
-    
-    
-    System.out.println(paths);
-    
+    }
+
+    if (isDebugOn()) {
+      for (PathModel p : paths) {
+        String s =
+            p.name + "--" + p.path + "--" + p.mode + "--" + p.size + "--" + p.commitId + "--"
+                + p.objectId + "--" + p.isFile();
+        LOG.debug(s);
+      }
+
+    }
     return paths;
-        
   }
-  
- 
-  
+
+  @Override
+  public Map<String, Object> getBlob(String repositoryName, String path, String commitId)
+      throws RevisionSyntaxException, MissingObjectException, IncorrectObjectTypeException,
+      AmbiguousObjectException, IOException {
+    Repository r = getRepository(repositoryName, false);
+
+    RevCommit commit = null;
+    try (RevWalk walk = new RevWalk(r)) {
+      commit = walk.parseCommit(r.resolve(commitId));
+      walk.dispose();
+    }
+
+    Map<String, Object> result = blobStrategy.convert(path, r, commit, getSettings());
+
+    return result;
+  }
+
+
+
 }

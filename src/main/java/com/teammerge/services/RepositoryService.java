@@ -11,7 +11,6 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
 import com.teammerge.manager.IManager;
@@ -486,5 +485,21 @@ public interface RepositoryService extends IManager {
 
   List<PathModel> getTree2(String repositoryName, String path, String commitId)
       throws MissingObjectException, IncorrectObjectTypeException, IOException;
+
+  /**
+   * Responsible to get the content of the files.
+   * 
+   * @param repositoryName name of the text file / image repository
+   * @param commitId commit id
+   * @return map of Objects containing content of string and status code
+   * @throws IOException
+   * @throws AmbiguousObjectException
+   * @throws IncorrectObjectTypeException
+   * @throws MissingObjectException
+   * @throws RevisionSyntaxException
+   */
+  Map<String,Object> getBlob(String repositoryName, String path, String commitId)
+      throws RevisionSyntaxException, MissingObjectException, IncorrectObjectTypeException,
+      AmbiguousObjectException, IOException;
 
 }
