@@ -219,6 +219,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   private Repository getUpdatedRepository(String repoName, boolean updateRequired) {
     Repository repo = null;
     boolean toUpdate = false;
+    RepositoryModel repoModel = getRepositoryModel(repoName);
 
     File repositoriesFolder = getRepositoriesFolder();
     if (!repositoriesFolder.exists() || !repositoriesFolder.isDirectory()) {
@@ -234,7 +235,8 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     boolean isRepoExists = isRepoExists(repositoriesFolder, repoName);
     if (toUpdate || updateRequired || !isRepoExists) {
-      repo = cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
+      repo =
+          cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, repoModel, isRepoExists);
     }
     return repo;
   }

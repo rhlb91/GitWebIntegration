@@ -19,7 +19,11 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.teammerge.dao.CompanyDao;
+import com.teammerge.dao.RepoCredentialDao;
+import com.teammerge.entity.RepoCredentials;
+import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.model.GitOptions;
+import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.LoggerUtils;
@@ -35,6 +39,8 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
   private CompanyDao companyDao;
 
+  private RepoCredentialDao repoCredentialDao;
+
   @Value("${app.debug}")
   private String debug;
 
@@ -43,7 +49,8 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
   }
 
   @Override
-  public Repository createOrUpdateRepo(File f, String repositoryName, boolean isRepoExists) {
+  public Repository createOrUpdateRepo(File f, String repositoryName, RepositoryModel repoModel,
+      boolean isRepoExists) {
     if (repositoryName == null) {
       LOG.error("Cannot clone or update repository from path, Reason: RepoName is null");
       return null;
@@ -60,6 +67,16 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       return null;
     }
 
+    RepoCredentials repoCreds =
+        repoCredentialDao.fetchEntity(new RepoCredentialsKey(repoModel.getCompanyId(),
+            repositoryName));
+
+    if (repoCreds == null) {
+      LOG.error("Cannot clone or update repository, Reason: Credentails not found for companyId: " + repoModel.getCompanyId()
+          + ", projectId: " + repositoryName);
+      return null;
+    }
+
     if (!isRepoExists) {
       LOG.info("Repo does not exits " + repositoryName + ", creating the repository!!");
 
@@ -69,6 +86,9 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       gitOptions.setCloneAllBranches(Boolean.TRUE);
       gitOptions.setIncludeSubModule(Boolean.TRUE);
       gitOptions.setBare(Boolean.FALSE);
+      gitOptions.setUsername(repoCreds.getUsername());
+      gitOptions.setPassword(repoCreds.getPassword());
+
 
       try (Git git = gitService.cloneRepository(gitOptions);) {
         repo = git.getRepository();

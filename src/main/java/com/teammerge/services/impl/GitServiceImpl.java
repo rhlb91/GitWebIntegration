@@ -19,6 +19,7 @@ import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
 import com.teammerge.utils.LoggerUtils;
+import com.teammerge.utils.StringUtils;
 
 @Service("gitService")
 public class GitServiceImpl implements GitService {
@@ -45,6 +46,14 @@ public class GitServiceImpl implements GitService {
     cmd.setNoCheckout(Boolean.TRUE);
     File destinationFolder = new File(options.getDestinationDirectory());
     cmd.setDirectory(destinationFolder);
+
+
+    if (isCredentialsProvided(options.getUsername(), options.getPassword())) {
+      cmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(options.getUsername(),
+          options.getPassword()));
+    }
+
+
     Git git = cmd.call();
 
     if (isDebugOn()) {
@@ -52,6 +61,10 @@ public class GitServiceImpl implements GitService {
           + " in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
     return git;
+  }
+
+  private boolean isCredentialsProvided(String username, String password) {
+    return !StringUtils.isEmpty(username) && !StringUtils.isEmpty(password);
   }
 
   public Ref createBranch(CreateBranchOptions branchOptions) throws GitAPIException {

@@ -1,11 +1,16 @@
 package com.teammerge.model;
 
+
+
 public class GitOptions {
   private String URI;
   private String destinationDirectory;
   private boolean isCloneAllBranches;
   private boolean includeSubModule;
   private boolean isBare;
+  private String username;
+  private String password;
+
 
   public GitOptions() {
     this("", "", true, true);
@@ -61,5 +66,22 @@ public class GitOptions {
   public void setBare(boolean isBare) {
     this.isBare = isBare;
   }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
 
 }

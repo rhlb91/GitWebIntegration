@@ -736,4 +736,12 @@ public class RepositoryModel implements Serializable, Comparable<RepositoryModel
   public static long getSerialversionuid() {
     return serialVersionUID;
   }
+
+  public String getCompanyId() {
+    return companyId;
+  }
+
+  public void setCompanyId(String companyId) {
+    this.companyId = companyId;
+  }
 }
