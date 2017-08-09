@@ -64,7 +64,7 @@ import com.teammerge.model.RefModel;
 import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
-import com.teammerge.services.CompanyDetailService;
+import com.teammerge.services.CompanyService;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.BlobConversionStrategy;
@@ -111,8 +111,8 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   private RepositoryDao repositoryDao;
 
-  @Resource(name = "companyDetailService")
-  private CompanyDetailService companyDetailService;
+  @Resource(name = "companyService")
+  private CompanyService companyService;
 
   @Resource(name = "repoCredentialDao")
   private RepoCredentialDao repoCredentialDao;
@@ -219,7 +219,6 @@ public class RepositoryServiceImpl implements RepositoryService {
   private Repository getUpdatedRepository(String repoName, boolean updateRequired) {
     Repository repo = null;
     boolean toUpdate = false;
-    RepositoryModel repoModel = getRepositoryModel(repoName);
 
     File repositoriesFolder = getRepositoriesFolder();
     if (!repositoriesFolder.exists() || !repositoriesFolder.isDirectory()) {
@@ -235,8 +234,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     boolean isRepoExists = isRepoExists(repositoriesFolder, repoName);
     if (toUpdate || updateRequired || !isRepoExists) {
-      repo =
-          cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, repoModel, isRepoExists);
+      repo = cloneStrategy.createOrUpdateRepo(repositoriesFolder, repoName, isRepoExists);
     }
     return repo;
   }
@@ -1074,7 +1072,7 @@ public class RepositoryServiceImpl implements RepositoryService {
     Ref branch = null;
 
     String remoteRepoUrl =
-        companyDetailService.getRemoteUrlForCompanyAndProject(companyId, projectId);
+        companyService.getRemoteUrlForCompanyAndProject(companyId, projectId);
 
     if (remoteRepoUrl == null) {
       result.put("reason", "Remote url not found with companyId: " + companyId + ", projectId: "

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
-import com.teammerge.services.CompanyDetailService;
+import com.teammerge.services.CompanyService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepoCredentialService;
 import com.teammerge.services.RepositoryService;
@@ -27,16 +27,16 @@ public abstract class AbstractController {
 
   @Resource(name = "branchService")
   private BranchService branchService;
-  
+
   @Resource(name = "scheduleService")
   private ScheduleService scheduleService;
-    
-  @Resource(name = "companyDetailService")
-  private CompanyDetailService companyDetailService;
+
+  @Resource(name = "companyService")
+  private CompanyService companyService;
 
   @Resource(name = "repoCredentialService")
   private RepoCredentialService repoCredentialService;
-  
+
   public RepoCredentialService getRepoCredentialService() {
     return repoCredentialService;
   }
@@ -46,23 +46,23 @@ public abstract class AbstractController {
   }
 
   public ScheduleService getScheduleService() {
-		return scheduleService;
-	}
+    return scheduleService;
+  }
 
-	public void setScheduleService(ScheduleService scheduleService) {
-		this.scheduleService = scheduleService;
-	}
+  public void setScheduleService(ScheduleService scheduleService) {
+    this.scheduleService = scheduleService;
+  }
 
   protected boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
   }
 
-  public CompanyDetailService getCompanyDetailService() {
-    return companyDetailService;
+  public CompanyService getCompanyService() {
+    return companyService;
   }
 
-  public void setCompanyDetailService(CompanyDetailService companyDetailService) {
-    this.companyDetailService = companyDetailService;
+  public void setCompanyService(CompanyService companyService) {
+    this.companyService = companyService;
   }
 
   public RepositoryService getRepositoryService() {
@@ -96,7 +96,8 @@ public abstract class AbstractController {
   public void setBranchService(BranchService branchService) {
     this.branchService = branchService;
   }
-    protected String convertToFinalOutput(final String output) {
+
+  protected String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
   }
 

@@ -98,7 +98,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/company/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response getCompanyDetails(@PathParam("id") String name) {
-    Company company = getCompanyDetailService().getCompanyDetails(name);
+    Company company = getCompanyService().getCompanyDetails(name);
     String jsonOutput = JacksonUtils.toJson(company);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -110,7 +110,7 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCompanyDetails(Company company) {
 
-    getCompanyDetailService().saveCompanyDetails(company);
+    getCompanyService().saveCompanyDetails(company);
     String finalOutput = "Saved successfully!!";
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -214,7 +214,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/addRepo")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addRepo(RepoForm repoForm) {
-    getCompanyDetailService().saveOrUpdateCompanyDetails(repoForm);
+    getCompanyService().saveOrUpdateCompanyDetails(repoForm);
     getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
 
     return Response.status(200).entity("Saved successfully!!")

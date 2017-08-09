@@ -18,12 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.teammerge.dao.CompanyDao;
 import com.teammerge.dao.RepoCredentialDao;
+import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.model.GitOptions;
 import com.teammerge.model.RepositoryModel;
+import com.teammerge.services.CompanyService;
 import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
 import com.teammerge.utils.LoggerUtils;
@@ -37,7 +38,7 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
   private GitService gitService;
 
-  private CompanyDao companyDao;
+  private CompanyService companyService;
 
   private RepoCredentialDao repoCredentialDao;
 
@@ -49,8 +50,7 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
   }
 
   @Override
-  public Repository createOrUpdateRepo(File f, String repositoryName, RepositoryModel repoModel,
-      boolean isRepoExists) {
+  public Repository createOrUpdateRepo(File f, String repositoryName, boolean isRepoExists) {
     if (repositoryName == null) {
       LOG.error("Cannot clone or update repository from path, Reason: RepoName is null");
       return null;
@@ -58,8 +58,9 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
     Repository repo = null;
     long start = System.currentTimeMillis();
-
-    String remoteRepoPath = companyDao.getRemoteUrlForProject(repositoryName);
+    Company company = companyService.getCompanyForProject(repositoryName);
+    String remoteRepoPath =
+        companyService.getRemoteUrlForCompanyAndProject(company, repositoryName);
 
     if (StringUtils.isEmpty(remoteRepoPath)) {
       LOG.error("Cannot clone or update repository, Reason: remoteRepoPath is null for repo "
@@ -68,12 +69,11 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
     }
 
     RepoCredentials repoCreds =
-        repoCredentialDao.fetchEntity(new RepoCredentialsKey(repoModel.getCompanyId(),
-            repositoryName));
+        repoCredentialDao.fetchEntity(new RepoCredentialsKey(company.getName(), repositoryName));
 
     if (repoCreds == null) {
-      LOG.error("Cannot clone or update repository, Reason: Credentails not found for companyId: " + repoModel.getCompanyId()
-          + ", projectId: " + repositoryName);
+      LOG.error("Cannot clone or update repository, Reason: Credentails not found for companyId: "
+          + company.getName() + ", projectId: " + repositoryName);
       return null;
     }
 
@@ -164,9 +164,13 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
   }
 
   @Required
-  public void setCompanyDao(CompanyDao companyDao) {
-    this.companyDao = companyDao;
+  public void setCompanyService(CompanyService companyService) {
+    this.companyService = companyService;
   }
 
+  @Required
+  public void setRepoCredentialDao(RepoCredentialDao repoCredentialDao) {
+    this.repoCredentialDao = repoCredentialDao;
+  }
 
 }
