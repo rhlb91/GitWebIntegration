@@ -1,11 +1,13 @@
 package com.teammerge.services;
 
 import java.util.List;
+import java.util.Map;
 
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.RepositoryCommit;
+import com.teammerge.model.RepositoryModel;
 
 public interface DashBoardService {
 
@@ -20,7 +22,7 @@ public interface DashBoardService {
    * @param daysBack gets the result since specified days back
    * @return
    */
-  public List<DailyLogEntry> getRawActivities(final int daysBack);
+  public Map<RepositoryModel,List<DailyLogEntry>> getRawActivities(final int daysBack);
 
   /**
    * Populates activity, this method returns all the activities till now that has been made on the

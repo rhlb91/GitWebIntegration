@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.codehaus.jackson.annotate.JsonManagedReference;
 
 public class ActivityModel {
   private Date pushDate;
@@ -21,6 +20,7 @@ public class ActivityModel {
   private List<CommitModel> commits;
   private String repositoryName;
   private String whenChanged;
+  private String remoteRepoBaseUrl;
 
   @Override
   public String toString() {
@@ -150,5 +150,13 @@ public class ActivityModel {
     this.whenChanged = whenChanged;
   }
 
- 
+  public String getRemoteRepoBaseUrl() {
+    return remoteRepoBaseUrl;
+  }
+
+  public void setRemoteRepoBaseUrl(String remoteRepoBaseUrl) {
+    this.remoteRepoBaseUrl = remoteRepoBaseUrl;
+  }
+
+
 }

@@ -16,6 +16,7 @@ import java.util.TimeZone;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -64,7 +65,7 @@ public class DashboardServiceImpl implements DashBoardService {
   }
 
   @Override
-  public List<DailyLogEntry> getRawActivities(final int daysBack) {
+  public Map<RepositoryModel, List<DailyLogEntry>> getRawActivities(final int daysBack) {
     long start = System.currentTimeMillis();
     List<RepositoryModel> repositories = repositoryService.getRepositoryModels();
 
@@ -80,7 +81,7 @@ public class DashboardServiceImpl implements DashBoardService {
     }
 
     // create daily commit digest feed
-    List<DailyLogEntry> digests = new ArrayList<DailyLogEntry>();
+    Map<RepositoryModel, List<DailyLogEntry>> digestsMap = new HashMap<>();
     for (RepositoryModel model : repositories) {
       if (model.isCollectingGarbage()) {
         continue;
@@ -95,7 +96,7 @@ public class DashboardServiceImpl implements DashBoardService {
 
           updateLastActivityInsertedPerRepo(model, entries);
 
-          digests.addAll(entries);
+          digestsMap.put(model, entries);
           repository.close();
         } else {
           LOG.error("Repository " + model.getName() + " is null!!");
@@ -111,7 +112,7 @@ public class DashboardServiceImpl implements DashBoardService {
           + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
 
-    return digests;
+    return digestsMap;
   }
 
   private void updateLastActivityInsertedPerRepo(RepositoryModel model, List<DailyLogEntry> entries) {
@@ -125,31 +126,41 @@ public class DashboardServiceImpl implements DashBoardService {
   @Override
   public List<ActivityModel> populateActivities(final boolean cached, final int daysBack) {
     List<ActivityModel> activityModels = new ArrayList<>();
-    List<DailyLogEntry> rawActivities = getRawActivities(daysBack);
+    Map<RepositoryModel, List<DailyLogEntry>> rawActivitiesMap = getRawActivities(daysBack);
     ActivityModel activityModel = new ActivityModel();
     int cacheHit = 0;
     int cacheMiss = 0;
     long start = System.currentTimeMillis();
 
-    if (CollectionUtils.isNotEmpty(rawActivities)) {
-      for (DailyLogEntry dailyLogEntry : rawActivities) {
-        if (cached) {
-          if (activityCache.hasCurrent(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date)) {
-            ++cacheHit;
-            activityModel = activityCache.getObject(getUniqueKeyForActivity(dailyLogEntry));
-          } else {
-            ++cacheMiss;
-            activityModel = populateActivity(dailyLogEntry);
 
-            activityCache.updateObject(getUniqueKeyForActivity(dailyLogEntry), dailyLogEntry.date,
-                activityModel);
+    if (MapUtils.isNotEmpty(rawActivitiesMap)) {
+
+      for (RepositoryModel rawActivitiesKey : rawActivitiesMap.keySet()) {
+        List<DailyLogEntry> rawActivities = rawActivitiesMap.get(rawActivitiesKey);
+
+        if (CollectionUtils.isNotEmpty(rawActivities)) {
+          for (DailyLogEntry dailyLogEntry : rawActivities) {
+            if (cached) {
+              if (activityCache.hasCurrent(getUniqueKeyForActivity(dailyLogEntry),
+                  dailyLogEntry.date)) {
+                ++cacheHit;
+                activityModel = activityCache.getObject(getUniqueKeyForActivity(dailyLogEntry));
+              } else {
+                ++cacheMiss;
+                activityModel = populateActivity(dailyLogEntry, rawActivitiesKey);
+
+                activityCache.updateObject(getUniqueKeyForActivity(dailyLogEntry),
+                    dailyLogEntry.date, activityModel);
+              }
+            } else {
+              activityModel = populateActivity(dailyLogEntry, rawActivitiesKey);
+            }
+
+            activityModels.add(activityModel);
           }
         }
-
-        activityModels.add(activityModel);
       }
     }
-
     Comparator<ActivityModel> activitySort = new Comparator<ActivityModel>() {
       @Override
       public int compare(ActivityModel o1, ActivityModel o2) {
@@ -176,7 +187,7 @@ public class DashboardServiceImpl implements DashBoardService {
     return str;
   }
 
-  private ActivityModel populateActivity(DailyLogEntry change) {
+  private ActivityModel populateActivity(DailyLogEntry change, RepositoryModel repo) {
     ActivityModel activityModel = new ActivityModel();
 
     Date pushDate = change.date;
@@ -200,6 +211,10 @@ public class DashboardServiceImpl implements DashBoardService {
     } else if (shortRefName.startsWith(Constants.R_TAGS)) {
       shortRefName = shortRefName.substring(Constants.R_TAGS.length());
       isTag = true;
+    } else if (shortRefName.startsWith(Constants.R_REMOTE_ORIGIN)) {
+      shortRefName = shortRefName.substring(Constants.R_REMOTE_ORIGIN.length());
+    } else if (shortRefName.startsWith(Constants.R_REMOTES)) {
+      shortRefName = shortRefName.substring(Constants.R_REMOTES.length());
     }
 
     String whoChanged = "";
@@ -271,6 +286,7 @@ public class DashboardServiceImpl implements DashBoardService {
     activityModel.setRepositoryName(repoName);
     activityModel.setWhenChanged(getWhenChanged(change.date));
     activityModel.setCommits(populateCommits(commits));
+    activityModel.setRemoteRepoBaseUrl(StringUtils.stripDotGit(repo.getOrigin()));
 
     return activityModel;
   }

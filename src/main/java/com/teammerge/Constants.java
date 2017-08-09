@@ -35,6 +35,9 @@ public class Constants {
   public static final String R_HEADS = "refs/heads/";
   public static final String R_TAGS = "refs/tags/";
   public static final String R_PULL = "refs/pull/";
+  public static final String R_REMOTES = "refs/remotes/";
+  public static final String R_REMOTE_ORIGIN = "refs/remotes/origin/";
+
   public static final int LEN_SHORTLOG_REFS = 60;
   public static final int LEN_SHORTLOG = 78;
 
