@@ -1,11 +1,13 @@
 package com.teammerge.strategy.impl;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 
 import com.teammerge.IStoredSettings;
 import com.teammerge.Keys;
@@ -20,7 +22,7 @@ public class DefaultBlobConversionStrategy implements BlobConversionStrategy {
       IStoredSettings settings) {
     Map<String, Object> res = new HashMap<>();
     String extension = null;
-
+    String source = "";
     String[] encodings = getEncodings(settings);
 
     if (blobPath.lastIndexOf('.') > -1) {
@@ -46,7 +48,13 @@ public class DefaultBlobConversionStrategy implements BlobConversionStrategy {
       switch (type) {
         case 2:
           // image blobs
-          // TODO
+          // TODO get correct image path
+          source = getImageSource(r, commit.getTree(), blobPath);
+          if (source == null) {
+            source = missingBlob(blobPath, commit);
+          }
+          res.put(BlobConversionStrategy.Key.SOURCE.name(), source);
+          res.put(BlobConversionStrategy.Key.FILE_EXTENSION.name(), extension);
           break;
         case 3:
           // binary blobs
@@ -54,7 +62,7 @@ public class DefaultBlobConversionStrategy implements BlobConversionStrategy {
           break;
         default:
           // plain text
-          String source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, encodings);
+          source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, encodings);
           String table;
           if (source == null) {
             table = missingBlob(blobPath, commit);
@@ -62,12 +70,12 @@ public class DefaultBlobConversionStrategy implements BlobConversionStrategy {
             table = generateSourceView(source, extension, type == 1, settings);
             // addBottomScriptInline("jQuery(prettyPrint);");
           }
-          res.put( BlobConversionStrategy.Key.SOURCE.name(), table);
+          res.put(BlobConversionStrategy.Key.SOURCE.name(), table);
           res.put(BlobConversionStrategy.Key.FILE_EXTENSION.name(), extension);
       }
     } else {
       // plain text
-      String source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, encodings);
+      source = JGitUtils.getStringContent(r, commit.getTree(), blobPath, encodings);
       String table;
       if (source == null) {
         table = missingBlob(blobPath, commit);
@@ -75,10 +83,34 @@ public class DefaultBlobConversionStrategy implements BlobConversionStrategy {
         table = generateSourceView(source, null, false, settings);
         // addBottomScriptInline("jQuery(prettyPrint);");
       }
-      res.put( BlobConversionStrategy.Key.SOURCE.name(), table);
+      res.put(BlobConversionStrategy.Key.SOURCE.name(), table);
     }
 
     return res;
+  }
+
+  private String getImageSource(Repository r, RevTree tree, String blobPath) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<!-- start blob table -->");
+    sb.append("<table width=\"100%\"><tbody><tr>");
+
+    String imgPath = getImagePath(r, blobPath);
+    // adding image
+    // TODO need to find correct path
+    sb.append("<img width=\"20px\" width=\"20px\" src=\"");
+    sb.append(imgPath);
+    sb.append("\"/>");
+    sb.append("</tr></tbody></table>");
+    sb.append("<!-- end blob table -->");
+    return sb.toString();
+  }
+
+  private String getImagePath(Repository r, String blobPath) {
+    String dirPath = r.getDirectory().getAbsolutePath();
+    dirPath=dirPath.substring(0, dirPath.lastIndexOf(File.separator) + 1);
+
+    String imgPath = dirPath.concat(blobPath);
+    return imgPath;
   }
 
   protected String missingBlob(String blobPath, RevCommit commit) {

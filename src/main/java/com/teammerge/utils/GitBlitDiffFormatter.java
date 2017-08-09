@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.wicket.Application;
-import org.apache.wicket.Localizer;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -177,16 +175,16 @@ public class GitBlitDiffFormatter extends DiffFormatter {
    * @return the limit
    */
   private int getLimit(String key, int minimum, int maximum) {
-    if (Application.exists()) {
-      Application application = Application.get();
-      /*
-       * commented by RB
-       * 
-       * if (application instanceof GitBlitWebApp) { GitBlitWebApp webApp = (GitBlitWebApp)
-       * application; int configValue = webApp.settings().getInteger(key, maximum); if (configValue
-       * < minimum) { return minimum; } else if (configValue < maximum) { return configValue; } }
-       */
-    }
+//    if (Application.exists()) {
+//      Application application = Application.get();
+//      /*
+//       * commented by RB
+//       * 
+//       * if (application instanceof GitBlitWebApp) { GitBlitWebApp webApp = (GitBlitWebApp)
+//       * application; int configValue = webApp.settings().getInteger(key, maximum); if (configValue
+//       * < minimum) { return minimum; } else if (configValue < maximum) { return configValue; } }
+//       */
+//    }
     return maximum;
   }
 
@@ -199,13 +197,13 @@ public class GitBlitDiffFormatter extends DiffFormatter {
    * @return the possibly localized message
    */
   private String getMsg(String key, String defaultValue) {
-    if (Application.exists()) {
-      Localizer localizer = Application.get().getResourceSettings().getLocalizer();
-      if (localizer != null) {
-        // Use getStringIgnoreSettings because we don't want exceptions here if the key is missing!
-        return localizer.getStringIgnoreSettings(key, null, null, defaultValue);
-      }
-    }
+//    if (Application.exists()) {
+//      Localizer localizer = Application.get().getResourceSettings().getLocalizer();
+//      if (localizer != null) {
+//        // Use getStringIgnoreSettings because we don't want exceptions here if the key is missing!
+//        return localizer.getStringIgnoreSettings(key, null, null, defaultValue);
+//      }
+//    }
     return defaultValue;
   }
 
