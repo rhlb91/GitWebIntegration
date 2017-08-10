@@ -423,8 +423,21 @@ public class RepositoryServiceImpl implements RepositoryService {
    */
   @Override
   public File getRepositoriesFolder() {
-    return runtimeService.getRuntimeManager().getFileOrFolder(Keys.git.repositoriesFolder,
-        ApplicationDirectoryUtils.getProgramDirectory() + "/" + repoFolderName);
+
+    File repoFolder =
+        runtimeService.getRuntimeManager().getFileOrFolder(Keys.git.repositoriesFolder,
+            ApplicationDirectoryUtils.getProgramDirectory() + "/" + repoFolderName);
+
+    if (!repoFolder.exists()) {
+      boolean isDirCreated = repoFolder.mkdir();
+
+      if (!isDirCreated) {
+        LOG.error("Cannot create repository folder " + repoFolderName + "at location: "
+            + ApplicationDirectoryUtils.getProgramDirectory() + "/"
+            + ". Try creating it mannually!!");
+      }
+    }
+    return repoFolder;
   }
 
   @Override
@@ -1062,7 +1075,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   public Map<String, Object> createBranch(final String companyId, final String projectId,
-      final String branchName,final String startingPoint) throws Exception {
+      final String branchName, final String startingPoint) throws Exception {
     Map<String, Object> result = new HashMap<>();
 
     // setting default to failure, updating in case of success
@@ -1095,7 +1108,7 @@ public class RepositoryServiceImpl implements RepositoryService {
     branchOptions.setUserName(repoCreds.getUsername());
     branchOptions.setPassword(repoCreds.getPassword());
     branchOptions.setStartingPoint(startingPoint);
-    
+
     try (Repository r = getRepository(projectId, false)) {
       branchOptions.setRepo(r);
       branch = gitService.createBranch(branchOptions);
