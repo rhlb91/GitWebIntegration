@@ -10,7 +10,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "repo_credentials")
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "entity")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
 public class RepoCredentials implements java.io.Serializable {
 
   private static final long serialVersionUID = -6344513471738441090L;
