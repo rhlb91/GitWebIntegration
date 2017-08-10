@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,12 +105,14 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
       try (Git git = new Git(repo);) {
         PullCommand pc = git.pull();
+        pc.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repoCreds.getUsername(),
+            repoCreds.getPassword()));
         PullResult pr = pc.call();
         MergeResult mergeResult = pr.getMergeResult();
 
         if (isDebugOn()) {
-          LOG.debug("Result of repo pull of " + repositoryName + ": "
-              + mergeResult.getMergeStatus());
+          LOG.debug(
+              "Result of repo pull of " + repositoryName + ": " + mergeResult.getMergeStatus());
         }
       } catch (GitAPIException e) {
         LOG.error("Error in updating repository " + repositoryName, e);
