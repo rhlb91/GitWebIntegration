@@ -463,7 +463,7 @@ public interface RepositoryService extends IManager {
   List<RepositoryModel> getRepositoryModelsFromDB();
 
   Map<String, Object> createBranch(final String companyId, final String projectId,
-      final String branchName);
+      final String branchName, final String startingPoint) throws Exception;
 
 
   /**
@@ -498,7 +498,7 @@ public interface RepositoryService extends IManager {
    * @throws MissingObjectException
    * @throws RevisionSyntaxException
    */
-  Map<String,Object> getBlob(String repositoryName, String path, String commitId)
+  Map<String, Object> getBlob(String repositoryName, String path, String commitId)
       throws RevisionSyntaxException, MissingObjectException, IncorrectObjectTypeException,
       AmbiguousObjectException, IOException;
 

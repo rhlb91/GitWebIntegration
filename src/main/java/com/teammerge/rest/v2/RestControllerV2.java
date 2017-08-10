@@ -237,20 +237,27 @@ public class RestControllerV2 extends AbstractController {
   public Response createBranch(final CreateNewBranchForm form) {
     String output = "";
 
-    Map<String, Object> result =
-        getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
-            form.getBranchName());
+    Map<String, Object> result;
+    try {
+      result =
+          getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
+              form.getBranchName(), form.getStartingPoint());
 
-    if (RepositoryService.Result.FAILURE.equals(result.get("result"))) {
+      if (RepositoryService.Result.FAILURE.equals(result.get("result"))) {
+        output += " { \"result\": " + RepositoryService.Result.FAILURE;
+        output += ", \"reason\": " + result.get("reason");
+        output += ", \"detailedReason\": " + result.get("completeError");
+        output += "}";
+      } else {
+        output += " { \"result\": " + RepositoryService.Result.SUCCESS;
+        output += "}";
+      }
+    } catch (Exception e) {
       output += " { \"result\": " + RepositoryService.Result.FAILURE;
-      output += ", \"reason\": " + result.get("reason");
-      output += ", \"detailedReason\": " + result.get("completeError");
-      output += "}";
-    } else {
-      output += " { \"result\": " + RepositoryService.Result.SUCCESS;
+      output += ", \"reason\": " + e.getMessage();
+      output += ", \"detailedReason\": " + e;
       output += "}";
     }
-
     return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
   }
 

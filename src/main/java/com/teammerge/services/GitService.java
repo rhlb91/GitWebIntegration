@@ -14,6 +14,6 @@ public interface GitService {
   Git cloneRepository(GitOptions options) throws InvalidRemoteException, TransportException,
       GitAPIException;
 
-  Ref createBranch(CreateBranchOptions branchOptions) throws GitAPIException;
+  Ref createBranch(CreateBranchOptions branchOptions) throws GitAPIException, Exception;
 
 }

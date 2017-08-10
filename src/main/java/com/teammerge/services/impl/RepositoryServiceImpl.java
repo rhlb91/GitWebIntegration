@@ -1062,7 +1062,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   public Map<String, Object> createBranch(final String companyId, final String projectId,
-      final String branchName) {
+      final String branchName,final String startingPoint) throws Exception {
     Map<String, Object> result = new HashMap<>();
 
     // setting default to failure, updating in case of success
@@ -1071,8 +1071,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     Ref branch = null;
 
-    String remoteRepoUrl =
-        companyService.getRemoteUrlForCompanyAndProject(companyId, projectId);
+    String remoteRepoUrl = companyService.getRemoteUrlForCompanyAndProject(companyId, projectId);
 
     if (remoteRepoUrl == null) {
       result.put("reason", "Remote url not found with companyId: " + companyId + ", projectId: "
@@ -1095,7 +1094,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     branchOptions.setRemoteURL(remoteRepoUrl);
     branchOptions.setUserName(repoCreds.getUsername());
     branchOptions.setPassword(repoCreds.getPassword());
-
+    branchOptions.setStartingPoint(startingPoint);
+    
     try (Repository r = getRepository(projectId, false)) {
       branchOptions.setRepo(r);
       branch = gitService.createBranch(branchOptions);
@@ -1266,7 +1266,5 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     return result;
   }
-
-
 
 }

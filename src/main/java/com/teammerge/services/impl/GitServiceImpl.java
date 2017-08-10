@@ -8,6 +8,7 @@ import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.GitOptions;
 import com.teammerge.services.GitService;
+import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.LoggerUtils;
 import com.teammerge.utils.StringUtils;
 
@@ -67,9 +69,14 @@ public class GitServiceImpl implements GitService {
     return !StringUtils.isEmpty(username) && !StringUtils.isEmpty(password);
   }
 
-  public Ref createBranch(CreateBranchOptions branchOptions) throws GitAPIException {
+  public Ref createBranch(CreateBranchOptions branchOptions) throws Exception {
     Ref ref = null;
+    String startingPoint = branchOptions.getStartingPoint();
     try (Git git = new Git(branchOptions.getRepo())) {
+
+      if (StringUtils.isEmpty(startingPoint)) {
+        startingPoint = JGitUtils.getHEADRef(branchOptions.getRepo());
+      }
       ref = git.branchCreate().setName(branchOptions.getBranchName()).call();
       if (ref == null) {
         LOG.debug("Trying to create a branch with starting point as master");
@@ -93,6 +100,7 @@ public class GitServiceImpl implements GitService {
         pushCommand.call();
       }
     }
+
     return ref;
   }
 }

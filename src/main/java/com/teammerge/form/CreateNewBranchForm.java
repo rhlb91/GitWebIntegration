@@ -7,6 +7,8 @@ public class CreateNewBranchForm {
   private String projectId;
 
   private String branchName;
+  
+  private String startingPoint;
 
   /**
    * @return the projectId
@@ -42,6 +44,14 @@ public class CreateNewBranchForm {
 
   public void setCompanyId(String companyId) {
     this.companyId = companyId;
+  }
+
+  public String getStartingPoint() {
+    return startingPoint;
+  }
+
+  public void setStartingPoint(String startingPoint) {
+    this.startingPoint = startingPoint;
   }
 
 
