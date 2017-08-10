@@ -111,8 +111,8 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
         MergeResult mergeResult = pr.getMergeResult();
 
         if (isDebugOn()) {
-          LOG.debug(
-              "Result of repo pull of " + repositoryName + ": " + mergeResult.getMergeStatus());
+          LOG.debug("Result of repo pull of " + repositoryName + ": "
+              + mergeResult.getMergeStatus());
         }
       } catch (GitAPIException e) {
         LOG.error("Error in updating repository " + repositoryName, e);
@@ -138,10 +138,9 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
         LOG.error("Error occured removing the repsositry folders " + repoDir, e);
       }
 
-      if (isDebugOn()) {
-        LOG.debug("Updated repository " + repositoryName + " in "
-            + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-      }
+      LOG.info("Updated repository " + repositoryName + " in "
+          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+      
       return repo;
     }
   }

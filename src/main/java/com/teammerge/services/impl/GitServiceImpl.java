@@ -55,7 +55,6 @@ public class GitServiceImpl implements GitService {
           options.getPassword()));
     }
 
-
     Git git = cmd.call();
 
     if (isDebugOn()) {
@@ -92,6 +91,7 @@ public class GitServiceImpl implements GitService {
       }
 
       if (ref != null) {
+        // push the newly created branch to remote origin
         PushCommand pushCommand = git.push();
         pushCommand.setRemote(branchOptions.getRemoteURL());
         pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(branchOptions

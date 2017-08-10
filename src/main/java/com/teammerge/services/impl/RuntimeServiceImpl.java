@@ -1,7 +1,9 @@
 package com.teammerge.services.impl;
 
 import java.io.File;
+import java.util.Map;
 
+import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +23,25 @@ public class RuntimeServiceImpl implements RuntimeService {
   @Value("${app.propertiesFile.name}")
   private String propertiesFileName;
 
+  @Value("${git.repository.folderName}")
+  private String repoFolderName;
+
   private String baseFolderPath;
 
   @Override
   public RuntimeManager getRuntimeManager() {
     if (runtimeManager == null) {
       File baseFolder = new File(getBaseFolderPath());
+      File repoFolder = new File(ApplicationDirectoryUtils.getProgramDirectory(), repoFolderName);
 
-     
       FileSettings settings = new FileSettings(getPropertiesFile().getAbsolutePath());
 
-      
+
       // configure the Gitblit singleton for minimal, non-server operation
       XssFilter xssFilter = new AllowXssFilter();
-      runtimeManager = new RuntimeManager(settings, xssFilter, baseFolder).start();
+
+      Map<String, File> paths = new HashedMap<>();
+      runtimeManager = new RuntimeManager(settings, xssFilter, baseFolder, repoFolder).start();
     }
     return runtimeManager;
   }
