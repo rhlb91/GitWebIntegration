@@ -44,16 +44,6 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
   
     fetchAndSaveBranchAndCommitDetails();
     
-    //To Store Schedule Job Details
-    scheduleService = ApplicationContextUtils.getBean(ScheduleService.class);
-    ScheduleJobModel job = new ScheduleJobModel();
-	job.setJobId("JobGetCommitDetails");
-	job.setPreviousFireTime(context.getFireTime());
-	job.setNextFireTime(context.getNextFireTime());
-	job.setJobStatus("Completed");
-	job.setjobscheduleInterval("0 0/5 * * * ?");
-	scheduleService.saveSchedule(job);
-    
     LOG.info("JobGetCommitDetails next scheduled time:" + context.getNextFireTime());
   }
 

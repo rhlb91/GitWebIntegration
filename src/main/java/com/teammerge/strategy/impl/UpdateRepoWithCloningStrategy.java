@@ -57,8 +57,8 @@ public class UpdateRepoWithCloningStrategy implements CloneStrategy {
     String remoteRepoPath = companyService.getRemoteUrlForProject(repoName);
 
     if (StringUtils.isEmpty(remoteRepoPath)) {
-      LOG.error("Cannot clone or update repository, Reason: remoteRepoPath is null for repo "
-          + repoName);
+      LOG.error(
+          "Cannot clone or update repository, Reason: remoteRepoPath is null for repo " + repoName);
       return null;
     }
 
