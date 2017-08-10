@@ -345,11 +345,7 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
 
       long startTime = System.currentTimeMillis();
-
       repositories = repositoryDao.fetchAllRepositoryNames();
-
-      System.out.println("repositories Name--->" + repositories);
-
 
       if (CollectionUtils.isEmpty(repositories)) {
         return null;
@@ -1230,10 +1226,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     Repository r = getRepository(repositoryName, false);
 
     RevCommit commit = null;
-    RevTree tree = null;
     try (RevWalk walk = new RevWalk(r)) {
       commit = walk.parseCommit(r.resolve(commitId));
-      tree = walk.parseTree(commit.getTree().getId());
       walk.dispose();
     }
 
@@ -1251,15 +1245,15 @@ public class RepositoryServiceImpl implements RepositoryService {
       paths.add(0, model);
     }
 
-    if (isDebugOn()) {
-      for (PathModel p : paths) {
-        String s =
-            p.name + "--" + p.path + "--" + p.mode + "--" + p.size + "--" + p.commitId + "--"
-                + p.objectId + "--" + p.isFile();
-        LOG.debug(s);
-      }
-
-    }
+    // if (isDebugOn()) {
+    // for (PathModel p : paths) {
+    // String s =
+    // p.name + "--" + p.path + "--" + p.mode + "--" + p.size + "--" + p.commitId + "--"
+    // + p.objectId + "--" + p.isFile();
+    // LOG.debug(s);
+    // }
+    //
+    // }
     return paths;
   }
 

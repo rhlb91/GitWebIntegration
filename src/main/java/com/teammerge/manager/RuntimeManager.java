@@ -37,6 +37,8 @@ public class RuntimeManager implements IRuntimeManager {
 
   private File baseFolder;
 
+  private File repoFolderPath;
+
   private TimeZone timezone;
 
   @Inject
@@ -44,19 +46,22 @@ public class RuntimeManager implements IRuntimeManager {
 
   @Inject
   public RuntimeManager(IStoredSettings settings, XssFilter xssFilter) {
-    this(settings, xssFilter, null);
+    this(settings, xssFilter, null, null);
   }
 
-  public RuntimeManager(IStoredSettings settings, XssFilter xssFilter, File baseFolder) {
+  public RuntimeManager(IStoredSettings settings, XssFilter xssFilter, File baseFolder,
+      File repoFolder) {
     this.settings = settings;
     this.settingsModel = new ServerSettings();
     this.serverStatus = new ServerStatus();
     this.xssFilter = xssFilter;
     this.baseFolder = baseFolder == null ? new File("") : baseFolder;
+    this.repoFolderPath = repoFolder == null ? new File("") : repoFolder;
   }
 
   public RuntimeManager start() {
     logger.info("Basefolder  : " + baseFolder.getAbsolutePath());
+    logger.info("Repository folder  : " + repoFolderPath.getAbsolutePath());
     logger.info("Settings    : " + settings.toString());
     logTimezone("JVM timezone: ", TimeZone.getDefault());
     logTimezone("App timezone: ", getTimezone());
@@ -170,9 +175,9 @@ public class RuntimeManager implements IRuntimeManager {
 
   /**
    * Returns the file object which may have it's base-path determined by environment variables for
-   * running on a cloud hosting service. All GitWebIntegration file or folder retrievals are (at least
-   * initially) funneled through this method so it is the correct point to globally override/alter
-   * filesystem access based on environment or some other indicator.
+   * running on a cloud hosting service. All GitWebIntegration file or folder retrievals are (at
+   * least initially) funneled through this method so it is the correct point to globally
+   * override/alter filesystem access based on environment or some other indicator.
    *
    * @return the file
    */
