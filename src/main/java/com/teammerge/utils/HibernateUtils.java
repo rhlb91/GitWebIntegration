@@ -43,13 +43,13 @@ public class HibernateUtils {
   }
 
   public static void closeCurrentSession() {
-    printStats(stats);
+    //printStats(stats);
     currentSession.close();
     stats=null;
   }
 
   public static void closeCurrentSessionwithTransaction() {
-    printStats(stats);
+    //printStats(stats);
     currentTransaction.commit();
     currentSession.close();
     stats=null;
@@ -62,7 +62,6 @@ public class HibernateUtils {
    * @return
    */
   public static Session getCurrentSession() {
-	  System.out.println("Enter in HU for getCurrentSession");
     return currentSession;
   }
 

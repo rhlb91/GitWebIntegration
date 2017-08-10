@@ -44,6 +44,16 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
   
     fetchAndSaveBranchAndCommitDetails();
     
+    /**
+     * To Auto save/update the NextFireTime based on ScheduleInterval Time stored in Database.
+     **/
+    ScheduleService scheduleService = ApplicationContextUtils.getBean(ScheduleService.class);
+    ScheduleJobModel job = scheduleService.getSchedule("JobGetCommitDetails");
+    job.setPreviousFireTime(context.getFireTime());
+    job.setNextFireTime(context.getNextFireTime());
+    scheduleService.saveSchedule(job);
+
+    
     LOG.info("JobGetCommitDetails next scheduled time:" + context.getNextFireTime());
   }
 
