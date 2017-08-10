@@ -8,8 +8,8 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.stat.Statistics;
 
 public class HibernateUtils {
-	
-	
+
+
 
   private static Session currentSession;
 
@@ -18,7 +18,7 @@ public class HibernateUtils {
   private static SessionFactory sessionFactory = null;
 
   private static Statistics stats = null;
- 
+
   public static SessionFactory getSessionFactory() {
     if (sessionFactory == null) {
       Configuration configuration = new Configuration().configure();
@@ -43,16 +43,18 @@ public class HibernateUtils {
   }
 
   public static void closeCurrentSession() {
-    //printStats(stats);
+    // printStats(stats);
     currentSession.close();
-    stats=null;
+    stats = null;
   }
 
   public static void closeCurrentSessionwithTransaction() {
-    //printStats(stats);
+    // printStats(stats);
     currentTransaction.commit();
-    currentSession.close();
-    stats=null;
+    if (currentSession.isOpen()) {
+      currentSession.close();
+    }
+    stats = null;
   }
 
   /**

@@ -10,7 +10,7 @@
 		<property name="hibernate.connection.username">TMGit</property>
 		<property name="hibernate.connection.password">TMGit</property>
 		<property name="hibernate.hbm2ddl.auto">update</property>
-		<property name="show_sql">true</property>
+		<property name="show_sql">false</property>
 		<property name="hibernate.current_session_context_class">thread</property>
 
 		<!-- enabling Second Level Cache -->
@@ -20,11 +20,12 @@
 
 		<!-- entity mappings -->
 		<mapping class="com.teammerge.model.BranchModel" />
-		<mapping class="com.teammerge.model.RepositoryModel"/>
+		<!-- <mapping class="com.teammerge.model.RepositoryModel"/> -->
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
 		<mapping class="com.teammerge.model.CommitModel"/>
 		<mapping class="com.teammerge.model.ScheduleJobModel"/>
+		<mapping class="com.teammerge.model.RepoCloneStatusModel"/>
 		
 	</session-factory>
 </hibernate-configuration>

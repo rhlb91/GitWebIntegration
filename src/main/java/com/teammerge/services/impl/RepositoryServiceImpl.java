@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import com.teammerge.Constants;
 import com.teammerge.Constants.AccessRestrictionType;
 import com.teammerge.Constants.AuthorizationControl;
+import com.teammerge.Constants.CloneStatus;
 import com.teammerge.Constants.CommitMessageRenderer;
 import com.teammerge.Constants.MergeType;
 import com.teammerge.IStoredSettings;
@@ -63,6 +64,7 @@ import com.teammerge.model.Metric;
 import com.teammerge.model.PathModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RegistrantAccessPermission;
+import com.teammerge.model.RepoCloneStatusModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
 import com.teammerge.services.CompanyService;
@@ -118,6 +120,8 @@ public class RepositoryServiceImpl implements RepositoryService {
   @Resource(name = "repoCredentialDao")
   private RepoCredentialDao repoCredentialDao;
 
+  BaseDao<RepoCloneStatusModel> repoCloneStatusDao;
+
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
   }
@@ -142,10 +146,28 @@ public class RepositoryServiceImpl implements RepositoryService {
       return null;
     }
 
+    List<RepoCloneStatusModel> repoStatusModels = repoCloneStatusDao.fetchAll();
+    RepoCloneStatusModel repoStatusModel = null;
     for (String repoName : list) {
-      RepositoryModel model = getRepositoryModel(repoName);
-      if (model != null) {
-        repositories.add(model);
+
+      if (CollectionUtils.isEmpty(repoStatusModels)) {
+        LOG.error("No Repo status entry found in DB for repo " + repoName);
+        return null;
+      }
+
+      for (RepoCloneStatusModel repoStatusModelItem : repoStatusModels) {
+        if (repoName.equals(repoStatusModelItem.getRepoName())) {
+          repoStatusModel = repoStatusModelItem;
+          break;
+        }
+      }
+
+      if (repoStatusModel != null
+          && CloneStatus.forName(repoStatusModel.getCloneStatus()).equals(CloneStatus.COMPLETED)) {
+        RepositoryModel model = getRepositoryModel(repoName);
+        if (model != null) {
+          repositories.add(model);
+        }
       }
     }
     LOG.info(MessageFormat.format("{0} repository models loaded in {1}", repositories.size(),
@@ -167,8 +189,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     }
 
     if (isDebugOn()) {
-      LOG.debug("Repository fetched in "
-          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
+      LOG.debug(
+          "Repository fetched in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
     return repo;
   }
@@ -274,12 +296,11 @@ public class RepositoryServiceImpl implements RepositoryService {
       // is invalid
       long startTime = System.currentTimeMillis();
 
-      repositories =
-          JGitUtils.getRepositoryList(getRepositoriesFolder(),
-              getSettings().getBoolean(Keys.git.onlyAccessBareRepositories, false), getSettings()
-                  .getBoolean(Keys.git.searchRepositoriesSubfolders, true), getSettings()
-                  .getInteger(Keys.git.searchRecursionDepth, -1),
-              getSettings().getStrings(Keys.git.searchExclusions));
+      repositories = JGitUtils.getRepositoryList(getRepositoriesFolder(),
+          getSettings().getBoolean(Keys.git.onlyAccessBareRepositories, false),
+          getSettings().getBoolean(Keys.git.searchRepositoriesSubfolders, true),
+          getSettings().getInteger(Keys.git.searchRecursionDepth, -1),
+          getSettings().getStrings(Keys.git.searchExclusions));
 
       if (!getSettings().getBoolean(Keys.git.cacheRepositoryList, true)) {
         // we are not caching
@@ -846,8 +867,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     if (model.isBare()) {
       model.setName(com.teammerge.utils.FileUtils.getRelativePath(basePath, r.getDirectory()));
     } else {
-      model.setName(com.teammerge.utils.FileUtils.getRelativePath(basePath, r.getDirectory()
-          .getParentFile()));
+      model.setName(com.teammerge.utils.FileUtils.getRelativePath(basePath,
+          r.getDirectory().getParentFile()));
     }
     if (StringUtils.isEmpty(model.getName())) {
       // Repository is NOT located relative to the base folder because it
@@ -865,9 +886,8 @@ public class RepositoryServiceImpl implements RepositoryService {
       if (getConfig(config, "description", null) == null) {
         File descFile = new File(r.getDirectory(), "description");
         if (descFile.exists()) {
-          String desc =
-              com.teammerge.utils.FileUtils.readContent(descFile,
-                  System.getProperty("line.separator"));
+          String desc = com.teammerge.utils.FileUtils.readContent(descFile,
+              System.getProperty("line.separator"));
           if (!desc.toLowerCase().startsWith("unnamed repository")) {
             config.setString(Constants.CONFIG_GITBLIT, null, "description", desc);
           }
@@ -881,8 +901,8 @@ public class RepositoryServiceImpl implements RepositoryService {
       model.setRequireApproval(getConfig(config, "requireApproval",
           settings.getBoolean(Keys.tickets.requireApproval, false)));
       model.setMergeTo(getConfig(config, "mergeTo", null));
-      model.setMergeType(MergeType.fromName(getConfig(config, "mergeType",
-          settings.getString(Keys.tickets.mergeType, null))));
+      model.setMergeType(MergeType.fromName(
+          getConfig(config, "mergeType", settings.getString(Keys.tickets.mergeType, null))));
       model.setUseIncrementalPushTags(getConfig(config, "useIncrementalPushTags", false));
       model.setIncrementalPushTagPrefix(getConfig(config, "incrementalPushTagPrefix", null));
       model.setAllowForks(getConfig(config, "allowForks", true));
@@ -901,16 +921,16 @@ public class RepositoryServiceImpl implements RepositoryService {
        * model.federationStrategy = FederationStrategy.fromName(getConfig( config,
        * "federationStrategy", null));
        */
-      model.setFederationSets(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "federationSets"))));
+      model.setFederationSets(new ArrayList<String>(
+          Arrays.asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "federationSets"))));
       model.setFederated(getConfig(config, "isFederated", false));
       model.setGcThreshold(getConfig(config, "gcThreshold",
           settings.getString(Keys.git.defaultGarbageCollectionThreshold, "500KB")));
       model.setGcPeriod(getConfig(config, "gcPeriod",
           settings.getInteger(Keys.git.defaultGarbageCollectionPeriod, 7)));
       try {
-        model.setLastGC(new SimpleDateFormat(Constants.ISO8601).parse(getConfig(config, "lastGC",
-            "1970-01-01'T'00:00:00Z")));
+        model.setLastGC(new SimpleDateFormat(Constants.ISO8601)
+            .parse(getConfig(config, "lastGC", "1970-01-01'T'00:00:00Z")));
       } catch (Exception e) {
         model.setLastGC(new Date(0));
       }
@@ -921,16 +941,16 @@ public class RepositoryServiceImpl implements RepositoryService {
         model.setOrigin(model.getOrigin().replace('\\', '/'));
         model.setMirror(config.getBoolean("remote", "origin", "mirror", false));
       }
-      model.setPreReceiveScripts(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "preReceiveScript"))));
-      model.setPostReceiveScripts(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "postReceiveScript"))));
-      model.setMailingLists(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "mailingList"))));
-      model.setIndexedBranches(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "indexBranch"))));
-      model.setMetricAuthorExclusions(new ArrayList<String>(Arrays.asList(config.getStringList(
-          Constants.CONFIG_GITBLIT, null, "metricAuthorExclusions"))));
+      model.setPreReceiveScripts(new ArrayList<String>(
+          Arrays.asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "preReceiveScript"))));
+      model.setPostReceiveScripts(new ArrayList<String>(Arrays
+          .asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "postReceiveScript"))));
+      model.setMailingLists(new ArrayList<String>(
+          Arrays.asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "mailingList"))));
+      model.setIndexedBranches(new ArrayList<String>(
+          Arrays.asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "indexBranch"))));
+      model.setMetricAuthorExclusions(new ArrayList<String>(Arrays
+          .asList(config.getStringList(Constants.CONFIG_GITBLIT, null, "metricAuthorExclusions"))));
 
       // Custom defined properties
       model.setCustomFields(new LinkedHashMap<String, String>());
@@ -1084,8 +1104,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     String remoteRepoUrl = companyService.getRemoteUrlForCompanyAndProject(companyId, projectId);
 
     if (remoteRepoUrl == null) {
-      result.put("reason", "Remote url not found with companyId: " + companyId + ", projectId: "
-          + projectId);
+      result.put("reason",
+          "Remote url not found with companyId: " + companyId + ", projectId: " + projectId);
       return result;
     }
 
@@ -1093,8 +1113,8 @@ public class RepositoryServiceImpl implements RepositoryService {
         repoCredentialDao.fetchEntity(new RepoCredentialsKey(companyId, projectId));
 
     if (repoCreds == null) {
-      result.put("reason", "Credentails not found for companyId: " + companyId + ", projectId: "
-          + projectId);
+      result.put("reason",
+          "Credentails not found for companyId: " + companyId + ", projectId: " + projectId);
       return result;
     }
 
@@ -1140,6 +1160,10 @@ public class RepositoryServiceImpl implements RepositoryService {
     Repository repository = null;
 
     List<RepositoryModel> repositories = getRepositoryModels();
+
+    for (RepositoryModel repositoryModel : repositories) {
+      LOG.debug(repositoryModel.getName());
+    }
 
     if (CollectionUtils.isEmpty(repositories)) {
       LOG.error("No repositories found in Database!!");
@@ -1189,8 +1213,8 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   @Override
-  public List<String> getTree(String commitId) throws MissingObjectException,
-      IncorrectObjectTypeException, IOException {
+  public List<String> getTree(String commitId)
+      throws MissingObjectException, IncorrectObjectTypeException, IOException {
 
     List<String> fileTree = new ArrayList<>();
 
@@ -1275,6 +1299,11 @@ public class RepositoryServiceImpl implements RepositoryService {
     return result;
   }
 
+  @Autowired
+  public void setRepoCloneStatusDao(BaseDao<RepoCloneStatusModel> baseDao) {
+    baseDao.setClazz(RepoCloneStatusModel.class);
+    this.repoCloneStatusDao = baseDao;
+  }
 
   @Override
   public void saveRepository(RepositoryModel repositoryModel) {

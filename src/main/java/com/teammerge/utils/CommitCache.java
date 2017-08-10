@@ -31,7 +31,7 @@ public class CommitCache {
 
   protected final Map<String, ObjectCache<List<RepositoryCommit>>> cache;
 
-  protected int cacheDays = -1;
+  protected int cacheDays = 20;
 
   public static CommitCache instance() {
     return instance;
@@ -171,10 +171,10 @@ public class CommitCache {
             // we don't have any cached commits for this branch, reload
             commits = get(repositoryName, repository, branch, cacheCutoffDate);
             repoCache.updateObject(branchKey, tipDate, commits);
-            logger.debug(MessageFormat.format(
+           /* logger.debug(MessageFormat.format(s
                 "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", commits.size(),
                 repositoryName, branch, cacheCutoffDate,
-                LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
+                LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));*/
           } else {
             // incrementally update cache since the last cached commit
             ObjectId sinceCommit = commits.get(0).getId();
@@ -213,7 +213,7 @@ public class CommitCache {
       // not caching or request outside cache window
       list = get(repositoryName, repository, branch, sinceDate);
       logger.debug(MessageFormat.format(
-          "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", list.size(),
+          "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", list.size(),
           repositoryName, branch, sinceDate,
           LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
     }

@@ -16,15 +16,19 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.teammerge.Constants;
+import com.teammerge.Constants.CloneStatus;
+import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.entity.RepoCredentialsKey;
 import com.teammerge.model.GitOptions;
-import com.teammerge.model.RepositoryModel;
+import com.teammerge.model.RepoCloneStatusModel;
 import com.teammerge.services.CompanyService;
 import com.teammerge.services.GitService;
 import com.teammerge.strategy.CloneStrategy;
@@ -42,6 +46,8 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
   private CompanyService companyService;
 
   private RepoCredentialDao repoCredentialDao;
+
+  BaseDao<RepoCloneStatusModel> repoCloneStatusDao;
 
   @Value("${app.debug}")
   private String debug;
@@ -90,11 +96,24 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       gitOptions.setUsername(repoCreds.getUsername());
       gitOptions.setPassword(repoCreds.getPassword());
 
+      RepoCloneStatusModel repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
+      if (repoCloneStatus == null) {
+        repoCloneStatus = new RepoCloneStatusModel();
+        repoCloneStatus.setRepoName(repositoryName);
+      }
+      repoCloneStatus.setCloneStatus(Constants.CloneStatus.IN_PROGRESS.name());
+      repoCloneStatusDao.saveEntity(repoCloneStatus);
 
       try (Git git = gitService.cloneRepository(gitOptions);) {
         repo = git.getRepository();
+
+
       } catch (GitAPIException e) {
         LOG.error("Error cloning repository from path " + remoteRepoPath, e);
+      } finally {
+        repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
+        repoCloneStatus.setCloneStatus(Constants.CloneStatus.COMPLETED.name());
+        repoCloneStatusDao.saveEntity(repoCloneStatus);
       }
 
       return repo;
@@ -175,5 +194,10 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
     this.repoCredentialDao = repoCredentialDao;
   }
 
+  @Autowired
+  public void setRepoCloneStatusDao(BaseDao<RepoCloneStatusModel> baseDao) {
+    baseDao.setClazz(RepoCloneStatusModel.class);
+    this.repoCloneStatusDao = baseDao;
+  }
 
 }
