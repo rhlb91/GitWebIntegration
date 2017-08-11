@@ -29,7 +29,7 @@ public class CommitModel implements Serializable, Comparable<CommitModel> {
   @Column(name = "commit_author")
   private PersonIdent commitAuthor;
 
-  @Column(name = "short_Message")
+  @Column(name = "short_Message", length = 512)
   private String shortMessage;
 
   @Column(name = "trimmed_Message")

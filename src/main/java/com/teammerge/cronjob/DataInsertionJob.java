@@ -49,24 +49,23 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
     job.setNextFireTime(context.getNextFireTime());
     scheduleService.saveSchedule(job);
 
-    LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime()+"\n");
+    LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime() + "\n");
   }
 
   public synchronized void fetchAndSaveBranchAndCommitDetails() {
-
     List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(true);
 
     if (CollectionUtils.isNotEmpty(customRefModels)) {
       for (CustomRefModel customRef : customRefModels) {
 
         Date sinceDate =
-            CommitLastChangeCache.instance().getLastChangeDate(customRef.getRepositoryName());
-          
+            CommitLastChangeCache.instance().getLastChangeDate(getUniqueName(customRef));
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(sinceDate);
         calendar.add(Calendar.SECOND, 1);
         sinceDate = calendar.getTime();
-        
+
         List<RepositoryCommit> commits =
             CommitCache.instance().getCommits(customRef.getRepositoryName(),
                 customRef.getRepository(), customRef.getRefModel().getName(), sinceDate);
@@ -89,15 +88,19 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
               }
               saveCommit(commit, customRef);
             } catch (InvalidArgumentsException e) {
-              LOG.error("Cannot create new commit model from cronjob!!"
-                  + getClass().getSimpleName(), e);
+              LOG.error(
+                  "Cannot create new commit model from cronjob!!" + getClass().getSimpleName(), e);
             }
           }
 
-          CommitLastChangeCache.instance().updateLastChangeDate(customRef.getRepositoryName(),
+          CommitLastChangeCache.instance().updateLastChangeDate(getUniqueName(customRef),
               mostRecentCommitDate);
         }
       }
     }
+  }
+
+  private String getUniqueName(CustomRefModel customRef) {
+    return customRef.getRepositoryName() + "_" + customRef.getRefModel().getName();
   }
 }
