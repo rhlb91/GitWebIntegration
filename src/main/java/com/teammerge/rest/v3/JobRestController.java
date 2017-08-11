@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,6 +34,8 @@ public class JobRestController extends AbstractController {// class
 
   @GET
   @Path("/updateAllBranchs")
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response runCronJobForBranch() {
 
     Map<String, Object> result = new HashMap<>();
@@ -44,11 +48,13 @@ public class JobRestController extends AbstractController {// class
 
     result.put("result", output);
     result.put("failedEntries", failedBranches);
-    return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
   @Path("/updateAllCommits")
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response runCronJobForCommit() {
     Map<String, Object> result = new HashMap<>();
 
@@ -60,19 +66,9 @@ public class JobRestController extends AbstractController {// class
     }
     result.put("result", output);
     result.put("failedEntries", failedCommits);
-    return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
   }
   
-  @GET
-  @Path("/updateAllRepository")
-  public Response getCronJobForRepository() {
-    // CronJob obj = new CronJob();
-    cronJob.runJobSavingForRepository();
-    String output = "Get Repository Details has been run sucessfully";
-    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build();
-  }
-
-
   @GET
   @Path("/updateAllDetails")
   public Response runSaveAllDetails() {

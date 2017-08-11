@@ -56,13 +56,13 @@ public class RestControllerV2 extends AbstractController {
 
   @Resource(name = "commitDiffValidator")
   private CommitDiffValidator diffValidator;
-  
+
   @Resource(name = "newBranchValidator")
   private CreateNewBranchValidator newBranchValidator;
-  
+
   @Resource(name = "repoFormValidator")
   private RepoFormValidator repoFormValidator;
-  
+
   @Resource(name = "commitFormValidator")
   private CommitFormValidator commitFormValidator;
 
@@ -88,7 +88,8 @@ public class RestControllerV2 extends AbstractController {
   @Path("/branch/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response getBranchDetails(@PathParam("id") String branchId) {
-    List<BranchModel> branchDetailModel = getBranchService().getBranchDetailsForBranchLike(branchId);
+    List<BranchModel> branchDetailModel =
+        getBranchService().getBranchDetailsForBranchLike(branchId);
     String jsonOutput = JacksonUtils.toJson(branchDetailModel);
     String finalOutput = convertToFinalOutput(jsonOutput);
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
@@ -144,6 +145,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
+
   @POST
   @Path("/addCommit")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -153,7 +155,8 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       commitFormValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
     }
     try {
 
@@ -216,9 +219,8 @@ public class RestControllerV2 extends AbstractController {
       }
     }
 
-    finalOutput =
-        convertToFinalOutput("{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": "
-            + numOfCommits + "}");
+    finalOutput = convertToFinalOutput(
+        "{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": " + numOfCommits + "}");
 
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
@@ -246,14 +248,15 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       repoFormValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
     }
     try {
-      getCompanyDetailService().saveOrUpdateCompanyDetails(repoForm);
+      getCompanyService().saveOrUpdateCompanyDetails(repoForm);
       getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
 
       result.put("result", "Saved successfully!!");
-      } catch (RevisionSyntaxException e) {
+    } catch (RevisionSyntaxException e) {
       result.put("result", "error");
       result.put("reason", e.getMessage());
       result.put("detailedReason", e);
@@ -261,7 +264,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
-  
+
   @GET
   @Path("/allRepos/")
   public Response getAllRepoModels() {
@@ -271,21 +274,28 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
         .build();
   }
-  
+
   @POST
   @Path("/createBranch")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response createBranch(final CreateNewBranchForm form) throws IOException {
+  public Response createBranch(final CreateNewBranchForm form) {
     Map<String, Object> result = new HashMap<>();
     ValidationResult vr = newBranchValidator.validate(form);
 
     if (vr.hasErrors()) {
       newBranchValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
     }
     try {
-      Map<String, Object> results = getRepositoryService().createBranch(form.getCompanyId(),
-          form.getProjectId(), form.getBranchName());
+      Map<String, Object> results = null;
+      try {
+        results = getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
+            form.getBranchName(), form.getStartingPoint());
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
       result.put("result", "success");
       result.put("output", results);
@@ -297,7 +307,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
-  
+
   @POST
   @Path("/commitDiff")
   @Consumes("application/json")
@@ -308,7 +318,8 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       diffValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
     }
 
     try {
