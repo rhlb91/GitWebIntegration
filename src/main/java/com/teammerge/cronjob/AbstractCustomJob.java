@@ -14,6 +14,7 @@ import com.teammerge.populator.CommitPopulator;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.services.ScheduleService;
 
 public abstract class AbstractCustomJob {
 
@@ -26,15 +27,11 @@ public abstract class AbstractCustomJob {
   private static BranchService branchService;
 
   protected static RepositoryService repositoryService;
-  
+
+  protected static ScheduleService scheduleService;
+
   public AbstractCustomJob() {
-    // repositoryService = ApplicationContextUtils.getBean(RepositoryService.class);
-    /*
-     * commitPopulator = ApplicationContextUtils.getBean(CommitPopulator.class); branchPopulator =
-     * ApplicationContextUtils.getBean(BranchPopulator.class); branchService =
-     * ApplicationContextUtils.getBean(BranchService.class); commitService =
-     * ApplicationContextUtils.getBean(CommitService.class);
-     */
+
   }
 
   protected void saveCommit(RepositoryCommit commit, CustomRefModel branch)
@@ -44,11 +41,15 @@ public abstract class AbstractCustomJob {
     commitService.saveCommit(newCommit);
   }
 
-  protected void saveBranch(CustomRefModel branch, List<RepositoryCommit> commits)
+  protected void saveOrUpdateBranch(CustomRefModel branch, List<RepositoryCommit> commits)
       throws InvalidArgumentsException {
-    BranchModel newbranch = new BranchModel();
-    branchPopulator.populate(branch, commits.size(), newbranch);
-    branchService.saveBranch(newbranch);
+    BranchModel branchModel = branchService.getBranchDetails(branch.getRefModel().getName());
+
+    if (branchModel == null) {
+      branchModel = new BranchModel(branch.getRefModel().getName(), branch.getRepositoryName());
+    }
+    branchPopulator.populate(branch, branchModel.getNumOfCommits() + commits.size(), branchModel);
+    branchService.saveBranch(branchModel);
   }
 
   @Required
@@ -76,4 +77,8 @@ public abstract class AbstractCustomJob {
     branchPopulator = branchPopulator1;
   }
 
+  @Required
+  public void setScheduleService(ScheduleService scheduleService1) {
+    scheduleService = scheduleService1;
+  }
 }

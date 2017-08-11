@@ -55,7 +55,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
               customRefModel.getRepository(), customRefModel.getRefModel().getName(), minimumDate);
 
       try {
-        saveBranch(customRefModel, commits);
+        saveOrUpdateBranch(customRefModel, commits);
       } catch (InvalidArgumentsException e) {
         failedBranches.add(customRefModel.getRefModel());
         LOG.error("Cannot create new branch model for repo " + customRefModel.getRepositoryName()
@@ -136,7 +136,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
 
 
       try {
-        saveBranch(customRefModel, commits);
+        saveOrUpdateBranch(customRefModel, commits);
       } catch (InvalidArgumentsException e) {
         failedEntries.add(customRefModel.getRefModel());
         LOG.error("Cannot create new branch model from cronjob !!" + getClass().getSimpleName(), e);

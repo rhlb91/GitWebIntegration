@@ -1,6 +1,7 @@
 package com.teammerge.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.teammerge.utils.TimeUtils;
 
 @Entity
 @Table(name = "branch_details")
@@ -24,7 +27,7 @@ public class BranchModel implements Serializable {
   @Id
   @Column(name = "short_name")
   private String shortName;
-  
+
   @Column(name = "num_Of_commits")
   private int numOfCommits;
 
@@ -36,6 +39,14 @@ public class BranchModel implements Serializable {
 
   @Column(name = "repository_id")
   private String repositoryId;
+
+  public BranchModel(String branchName, String repoName) {
+    this.branchId = branchName;
+    numOfCommits = 0;
+    numOfPull = 0;
+    lastModifiedDate = "";
+    this.repositoryId = repoName;
+  }
 
   @Override
   public String toString() {

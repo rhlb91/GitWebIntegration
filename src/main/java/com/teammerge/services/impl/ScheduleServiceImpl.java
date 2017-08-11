@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.dao.BaseDao;
-import com.teammerge.dao.ScheduleDao;
-import com.teammerge.dao.impl.BranchDao;
-import com.teammerge.entity.Company;
-import com.teammerge.model.BranchModel;
 import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.services.ScheduleService;
 

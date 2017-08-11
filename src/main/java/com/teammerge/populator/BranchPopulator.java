@@ -15,12 +15,13 @@ public class BranchPopulator {
   private String branchDateFormat;
 
 
-  public void populate(CustomRefModel source1, int numOfCommits, BranchModel target) throws GitWebException.InvalidArgumentsException {
-    
-    if(source1 ==null || target ==null){
+  public void populate(CustomRefModel source1, int numOfCommits, BranchModel target)
+      throws GitWebException.InvalidArgumentsException {
+
+    if (source1 == null || target == null) {
       throw new GitWebException.InvalidArgumentsException("One of the parameters null");
     }
-    
+
     target.setBranchId(source1.getRefModel().getName());
     target.setNumOfCommits(numOfCommits);
     target.setRepositoryId(source1.getRepositoryName());
@@ -28,9 +29,10 @@ public class BranchPopulator {
     target.setLastModifiedDate(TimeUtils.convertToDateFormat(source1.getRefModel().getDate(),
         branchDateFormat));
 
+    target.setShortName(source1.getRefModel().displayName);
+
     // Not used as of now, but can be used in future
     target.setNumOfPull(0);
-    target.setShortName(source1.getRefModel().displayName);
 
   }
 }
