@@ -71,6 +71,8 @@ public class JobRestController extends AbstractController {// class
   
   @GET
   @Path("/updateAllDetails")
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response runSaveAllDetails() {
     Map<String, Object> result = new HashMap<>();
 
@@ -82,6 +84,6 @@ public class JobRestController extends AbstractController {// class
     }
     result.put("result", output);
     result.put("failedEntries", failedEntries);
-    return Response.status(200).entity(result).header("Access-Control-Allow-Origin", "*").build();
+    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
   }
 }

@@ -24,7 +24,6 @@ public class BranchModel implements Serializable {
   @Column(name = "branch_id")
   private String branchId;
 
-  @Id
   @Column(name = "short_name")
   private String shortName;
 
@@ -40,11 +39,15 @@ public class BranchModel implements Serializable {
   @Column(name = "repository_id")
   private String repositoryId;
 
+  public BranchModel() {
+    this(null, "");
+  }
+
   public BranchModel(String branchName, String repoName) {
     this.branchId = branchName;
-    numOfCommits = 0;
-    numOfPull = 0;
-    lastModifiedDate = "";
+    this.numOfCommits = 0;
+    this.numOfPull = 0;
+    this.lastModifiedDate = "";
     this.repositoryId = repoName;
   }
 

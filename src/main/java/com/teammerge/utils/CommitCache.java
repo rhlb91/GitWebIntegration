@@ -171,19 +171,21 @@ public class CommitCache {
             // we don't have any cached commits for this branch, reload
             commits = get(repositoryName, repository, branch, cacheCutoffDate);
             repoCache.updateObject(branchKey, tipDate, commits);
-           /* logger.debug(MessageFormat.format(s
-                "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", commits.size(),
-                repositoryName, branch, cacheCutoffDate,
-                LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));*/
+            /*
+             * logger.debug(MessageFormat.format(s
+             * "parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", commits.size(),
+             * repositoryName, branch, cacheCutoffDate, LoggerUtils.getTimeInSecs(start,
+             * System.currentTimeMillis())));
+             */
           } else {
             // incrementally update cache since the last cached commit
             ObjectId sinceCommit = commits.get(0).getId();
             List<RepositoryCommit> incremental =
                 get(repositoryName, repository, branch, sinceCommit);
-            logger.info(MessageFormat.format(
-                "incrementally added {0} commits to cache for {1}:{2} in {3}", incremental.size(),
-                repositoryName, branch,
-                LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
+            logger.info(
+                MessageFormat.format("incrementally added {0} commits to cache for {1}:{2} in {3}",
+                    incremental.size(), repositoryName, branch,
+                    LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
             incremental.addAll(commits);
             repoCache.updateObject(branchKey, tipDate, incremental);
             commits = incremental;
@@ -205,16 +207,18 @@ public class CommitCache {
           list = reduce(commits, sinceDate);
         }
       }
-      logger.debug(MessageFormat.format(
-          "retrieved {0} commits from cache of {1}:{2} since {3,date,yyyy-MM-dd} in {4} msecs",
-          list.size(), repositoryName, branch, sinceDate,
-          TimeUnit.NANOSECONDS.toMillis(System.currentTimeMillis() - start)));
+      if (list.size() > 0) {
+        logger.debug(MessageFormat.format(
+            "retrieved {0} commits from cache of {1}:{2} since {3,date,yyyy-MM-dd} in {4} msecs",
+            list.size(), repositoryName, branch, sinceDate,
+            TimeUnit.NANOSECONDS.toMillis(System.currentTimeMillis() - start)));
+      }
     } else {
       // not caching or request outside cache window
       list = get(repositoryName, repository, branch, sinceDate);
       logger.debug(MessageFormat.format(
-          "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}", list.size(),
-          repositoryName, branch, sinceDate,
+          "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
+          list.size(), repositoryName, branch, sinceDate,
           LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
     }
     return list;

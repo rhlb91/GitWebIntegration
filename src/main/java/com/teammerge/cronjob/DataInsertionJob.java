@@ -1,5 +1,6 @@
 package com.teammerge.cronjob;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
 
   public void execute(JobExecutionContext context) throws JobExecutionException {
 
-    LOG.debug("Executing the DataInsertion Job - " + context.getFireTime());
+    LOG.debug("\nExecuting the DataInsertion Job - " + context.getFireTime());
 
     fetchAndSaveBranchAndCommitDetails();
 
@@ -48,7 +49,7 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
     job.setNextFireTime(context.getNextFireTime());
     scheduleService.saveSchedule(job);
 
-    LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime());
+    LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime()+"\n");
   }
 
   public synchronized void fetchAndSaveBranchAndCommitDetails() {
@@ -60,6 +61,12 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
 
         Date sinceDate =
             CommitLastChangeCache.instance().getLastChangeDate(customRef.getRepositoryName());
+          
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(sinceDate);
+        calendar.add(Calendar.SECOND, 1);
+        sinceDate = calendar.getTime();
+        
         List<RepositoryCommit> commits =
             CommitCache.instance().getCommits(customRef.getRepositoryName(),
                 customRef.getRepository(), customRef.getRefModel().getName(), sinceDate);

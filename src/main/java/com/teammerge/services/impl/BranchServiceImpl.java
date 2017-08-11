@@ -71,7 +71,7 @@ public class BranchServiceImpl implements BranchService {
   }
 
   @Autowired
-  public void setBaseDao(BranchDao branchDao) {
+  public void setBranchDao(BranchDao branchDao) {
     branchDao.setClazz(BranchModel.class);
     this.branchDao = branchDao;
   }
