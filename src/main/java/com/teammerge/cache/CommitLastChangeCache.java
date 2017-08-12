@@ -1,4 +1,4 @@
-package com.teammerge.utils;
+package com.teammerge.cache;
 
 import java.text.MessageFormat;
 import java.util.Date;
@@ -8,6 +8,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.teammerge.utils.StringUtils;
+import com.teammerge.utils.TimeUtils;
+
 /**
  * Caches the last commit saved in DB per repository.
  * <p>
@@ -15,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public class CommitLastChangeCache {
-  protected static final Logger logger = LoggerFactory.getLogger(CommitLastChangeCache.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(CommitLastChangeCache.class);
 
   private static final CommitLastChangeCache instance;
 
@@ -45,7 +48,7 @@ public class CommitLastChangeCache {
       hadEntries = cache.remove(repoKey) != null;
     }
     if (hadEntries) {
-      logger.info(MessageFormat.format("{0} CommitLastChange cache cleared", repositoryName));
+      LOG.info(MessageFormat.format("{0} CommitLastChange cache cleared", repositoryName));
     }
   }
 

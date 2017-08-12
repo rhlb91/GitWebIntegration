@@ -451,9 +451,6 @@ public interface RepositoryService extends IManager {
    */
   void close(String repository);
   
-  
-  void saveRepository(RepositoryModel repositoryModel);
-
   /**
    * Returns true if the repository is idle (not being accessed).
    *

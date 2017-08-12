@@ -13,17 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
+import com.teammerge.cache.CommitCache;
+import com.teammerge.cache.CommitLastChangeCache;
+import com.teammerge.cache.CronJobStatusCache;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
-import com.teammerge.model.ScheduleJobModel;
-import com.teammerge.utils.CommitCache;
-import com.teammerge.utils.CommitLastChangeCache;
 
 public class DataInsertionJob extends AbstractCustomJob implements Job {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DataInsertionJob.class);
   private static final String SCHEDULE_JOB_ID = "JobGetCommitDetails";
-
-  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Value("${git.commit.timeFormat}")
   private String commitTimeFormat;
@@ -36,20 +35,33 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
   }
 
   public void execute(JobExecutionContext context) throws JobExecutionException {
+    boolean isError = false;
+    JobStatus currentJobStatus = CronJobStatusCache.instance().getJobStatus(SCHEDULE_JOB_ID);
+
+    if (JobStatusEnum.IN_PROGRESS.equals(currentJobStatus.currentStatus)) {
+      LOG.info("Could not run a new job. A job already running!!");
+      return;
+    }
 
     LOG.debug("\nExecuting the DataInsertion Job - " + context.getFireTime());
+    currentJobStatus.currentStatus = JobStatusEnum.IN_PROGRESS;
+    CronJobStatusCache.instance().updateJobStatus(SCHEDULE_JOB_ID, currentJobStatus);
 
-    fetchAndSaveBranchAndCommitDetails();
+    try {
+      fetchAndSaveBranchAndCommitDetails();
 
-    /**
-     * To auto update NextFireTime based on ScheduleInterval Time stored in Database.
-     **/
-    ScheduleJobModel job = scheduleService.getSchedule(SCHEDULE_JOB_ID);
-    job.setPreviousFireTime(context.getFireTime());
-    job.setNextFireTime(context.getNextFireTime());
-    scheduleService.saveSchedule(job);
+    } catch (Exception e) {
+      currentJobStatus.currentStatus = JobStatusEnum.ERROR;
+      isError = true;
+      LOG.error("Caught error in" + getClass().getSimpleName(), e);
+    }
 
     LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime() + "\n");
+
+    if (!isError)
+      currentJobStatus.currentStatus = JobStatusEnum.COMPLETED;
+
+    CronJobStatusCache.instance().updateJobStatus(SCHEDULE_JOB_ID, currentJobStatus);
   }
 
   public synchronized void fetchAndSaveBranchAndCommitDetails() {
@@ -88,8 +100,8 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
               }
               saveCommit(commit, customRef);
             } catch (InvalidArgumentsException e) {
-              LOG.error(
-                  "Cannot create new commit model from cronjob!!" + getClass().getSimpleName(), e);
+              LOG.error("Cannot create new commit model from cronjob!!"
+                  + getClass().getSimpleName(), e);
             }
           }
 

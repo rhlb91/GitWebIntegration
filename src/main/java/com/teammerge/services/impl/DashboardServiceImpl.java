@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
+import com.teammerge.cache.ObjectCache;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.CommitModel;
 import com.teammerge.model.DailyLogEntry;
@@ -34,7 +35,6 @@ import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.LoggerUtils;
-import com.teammerge.utils.ObjectCache;
 import com.teammerge.utils.RefLogUtils;
 import com.teammerge.utils.StringUtils;
 import com.teammerge.utils.TimeUtils;

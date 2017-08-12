@@ -1,4 +1,4 @@
-package com.teammerge.utils;
+package com.teammerge.cache;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import com.teammerge.model.ActivityModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.ActivityModel;
+import com.teammerge.utils.ArrayUtils;
+import com.teammerge.utils.JGitUtils;
+import com.teammerge.utils.LoggerUtils;
 
 public class ActivityCache {
   private static final ActivityCache instance;

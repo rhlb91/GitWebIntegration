@@ -1,4 +1,4 @@
-package com.teammerge.utils;
+package com.teammerge.cache;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
+import com.teammerge.utils.ArrayUtils;
+import com.teammerge.utils.JGitUtils;
+import com.teammerge.utils.LoggerUtils;
+import com.teammerge.utils.StringUtils;
 
 /**
  * Caches repository commits for re-use in the dashboard and activity pages.
@@ -216,10 +220,13 @@ public class CommitCache {
     } else {
       // not caching or request outside cache window
       list = get(repositoryName, repository, branch, sinceDate);
-      logger.debug(MessageFormat.format(
-          "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
-          list.size(), repositoryName, branch, sinceDate,
-          LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
+      
+      if(list.size() > 0){
+        logger.debug(MessageFormat.format(
+            "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
+            list.size(), repositoryName, branch, sinceDate,
+            LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));  
+      }
     }
     return list;
   }

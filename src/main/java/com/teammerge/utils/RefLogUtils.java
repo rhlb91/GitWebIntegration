@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teammerge.Constants;
+import com.teammerge.cache.CommitCache;
 import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.PathModel.PathChangeModel;
 import com.teammerge.model.RefLogEntry;

@@ -1,4 +1,4 @@
-package com.teammerge.utils;
+package com.teammerge.cache;
 
 import java.io.Serializable;
 import java.util.Date;

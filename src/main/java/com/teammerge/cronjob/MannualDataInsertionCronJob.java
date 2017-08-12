@@ -11,12 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
+import com.teammerge.cache.CommitCache;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.TimeUtils;
 
 public class MannualDataInsertionCronJob extends AbstractCustomJob {

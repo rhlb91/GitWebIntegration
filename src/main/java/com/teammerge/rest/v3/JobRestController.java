@@ -21,8 +21,7 @@ import com.teammerge.rest.AbstractController;
 
 @Component
 @Path("/v3")
-public class JobRestController extends AbstractController {// class
-
+public class JobRestController extends AbstractController {
   @Resource(name = "mannualDataInsertionCronJob")
   private MannualDataInsertionCronJob cronJob;
 

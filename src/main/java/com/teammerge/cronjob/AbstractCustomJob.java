@@ -52,6 +52,36 @@ public abstract class AbstractCustomJob {
     branchService.saveBranch(branchModel);
   }
 
+  public static class JobStatus {
+    public JobStatusEnum currentStatus;
+
+    public JobStatus() {
+      this.currentStatus = JobStatusEnum.NOT_STARTED;
+    }
+  }
+
+  public enum JobStatusEnum {
+    NOT_STARTED, IN_PROGRESS, COMPLETED, ERROR;
+
+    public static JobStatusEnum forName(String name) {
+      for (JobStatusEnum type : values()) {
+        if (type.name().equalsIgnoreCase(name)) {
+          return type;
+        }
+      }
+      return NOT_STARTED;
+    }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
+
+  protected void printJobStatus(JobStatus jobStatus) {
+    System.out.println(jobStatus.currentStatus);
+  }
+
   @Required
   public void setCommitService(CommitService commitService1) {
     commitService = commitService1;

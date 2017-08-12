@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
+import com.teammerge.cache.CommitCache;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.CommitDao;
 import com.teammerge.form.CommitForm;
@@ -33,7 +34,6 @@ import com.teammerge.model.RepositoryCommit;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CommitDiffStrategy;
-import com.teammerge.utils.CommitCache;
 import com.teammerge.utils.StringUtils;
 import com.teammerge.utils.TimeUtils;
 

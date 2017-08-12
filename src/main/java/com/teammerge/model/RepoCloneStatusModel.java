@@ -11,7 +11,7 @@ import com.teammerge.Constants.CloneStatus;
 
 @Entity
 @Table(name = "repo_clone_status")
-public class RepoCloneStatusModel implements Serializable{
+public class RepoCloneStatusModel implements Serializable {
   private static final long serialVersionUID = -6976452034587151083L;
 
   @Id
@@ -20,6 +20,21 @@ public class RepoCloneStatusModel implements Serializable{
 
   @Column(name = "clone_status")
   private String cloneStatus;
+
+  public RepoCloneStatusModel() {
+    this.repoName = null;
+    this.cloneStatus = CloneStatus.NOT_STARTED.toString();
+  }
+
+  public RepoCloneStatusModel(String name) {
+    this.repoName = name;
+    this.cloneStatus = CloneStatus.NOT_STARTED.toString();
+  }
+
+  public RepoCloneStatusModel(String name, CloneStatus status) {
+    this.repoName = name;
+    this.cloneStatus = status.toString();
+  }
 
   public String getRepoName() {
     return repoName;

@@ -98,8 +98,7 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
 
       RepoCloneStatusModel repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
       if (repoCloneStatus == null) {
-        repoCloneStatus = new RepoCloneStatusModel();
-        repoCloneStatus.setRepoName(repositoryName);
+        repoCloneStatus = new RepoCloneStatusModel(repositoryName);
       }
       repoCloneStatus.setCloneStatus(Constants.CloneStatus.IN_PROGRESS.name());
       repoCloneStatusDao.saveEntity(repoCloneStatus);
@@ -107,11 +106,9 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       try (Git git = gitService.cloneRepository(gitOptions);) {
         repo = git.getRepository();
 
-
       } catch (GitAPIException e) {
         LOG.error("Error cloning repository from path " + remoteRepoPath, e);
       } finally {
-        repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
         repoCloneStatus.setCloneStatus(Constants.CloneStatus.COMPLETED.name());
         repoCloneStatusDao.saveEntity(repoCloneStatus);
       }
