@@ -21,4 +21,6 @@ public interface BranchService {
 
   int saveOrUpdateBranch(BranchModel branch);
 
+  void saveOrUpdateBranchInSeparateSession(BranchModel commit);
+
 }

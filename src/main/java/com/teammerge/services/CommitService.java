@@ -40,4 +40,6 @@ public interface CommitService {
       IOException;
   
   void saveOrUpdateCommit(CommitModel commit);
+
+  void saveOrUpdateCommitInSeparateSession(CommitModel commit);
 }

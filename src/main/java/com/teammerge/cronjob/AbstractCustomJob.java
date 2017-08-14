@@ -2,14 +2,9 @@ package com.teammerge.cronjob;
 
 import java.util.List;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Required;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
-import com.teammerge.dao.BaseDao;
-import com.teammerge.entity.BranchLastCommitAdded;
 import com.teammerge.entity.BranchModel;
 import com.teammerge.entity.CommitModel;
 import com.teammerge.model.CustomRefModel;
@@ -20,7 +15,6 @@ import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.services.ScheduleService;
-import com.teammerge.utils.HibernateUtils;
 
 public abstract class AbstractCustomJob {
 
@@ -44,7 +38,7 @@ public abstract class AbstractCustomJob {
       throws InvalidArgumentsException {
     CommitModel newCommit = new CommitModel();
     commitPopulator.populate(commit, branch, newCommit);
-    commitService.saveOrUpdateCommit(newCommit);
+    commitService.saveOrUpdateCommitInSeparateSession(newCommit);
   }
 
   protected void saveOrUpdateBranch(CustomRefModel branch, List<RepositoryCommit> commits)
@@ -55,7 +49,7 @@ public abstract class AbstractCustomJob {
       branchModel = new BranchModel(branch.getRefModel().getName(), branch.getRepositoryName());
     }
     branchPopulator.populate(branch, branchModel.getNumOfCommits() + commits.size(), branchModel);
-    branchService.saveOrUpdateBranch(branchModel);
+    branchService.saveOrUpdateBranchInSeparateSession(branchModel);
   }
 
   public static class JobStatus {

@@ -7,6 +7,9 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import com.teammerge.entity.BranchModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.RepositoryService;
+import com.teammerge.utils.HibernateUtils;
 import com.teammerge.utils.StringUtils;
 
 @Service("branchService")
@@ -73,6 +77,23 @@ public class BranchServiceImpl implements BranchService {
   public int saveOrUpdateBranch(BranchModel branch) {
     branchDao.saveOrUpdateEntity(branch);
     return 0;
+  }
+
+  @Override
+  public void saveOrUpdateBranchInSeparateSession(BranchModel branch) {
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      branchDao.saveInSeparateSession(session, branch);
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      LOG.error("Branch " + branch.getBranchId() + " from branch " + branch.getRepositoryId()
+          + " not saved!!");
+    } finally {
+      session.close();
+    }
   }
 
   @Override

@@ -187,7 +187,7 @@ public class CommitServiceImpl implements CommitService {
     Transaction transaction = null;
     try {
       transaction = session.beginTransaction();
-      getBaseDao().saveCommitInSeparateSession(session, commit);
+      getBaseDao().saveInSeparateSession(session, commit);
       transaction.commit();
     } catch (HibernateException e) {
       transaction.rollback();

@@ -62,9 +62,8 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   }
 
   @Override
-  public void saveCommitInSeparateSession(Session s, T entity) {
+  public void saveInSeparateSession(Session s, T entity) {
     s.saveOrUpdate(entity);
   }
-
 
 }
