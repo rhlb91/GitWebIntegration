@@ -1,0 +1,19 @@
+GitWebIntration Initial SQL Queries
+
+INSERT INTO `company` (`name`) VALUES ('Reflex');
+
+INSERT INTO `Company_remoteRepoUrls` (`Company_name`, `remoteRepoUrls`, `remoteRepoUrls_KEY`) VALUES ('Reflex', 'https://github.com/rhlb91/GitWebIntegration.git', 'GitWebIntegration');
+
+
+INSERT INTO `repo_credentials` (`company`, `repoName`, `password`, `username`) VALUES ('Reflex', 'GitWebIntegration', 'admin123', 'rhlb91');
+
+INSERT INTO `schedule_job_details` (`job_id`, `NextFireTime`, `PreviousFireTime`, `job_scheduleInterval`, `job_status`) VALUES ('JobGetCommitDetails', NULL, NULL, '0/5 * * * * ? *', 'Not Started');
+
+
+--------------
+
+#Adding a new project
+
+INSERT INTO `Company_remoteRepoUrls` (`Company_name`, `remoteRepoUrls`, `remoteRepoUrls_KEY`) VALUES ('Reflex', 'http://203.122.41.106:8081/PHP/Teamerge.git', 'Japan Jindal');
+
+INSERT INTO `repo_credentials` (`company`, `repoName`, `password`, `username`) VALUES ('Reflex', 'Japan Jindal', '123456789', 'rahul.bokolia@reflexsolution.com');

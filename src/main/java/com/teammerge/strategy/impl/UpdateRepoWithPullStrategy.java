@@ -90,30 +90,25 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       GitOptions gitOptions = new GitOptions();
       gitOptions.setURI(remoteRepoPath);
       gitOptions.setDestinationDirectory(f.getAbsolutePath() + "/" + repositoryName);
+      gitOptions.setRepositoryName(repositoryName);
       gitOptions.setCloneAllBranches(Boolean.TRUE);
       gitOptions.setIncludeSubModule(Boolean.TRUE);
       gitOptions.setBare(Boolean.FALSE);
       gitOptions.setUsername(repoCreds.getUsername());
       gitOptions.setPassword(repoCreds.getPassword());
 
-      RepoCloneStatusModel repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
-      if (repoCloneStatus == null) {
-        repoCloneStatus = new RepoCloneStatusModel(repositoryName);
-      }
-      repoCloneStatus.setCloneStatus(Constants.CloneStatus.IN_PROGRESS.name());
-      repoCloneStatusDao.saveEntity(repoCloneStatus);
-
       try (Git git = gitService.cloneRepository(gitOptions);) {
-        repo = git.getRepository();
 
       } catch (GitAPIException e) {
         LOG.error("Error cloning repository from path " + remoteRepoPath, e);
       } finally {
-        repoCloneStatus.setCloneStatus(Constants.CloneStatus.COMPLETED.name());
-        repoCloneStatusDao.saveEntity(repoCloneStatus);
+
       }
 
-      return repo;
+      // As the cloning is happening in thread we don't know how much time this will take, thus
+      // returning null in case of cloning, this repository should automatically gets picked once
+      // the cloning is finished
+      return null;
     } else {
 
       // check for updates
@@ -134,30 +129,34 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
         LOG.error("Error in updating repository " + repositoryName, e);
       }
 
-      // To do delete files except .git dir
-      File repoDir = new File(f, repositoryName);
-      try {
-        File[] files = repoDir.listFiles();
-        if (files != null) {
-          for (File fe : files) {
-            if (fe.isFile()) {
-              fe.delete();
-            } else {
-              if (GIT_FOLDER_NAME.equalsIgnoreCase(fe.getName())) {
-                continue;
-              }
-              FileUtils.deleteDirectory(fe);
-            }
-          }
-        }
-      } catch (IOException e) {
-        LOG.error("Error occured removing the repsositry folders " + repoDir, e);
-      }
+      // delete files except .git dir
+      deleteFolderExceptGit(f, repositoryName);
 
       LOG.info("Updated repository " + repositoryName + " in "
           + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-      
+
       return repo;
+    }
+  }
+
+  private void deleteFolderExceptGit(File f, String repositoryName) {
+    File repoDir = new File(f, repositoryName);
+    try {
+      File[] files = repoDir.listFiles();
+      if (files != null) {
+        for (File fe : files) {
+          if (fe.isFile()) {
+            fe.delete();
+          } else {
+            if (GIT_FOLDER_NAME.equalsIgnoreCase(fe.getName())) {
+              continue;
+            }
+            FileUtils.deleteDirectory(fe);
+          }
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Error occured removing the repsositry folders " + repoDir, e);
     }
   }
 

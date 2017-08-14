@@ -10,7 +10,7 @@ public class GitOptions {
   private boolean isBare;
   private String username;
   private String password;
-
+  private String repositoryName;
 
   public GitOptions() {
     this("", "", true, true);
@@ -82,6 +82,15 @@ public class GitOptions {
   public void setPassword(String password) {
     this.password = password;
   }
+
+  public String getRepositoryName() {
+    return repositoryName;
+  }
+
+  public void setRepositoryName(String repositoryName) {
+    this.repositoryName = repositoryName;
+  }
+
 
 
 }

@@ -171,21 +171,18 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   public Repository getRepository(String repositoryName, boolean updated) {
-    long start = System.currentTimeMillis();
-
     Repository repo = getUpdatedRepository(repositoryName, updated);
 
+    // this is because, might be the repo is still in cloning phase,thus using a cached instance if
+    // possible
     if (repo == null) {
+      LOG.warn("Updated repo returns 'null', Loading repo " + repositoryName);
       repo = getRepository(repositoryName);
     }
+    
     if (repo == null) {
       LOG.error("\nCannot Load Repository" + " " + repositoryName);
       return null;
-    }
-
-    if (isDebugOn()) {
-      LOG.debug("Repository fetched in "
-          + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
     }
     return repo;
   }
@@ -1172,6 +1169,8 @@ public class RepositoryServiceImpl implements RepositoryService {
       boolean isRepoValidForWorking = checkIsRepoIsValidForWorking(repoName);
 
       if (!isRepoValidForWorking) {
+        LOG.debug("Repository clone status " + repoName
+            + " is currenlty not completed, this not valid for working!!");
         continue;
       }
 

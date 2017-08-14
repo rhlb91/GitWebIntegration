@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,11 +20,18 @@ import com.teammerge.cache.CommitLastChangeCache;
 import com.teammerge.cache.CronJobStatusCache;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
+import com.teammerge.utils.LoggerUtils;
 
+@PersistJobDataAfterExecution
+@DisallowConcurrentExecution
 public class DataInsertionJob extends AbstractCustomJob implements Job {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataInsertionJob.class);
+
   private static final String SCHEDULE_JOB_ID = "JobGetCommitDetails";
+  private static final String JOB_NUMBER = "jobNumber";
+
+  private int jobNumber;
 
   @Value("${git.commit.timeFormat}")
   private String commitTimeFormat;
@@ -34,34 +43,52 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
     super();
   }
 
-  public void execute(JobExecutionContext context) throws JobExecutionException {
-    boolean isError = false;
-    JobStatus currentJobStatus = CronJobStatusCache.instance().getJobStatus(SCHEDULE_JOB_ID);
-
-    if (JobStatusEnum.IN_PROGRESS.equals(currentJobStatus.currentStatus)) {
-      LOG.info("Could not run a new job. A job already running!!");
-      return;
-    }
-
-    LOG.debug("\nExecuting the DataInsertion Job - " + context.getFireTime());
-    currentJobStatus.currentStatus = JobStatusEnum.IN_PROGRESS;
-    CronJobStatusCache.instance().updateJobStatus(SCHEDULE_JOB_ID, currentJobStatus);
-
+  /**
+   * <p>
+   * jobNumber will get inserted by Quartz at run runtime as we have used setter injection for
+   * jobNumber.
+   * </p>
+   */
+  public void execute(JobExecutionContext context) {
     try {
-      fetchAndSaveBranchAndCommitDetails();
+      long methodStart = System.currentTimeMillis();
+      boolean isError = false;
+      JobStatus currentJobStatus = CronJobStatusCache.instance().getJobStatus(SCHEDULE_JOB_ID);
 
+      if (JobStatusEnum.IN_PROGRESS.equals(currentJobStatus.currentStatus)) {
+        LOG.debug("Could not run a new job. A job already running!!");
+        return;
+      }
+
+      LOG.info("\nExecuting the DataInsertion Job #" + jobNumber + " at " + context.getFireTime());
+
+      // before starting this job, changing the status to In_Progress
+      updateJobStatusInCache(currentJobStatus, JobStatusEnum.IN_PROGRESS);
+
+      try {
+        fetchAndSaveBranchAndCommitDetails();
+
+      } catch (Exception e) {
+        updateJobStatusInCache(currentJobStatus, JobStatusEnum.ERROR);
+        isError = true;
+        LOG.error("Caught exception in " + getClass().getSimpleName(), e);
+      }
+
+      // after completing this job, changing the status to completed
+      if (!isError)
+        updateJobStatusInCache(currentJobStatus, JobStatusEnum.COMPLETED);
+
+
+      LOG.info("DataInsertion #" + jobNumber + " Completed in "
+          + LoggerUtils.getTimeInSecs(methodStart, System.currentTimeMillis())
+          + "!! Next scheduled time:" + context.getNextFireTime() + "_" + jobNumber + "\n");
+
+      // Incrementing the job execution number, this will get saved with this job detail as we are
+      // using @PersistJobDataAfterExecution
+      context.getJobDetail().getJobDataMap().put(JOB_NUMBER, jobNumber + 1);
     } catch (Exception e) {
-      currentJobStatus.currentStatus = JobStatusEnum.ERROR;
-      isError = true;
-      LOG.error("Caught error in" + getClass().getSimpleName(), e);
+      LOG.error("Caught Exception in execute() in " + getClass().getSimpleName(), e);
     }
-
-    LOG.debug("DataInsertion Completed!! Next scheduled time:" + context.getNextFireTime() + "\n");
-
-    if (!isError)
-      currentJobStatus.currentStatus = JobStatusEnum.COMPLETED;
-
-    CronJobStatusCache.instance().updateJobStatus(SCHEDULE_JOB_ID, currentJobStatus);
   }
 
   public synchronized void fetchAndSaveBranchAndCommitDetails() {
@@ -115,4 +142,14 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
   private String getUniqueName(CustomRefModel customRef) {
     return customRef.getRepositoryName() + "_" + customRef.getRefModel().getName();
   }
+
+  private void updateJobStatusInCache(JobStatus currentJobStatus, JobStatusEnum jobStatus) {
+    currentJobStatus.currentStatus = jobStatus;
+    CronJobStatusCache.instance().updateJobStatus(SCHEDULE_JOB_ID, currentJobStatus);
+  }
+
+  public void setJobNumber(int jobNumber) {
+    this.jobNumber = jobNumber;
+  }
+
 }

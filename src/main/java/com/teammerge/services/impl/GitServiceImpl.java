@@ -8,16 +8,20 @@ import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.teammerge.Constants;
+import com.teammerge.Constants.CloneStatus;
+import com.teammerge.dao.BaseDao;
 import com.teammerge.model.CreateBranchOptions;
 import com.teammerge.model.GitOptions;
+import com.teammerge.model.RepoCloneStatusModel;
 import com.teammerge.services.GitService;
 import com.teammerge.utils.JGitUtils;
 import com.teammerge.utils.LoggerUtils;
@@ -26,6 +30,8 @@ import com.teammerge.utils.StringUtils;
 @Service("gitService")
 public class GitServiceImpl implements GitService {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+  BaseDao<RepoCloneStatusModel> repoCloneStatusDao;
 
   @Value("${app.debug}")
   private String debug;
@@ -37,31 +43,14 @@ public class GitServiceImpl implements GitService {
   @Override
   public Git cloneRepository(GitOptions options) throws InvalidRemoteException, TransportException,
       GitAPIException {
-    long start = System.currentTimeMillis();
-    LOG.info("Cloning repo " + options.getURI());
 
-    CloneCommand cmd = Git.cloneRepository();
-    cmd.setCloneAllBranches(options.isCloneAllBranches());
-    cmd.setCloneSubmodules(options.isIncludeSubModule());
-    cmd.setURI(options.getURI());
-    cmd.setBare(options.isBare());
-    cmd.setNoCheckout(Boolean.TRUE);
-    File destinationFolder = new File(options.getDestinationDirectory());
-    cmd.setDirectory(destinationFolder);
+    // create a thread for every new cloning
+    GitServiceRunnable runnable = new GitServiceRunnable(options);
+    Thread t1 = new Thread(runnable);
+    t1.setName("CloningThread-" + options.getRepositoryName());
+    t1.start();
 
-
-    if (isCredentialsProvided(options.getUsername(), options.getPassword())) {
-      cmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(options.getUsername(),
-          options.getPassword()));
-    }
-
-    Git git = cmd.call();
-
-    if (isDebugOn()) {
-      LOG.debug("Repo " + options.getURI() + " cloned to " + options.getDestinationDirectory()
-          + " in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()));
-    }
-    return git;
+    return null;
   }
 
   private boolean isCredentialsProvided(String username, String password) {
@@ -102,5 +91,70 @@ public class GitServiceImpl implements GitService {
     }
 
     return ref;
+  }
+
+  protected class GitServiceRunnable implements Runnable {
+    GitOptions options;
+
+    public GitServiceRunnable(GitOptions options) {
+      this.options = options;
+    }
+
+    @Override
+    public void run() {
+      long start = System.currentTimeMillis();
+
+      LOG.info("Cloning repository " + options.getURI() + ", in a thread "
+          + Thread.currentThread().getName());
+
+      updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.IN_PROGRESS);
+
+      Git git = null;
+      CloneCommand cmd = Git.cloneRepository();
+      cmd.setCloneAllBranches(options.isCloneAllBranches());
+      cmd.setCloneSubmodules(options.isIncludeSubModule());
+      cmd.setURI(options.getURI());
+      cmd.setBare(options.isBare());
+      cmd.setNoCheckout(Boolean.TRUE);
+      File destinationFolder = new File(options.getDestinationDirectory());
+      cmd.setDirectory(destinationFolder);
+
+      if (isCredentialsProvided(options.getUsername(), options.getPassword())) {
+        cmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(options.getUsername(),
+            options.getPassword()));
+      }
+
+      try {
+        git = cmd.call();
+
+        if (git != null && git.getRepository() != null) {
+          updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.COMPLETED);
+        }
+      } catch (GitAPIException e) {
+        updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.FAILURE);
+        System.out.println("Error from Thread!!" + e.getMessage());
+        e.printStackTrace();
+      }
+
+      LOG.info("Repo " + options.getURI() + " cloned to " + options.getDestinationDirectory()
+          + " in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()) + " with thread:"
+          + Thread.currentThread().getName());
+    }
+  }
+
+  private void updateRepoCloneStatus(String repositoryName, CloneStatus cloneStatus) {
+    RepoCloneStatusModel repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
+    if (repoCloneStatus == null) {
+      repoCloneStatus = new RepoCloneStatusModel(repositoryName);
+    }
+    repoCloneStatus.setCloneStatus(cloneStatus.name());
+    repoCloneStatusDao.saveEntity(repoCloneStatus);
+
+  }
+
+  @Autowired
+  public void setRepoCloneStatusDao(BaseDao<RepoCloneStatusModel> baseDao) {
+    baseDao.setClazz(RepoCloneStatusModel.class);
+    this.repoCloneStatusDao = baseDao;
   }
 }
