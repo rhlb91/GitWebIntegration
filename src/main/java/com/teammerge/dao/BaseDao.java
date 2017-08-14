@@ -15,8 +15,6 @@ public interface BaseDao<T extends Serializable> {
 
   void saveEntity(T entity);
 
-  void saveCommitInSeparateSession(Session s, T entity);
-
   void saveOrUpdateEntity(T entity);
 
 }

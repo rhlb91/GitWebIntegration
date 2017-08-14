@@ -173,7 +173,7 @@ public class CommitServiceImpl implements CommitService {
 
   @Override
   public void saveCommit(CommitModel commit) {
-    getBaseDao().saveEntity(entity);
+    getBaseDao().saveEntity(commit);
   }
 
   @Override

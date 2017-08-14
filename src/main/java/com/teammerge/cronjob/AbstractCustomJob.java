@@ -44,7 +44,7 @@ public abstract class AbstractCustomJob {
       throws InvalidArgumentsException {
     CommitModel newCommit = new CommitModel();
     commitPopulator.populate(commit, branch, newCommit);
-    commitService.saveOrUpdateCommitInSeparateSession(newCommit);
+    commitService.saveOrUpdateCommit(newCommit);
   }
 
   protected void saveOrUpdateBranch(CustomRefModel branch, List<RepositoryCommit> commits)
@@ -55,18 +55,6 @@ public abstract class AbstractCustomJob {
       branchModel = new BranchModel(branch.getRefModel().getName(), branch.getRepositoryName());
     }
     branchPopulator.populate(branch, branchModel.getNumOfCommits() + commits.size(), branchModel);
-    Session session = HibernateUtils.getSessionFactory().openSession();
-    Transaction transaction = null;
-    try {
-      transaction = session.beginTransaction();
-      branchService.saveOrUpdateBranch(branchModel);
-      transaction.commit();
-    } catch (HibernateException e) {
-      transaction.rollback();
-      e.printStackTrace();
-    } finally {
-      session.close();
-    }
     branchService.saveOrUpdateBranch(branchModel);
   }
 

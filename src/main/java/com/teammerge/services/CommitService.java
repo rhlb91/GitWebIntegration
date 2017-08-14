@@ -38,8 +38,6 @@ public interface CommitService {
   List<String> getCommitDiff(String repoName, String branch, String commitId)
       throws RevisionSyntaxException, AmbiguousObjectException, IncorrectObjectTypeException,
       IOException;
-
+  
   void saveOrUpdateCommit(CommitModel commit);
-
-  void saveOrUpdateCommitInSeparateSession(CommitModel commit);
 }
