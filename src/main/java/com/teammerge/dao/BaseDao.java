@@ -3,6 +3,8 @@ package com.teammerge.dao;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hibernate.Session;
+
 public interface BaseDao<T extends Serializable> {
 
   public void setClazz(Class<T> clazz);
@@ -12,5 +14,7 @@ public interface BaseDao<T extends Serializable> {
   List<T> fetchAll();
 
   void saveEntity(T entity);
+
+  void saveEntityJob(Session s, T entity);
 
 }

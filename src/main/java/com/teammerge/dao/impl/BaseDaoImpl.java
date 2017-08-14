@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
@@ -52,5 +53,10 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
     this.clazz = clazz;
   }
 
+  @Override
+  public synchronized void saveEntityJob(Session s,T entity) {
+   s.saveOrUpdate(entity);
+  }
+  
 
 }

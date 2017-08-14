@@ -2,6 +2,9 @@ package com.teammerge.cronjob;
 
 import java.util.List;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Required;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
@@ -15,6 +18,7 @@ import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.services.ScheduleService;
+import com.teammerge.utils.HibernateUtils;
 
 public abstract class AbstractCustomJob {
 
@@ -49,7 +53,18 @@ public abstract class AbstractCustomJob {
       branchModel = new BranchModel(branch.getRefModel().getName(), branch.getRepositoryName());
     }
     branchPopulator.populate(branch, branchModel.getNumOfCommits() + commits.size(), branchModel);
-    branchService.saveBranch(branchModel);
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      branchService.saveBranch(branchModel);
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      e.printStackTrace();
+    } finally {
+      session.close();
+    }
   }
 
   public static class JobStatus {

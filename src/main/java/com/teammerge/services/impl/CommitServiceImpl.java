@@ -16,6 +16,9 @@ import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import com.teammerge.model.RepositoryCommit;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CommitDiffStrategy;
+import com.teammerge.utils.HibernateUtils;
 import com.teammerge.utils.StringUtils;
 import com.teammerge.utils.TimeUtils;
 
@@ -167,7 +171,19 @@ public class CommitServiceImpl implements CommitService {
   }
 
   public void saveCommit(CommitModel commit) {
-    getBaseDao().saveEntity(commit);
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+    getBaseDao().saveEntityJob(session, commit);
+    transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      e.printStackTrace();
+  } finally {
+      session.close();
+  }
+
 
   }
 
