@@ -173,23 +173,31 @@ public class CommitServiceImpl implements CommitService {
 
   @Override
   public void saveCommit(CommitModel commit) {
-    Session session = HibernateUtils.getSessionFactory().openSession();
-    Transaction transaction = null;
-    try {
-      transaction = session.beginTransaction();
-    getBaseDao().saveEntityJob(session, commit);
-    transaction.commit();
-    } catch (HibernateException e) {
-      transaction.rollback();
-      e.printStackTrace();
-  } finally {
-      session.close();
+    getBaseDao().saveEntity(entity);
   }
 
   @Override
   public void saveOrUpdateCommit(CommitModel commit) {
     getBaseDao().saveOrUpdateEntity(commit);
   }
+
+  @Override
+  public void saveOrUpdateCommitInSeparateSession(CommitModel commit) {
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    try {
+      transaction = session.beginTransaction();
+      getBaseDao().saveCommitInSeparateSession(session, commit);
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      LOG.error("Commit " + commit.getCommitId() + " from branch " + commit.getBranchName()
+          + " not saved!!");
+    } finally {
+      session.close();
+    }
+  }
+
 
   public BaseDao<CommitModel> getBaseDao() {
     return baseDao;

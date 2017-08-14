@@ -14,11 +14,15 @@ import com.teammerge.form.CommitForm;
 public interface CommitService {
 
   public Map<String, List<CommitModel>> getDetailsForBranchName(String branchName);
+
   public List<CommitModel> getCommitDetailsAll();
+
   public List<CommitModel> getCommitDetails(String commitId);
+
   void saveCommit(CommitModel commit);
+
   void saveOrUpdateCommitDetails(final CommitForm commitForm);
-  
+
   /**
    * Generates difference between 2 commits.
    * 
@@ -34,6 +38,8 @@ public interface CommitService {
   List<String> getCommitDiff(String repoName, String branch, String commitId)
       throws RevisionSyntaxException, AmbiguousObjectException, IncorrectObjectTypeException,
       IOException;
-  
+
   void saveOrUpdateCommit(CommitModel commit);
+
+  void saveOrUpdateCommitInSeparateSession(CommitModel commit);
 }
