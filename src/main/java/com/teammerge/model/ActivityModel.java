@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.teammerge.entity.CommitModel;
+
 public class ActivityModel {
   private Date pushDate;
   private String color;

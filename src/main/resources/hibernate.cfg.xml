@@ -19,13 +19,15 @@
 		<property name="net.sf.ehcache.configurationResourceName">/ehcache_config.xml</property>
 
 		<!-- entity mappings -->
-		<mapping class="com.teammerge.model.BranchModel" />
+		<mapping class="com.teammerge.entity.BranchModel" />
 		<!-- <mapping class="com.teammerge.model.RepositoryModel"/> -->
 		<mapping class="com.teammerge.entity.Company" />
 		<mapping class="com.teammerge.entity.RepoCredentials" />
-		<mapping class="com.teammerge.model.CommitModel"/>
-		<mapping class="com.teammerge.model.ScheduleJobModel"/>
-		<mapping class="com.teammerge.model.RepoCloneStatusModel"/>
-		
+		<mapping class="com.teammerge.entity.CommitModel" />
+		<mapping class="com.teammerge.model.ScheduleJobModel" />
+		<mapping class="com.teammerge.model.RepoCloneStatusModel" />
+		<mapping class="com.teammerge.entity.BranchLastCommitAdded" />
+
+
 	</session-factory>
 </hibernate-configuration>

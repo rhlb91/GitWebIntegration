@@ -2,13 +2,14 @@ package com.teammerge.cronjob;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,9 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
 
   @Value("${app.dateFormat}")
   private String commitDateFormat;
+
+
+  Map<String, Date> lastCommitSaveDetailsInDB = new HashMap<>();
 
   public DataInsertionJob() {
     super();
@@ -81,7 +85,7 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
 
       LOG.info("DataInsertion #" + jobNumber + " Completed in "
           + LoggerUtils.getTimeInSecs(methodStart, System.currentTimeMillis())
-          + "!! Next scheduled time:" + context.getNextFireTime() + "_" + jobNumber + "\n");
+          + "!! Next scheduled time:" + context.getNextFireTime() + "\n");
 
       // Incrementing the job execution number, this will get saved with this job detail as we are
       // using @PersistJobDataAfterExecution
@@ -97,8 +101,8 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
     if (CollectionUtils.isNotEmpty(customRefModels)) {
       for (CustomRefModel customRef : customRefModels) {
 
-        Date sinceDate =
-            CommitLastChangeCache.instance().getLastChangeDate(getUniqueName(customRef));
+        Date sinceDate = getLastChangeDate(getUniqueName(customRef));
+
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(sinceDate);
@@ -132,11 +136,42 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
             }
           }
 
-          CommitLastChangeCache.instance().updateLastChangeDate(getUniqueName(customRef),
-              mostRecentCommitDate);
+          updateLastCommitDateInCache(getUniqueName(customRef), mostRecentCommitDate);
+          updateLastCommitInDB(getUniqueName(customRef), mostRecentCommitDate);
         }
       }
     }
+  }
+
+  private void updateLastCommitDateInCache(String uniqueName, Date mostRecentCommitDate) {
+    CommitLastChangeCache.instance().updateLastChangeDate(uniqueName, mostRecentCommitDate);
+  }
+
+  private void updateLastCommitInDB(String uniqueName, Date mostRecentCommitDate) {
+    Date commitDateInDB = lastCommitSaveDetailsInDB.get(uniqueName);
+    if (commitDateInDB == null || commitDateInDB.before(mostRecentCommitDate)) {
+      branchService.updateLastCommitDateAddedInBranch(uniqueName, mostRecentCommitDate);
+      lastCommitSaveDetailsInDB.put(uniqueName, mostRecentCommitDate);
+      updateLastCommitDateInCache(uniqueName, mostRecentCommitDate);
+    }
+  }
+
+  private Date getLastChangeDate(String uniqueName) {
+    Date lastChange = null;
+
+    if (jobNumber == 1) {
+      lastChange = branchService.getLastCommitDateAddedInBranch(uniqueName);
+      lastCommitSaveDetailsInDB.put(uniqueName, lastChange);
+      updateLastCommitDateInCache(uniqueName, lastChange);
+    }
+
+    if (lastChange == null) {
+      lastChange = CommitLastChangeCache.instance().getLastChangeDate(uniqueName);
+
+      // this means there is no entry in the DB for this branch yet, so create with inception date
+      // updateLastCommitInDB(uniqueName, lastChange);
+    }
+    return lastChange;
   }
 
   private String getUniqueName(CustomRefModel customRef) {

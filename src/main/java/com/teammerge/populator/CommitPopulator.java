@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.teammerge.Constants;
 import com.teammerge.GitWebException;
-import com.teammerge.model.CommitModel;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.utils.StringUtils;

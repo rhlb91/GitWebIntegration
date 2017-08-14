@@ -19,9 +19,9 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
 
+import com.teammerge.entity.BranchModel;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.model.ActivityModel;
-import com.teammerge.model.BranchModel;
-import com.teammerge.model.CommitModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JGitUtils;

@@ -3,16 +3,13 @@ package com.teammerge.dao.impl;
 import java.util.List;
 
 import org.hibernate.Query;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 
 import com.teammerge.dao.CommitDao;
-import com.teammerge.model.CommitModel;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.utils.HibernateUtils;
 
 @Repository("commitDao")
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class CommitDaoImpl extends BaseDaoImpl<CommitModel> implements CommitDao {
 
   @SuppressWarnings("unchecked")

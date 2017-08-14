@@ -27,8 +27,8 @@ import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants;
 import com.teammerge.cache.ObjectCache;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.model.ActivityModel;
-import com.teammerge.model.CommitModel;
 import com.teammerge.model.DailyLogEntry;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.model.RepositoryModel;

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.GitWebException;
-import com.teammerge.model.BranchModel;
+import com.teammerge.entity.BranchModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.utils.TimeUtils;
 

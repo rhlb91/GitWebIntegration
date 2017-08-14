@@ -20,6 +20,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.springframework.stereotype.Component;
 
+import com.teammerge.entity.BranchModel;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.form.CommitDiffRequestForm;
@@ -27,8 +29,6 @@ import com.teammerge.form.CommitForm;
 import com.teammerge.form.CommitTreeRequestForm;
 import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.form.RepoForm;
-import com.teammerge.model.BranchModel;
-import com.teammerge.model.CommitModel;
 import com.teammerge.model.PathModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.ScheduleJobModel;

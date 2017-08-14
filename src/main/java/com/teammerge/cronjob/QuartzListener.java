@@ -65,7 +65,7 @@ public class QuartzListener implements ServletContextListener {
 
   @Override
   public void contextDestroyed(ServletContextEvent servletContext) {
-    System.out.println("Context Destroyed");
+    System.out.println("\n\nContext Destroyed");
     try {
       scheduler.shutdown();
     } catch (SchedulerException e) {

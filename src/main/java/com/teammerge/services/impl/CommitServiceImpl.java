@@ -29,8 +29,8 @@ import com.teammerge.Constants;
 import com.teammerge.cache.CommitCache;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.CommitDao;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.form.CommitForm;
-import com.teammerge.model.CommitModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
@@ -46,9 +46,9 @@ public class CommitServiceImpl implements CommitService {
   private static final Logger LOG = LoggerFactory.getLogger(CommitServiceImpl.class);
 
   private BaseDao<CommitModel> baseDao;
-  
+
   private CommitDao commitDao;
-    
+
   @Resource(name = "repositoryService")
   RepositoryService repositoryService;
 
@@ -82,22 +82,23 @@ public class CommitServiceImpl implements CommitService {
     int numOfMatchedBranches = 0;
     Date minimumDate = TimeUtils.getInceptionDate();
 
-      List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(false);
+    List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(false);
 
-      if (CollectionUtils.isNotEmpty(customRefModels)) {
-        for (CustomRefModel branch : customRefModels) {
-          repoCommits.clear();
-          if (branch.getRefModel().getName().contains(branchName)) {
-            ++numOfMatchedBranches;
+    if (CollectionUtils.isNotEmpty(customRefModels)) {
+      for (CustomRefModel branch : customRefModels) {
+        repoCommits.clear();
+        if (branch.getRefModel().getName().contains(branchName)) {
+          ++numOfMatchedBranches;
 
-            if (branch.getRepository() != null) {
-              List<RepositoryCommit> commitsPerBranch =
-                  CommitCache.instance().getCommits(branch.getRepositoryName(), branch.getRepository(),
-                      branch.getRefModel().getName(), minimumDate);
+          if (branch.getRepository() != null) {
+            List<RepositoryCommit> commitsPerBranch =
+                CommitCache.instance().getCommits(branch.getRepositoryName(),
+                    branch.getRepository(), branch.getRefModel().getName(), minimumDate);
 
-              commits.addAll(populateCommits(commitsPerBranch, branch.getRepositoryName(), branch.getRefModel()));
-            }
-            commitsPerMatchedBranch.put(branch.getRefModel().getName(), commits);
+            commits.addAll(populateCommits(commitsPerBranch, branch.getRepositoryName(),
+                branch.getRefModel()));
+          }
+          commitsPerMatchedBranch.put(branch.getRefModel().getName(), commits);
         }
       }
     }
@@ -170,6 +171,7 @@ public class CommitServiceImpl implements CommitService {
     return commitModel;
   }
 
+  @Override
   public void saveCommit(CommitModel commit) {
     Session session = HibernateUtils.getSessionFactory().openSession();
     Transaction transaction = null;
@@ -184,7 +186,9 @@ public class CommitServiceImpl implements CommitService {
       session.close();
   }
 
-
+  @Override
+  public void saveOrUpdateCommit(CommitModel commit) {
+    getBaseDao().saveOrUpdateEntity(commit);
   }
 
   public BaseDao<CommitModel> getBaseDao() {
@@ -217,7 +221,7 @@ public class CommitServiceImpl implements CommitService {
     model.setShortMessage(commitForm.getShortMsg());
     model.setTrimmedMessage(commitForm.getTrimmedMsg());
 
-    getBaseDao().saveEntity(model);
+    getBaseDao().saveOrUpdateEntity(model);
 
   }
 
@@ -232,7 +236,7 @@ public class CommitServiceImpl implements CommitService {
   public List<CommitModel> getCommitDetailsAll() {
     return getBaseDao().fetchAll();
   }
-  
+
   @Autowired
   public void setCommitDao(CommitDao commitDao) {
     commitDao.setClazz(CommitModel.class);

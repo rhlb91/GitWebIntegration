@@ -1,9 +1,8 @@
-package com.teammerge.dao.impl;
+package com.teammerge.dao;
 
 import java.util.List;
 
-import com.teammerge.dao.BaseDao;
-import com.teammerge.model.BranchModel;
+import com.teammerge.entity.BranchModel;
 
 public interface BranchDao extends BaseDao<BranchModel> {
   public List<BranchModel> fetchEntityLike(String entityId);

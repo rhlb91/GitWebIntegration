@@ -8,8 +8,8 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 
+import com.teammerge.entity.CommitModel;
 import com.teammerge.form.CommitForm;
-import com.teammerge.model.CommitModel;
 
 public interface CommitService {
 
@@ -34,4 +34,6 @@ public interface CommitService {
   List<String> getCommitDiff(String repoName, String branch, String commitId)
       throws RevisionSyntaxException, AmbiguousObjectException, IncorrectObjectTypeException,
       IOException;
+  
+  void saveOrUpdateCommit(CommitModel commit);
 }

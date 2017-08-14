@@ -1,4 +1,4 @@
-package com.teammerge.model;
+package com.teammerge.entity;
 
 import java.io.Serializable;
 import java.util.Date;

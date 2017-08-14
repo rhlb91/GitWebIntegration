@@ -1,6 +1,7 @@
 package com.teammerge.services.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -11,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.teammerge.dao.impl.BranchDao;
-import com.teammerge.model.BranchModel;
+import com.teammerge.dao.BaseDao;
+import com.teammerge.dao.BranchDao;
+import com.teammerge.entity.BranchLastCommitAdded;
+import com.teammerge.entity.BranchModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.RepositoryService;
@@ -27,6 +30,8 @@ public class BranchServiceImpl implements BranchService {
   RepositoryService repositoryService;
 
   private BranchDao branchDao;
+
+  private BaseDao<BranchLastCommitAdded> baseDao;
 
   @Override
   public List<BranchModel> getBranchesWithMinimumDetails(String branchName) {
@@ -65,9 +70,30 @@ public class BranchServiceImpl implements BranchService {
   }
 
   @Override
+  public int saveOrUpdateBranch(BranchModel branch) {
+    branchDao.saveOrUpdateEntity(branch);
+    return 0;
+  }
+
+  @Override
   public List<BranchModel> getBranchDetailsForBranchLike(String branchId) {
     List<BranchModel> branchdetails = branchDao.fetchEntityLike(branchId);
     return branchdetails;
+  }
+
+  @Override
+  public Date getLastCommitDateAddedInBranch(String entityKey) {
+    Date lastCommitDate = null;
+    BranchLastCommitAdded entity = baseDao.fetchEntity(entityKey);
+    if (entity != null) {
+      lastCommitDate = entity.getLastModified();
+    }
+    return lastCommitDate;
+  }
+
+  public void updateLastCommitDateAddedInBranch(String entityKey, Date date) {
+    BranchLastCommitAdded model = new BranchLastCommitAdded(entityKey, date);
+    baseDao.saveOrUpdateEntity(model);
   }
 
   @Autowired
@@ -75,4 +101,15 @@ public class BranchServiceImpl implements BranchService {
     branchDao.setClazz(BranchModel.class);
     this.branchDao = branchDao;
   }
+
+  @Autowired
+  public void setBranchLastCommitAddedDao(BaseDao<BranchLastCommitAdded> baseDao) {
+    baseDao.setClazz(BranchLastCommitAdded.class);
+    this.baseDao = baseDao;
+  }
+
+  public BaseDao<BranchLastCommitAdded> getBranchLastCommitAddedDao() {
+    return baseDao;
+  }
+
 }

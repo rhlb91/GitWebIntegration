@@ -1,8 +1,9 @@
 package com.teammerge.services;
 
+import java.util.Date;
 import java.util.List;
 
-import com.teammerge.model.BranchModel;
+import com.teammerge.entity.BranchModel;
 
 public interface BranchService {
 
@@ -13,5 +14,11 @@ public interface BranchService {
   int saveBranch(BranchModel branch);
 
   List<BranchModel> getBranchDetailsForBranchLike(String branchId);
+
+  Date getLastCommitDateAddedInBranch(String entityKey);
+
+  void updateLastCommitDateAddedInBranch(String entityKey, Date date);
+
+  int saveOrUpdateBranch(BranchModel branch);
 
 }

@@ -17,4 +17,6 @@ public interface BaseDao<T extends Serializable> {
 
   void saveEntityJob(Session s, T entity);
 
+  void saveOrUpdateEntity(T entity);
+
 }

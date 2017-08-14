@@ -17,7 +17,7 @@ import com.teammerge.utils.HibernateUtils;
 public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   private Class<T> clazz;
 
- 
+
   @Override
   public T fetchEntity(String entityId) {
     HibernateUtils.openCurrentSession();
@@ -29,12 +29,20 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   @Override
   public synchronized void saveEntity(T entity) {
     HibernateUtils.openCurrentSessionwithTransaction();
+    HibernateUtils.getCurrentSession().save(entity);
+    HibernateUtils.closeCurrentSessionwithTransaction();
+  }
+
+  @Override
+  public synchronized void saveOrUpdateEntity(T entity) {
+    HibernateUtils.openCurrentSessionwithTransaction();
     HibernateUtils.getCurrentSession().saveOrUpdate(entity);
     HibernateUtils.closeCurrentSessionwithTransaction();
   }
-  
+
   /**
-   * The below method is only used to fetch all list of Data, based on Model Class name using HibernateUtils.
+   * The below method is only used to fetch all list of Data, based on Model Class name using
+   * HibernateUtils.
    */
   @Override
   public List<T> fetchAll() {

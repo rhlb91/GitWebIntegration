@@ -5,7 +5,8 @@ import java.util.List;
 import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
-import com.teammerge.model.BranchModel;
+import com.teammerge.dao.BranchDao;
+import com.teammerge.entity.BranchModel;
 import com.teammerge.utils.HibernateUtils;
 
 @Repository("branchDao")

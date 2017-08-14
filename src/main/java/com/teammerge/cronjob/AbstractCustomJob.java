@@ -8,8 +8,10 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Required;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
-import com.teammerge.model.BranchModel;
-import com.teammerge.model.CommitModel;
+import com.teammerge.dao.BaseDao;
+import com.teammerge.entity.BranchLastCommitAdded;
+import com.teammerge.entity.BranchModel;
+import com.teammerge.entity.CommitModel;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.populator.BranchPopulator;
@@ -28,7 +30,7 @@ public abstract class AbstractCustomJob {
 
   private static CommitService commitService;
 
-  private static BranchService branchService;
+  protected static BranchService branchService;
 
   protected static RepositoryService repositoryService;
 
@@ -42,7 +44,7 @@ public abstract class AbstractCustomJob {
       throws InvalidArgumentsException {
     CommitModel newCommit = new CommitModel();
     commitPopulator.populate(commit, branch, newCommit);
-    commitService.saveCommit(newCommit);
+    commitService.saveOrUpdateCommit(newCommit);
   }
 
   protected void saveOrUpdateBranch(CustomRefModel branch, List<RepositoryCommit> commits)
@@ -126,4 +128,5 @@ public abstract class AbstractCustomJob {
   public void setScheduleService(ScheduleService scheduleService1) {
     scheduleService = scheduleService1;
   }
+
 }
