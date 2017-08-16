@@ -147,17 +147,17 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
 		return failedEntries;
 	}
 
-	public synchronized void fetchAndSaveBranchAndCommitDetailsOnline(String branchId) {
+	public synchronized void fetchAndSaveBranchAndCommitDetailsOnline(String reponame, String branchId) {
 		List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(true);
 		Date minimumDate = TimeUtils.getInceptionDate();
 		if (CollectionUtils.isNotEmpty(customRefModels)) {
 			for (CustomRefModel customRef : customRefModels) {
 
 				String str = customRef.getRefModel().getName();
-
+				String repoid = customRef.getRepositoryName();
 				boolean retval = str.contains(branchId);
 
-				if (retval == true) {
+				if (reponame.equalsIgnoreCase(repoid) && (retval == true)) {
 
 					List<RepositoryCommit> commits = CommitCache.instance().getCommits(customRef.getRepositoryName(),
 							customRef.getRepository(), customRef.getRefModel().getName(), minimumDate);

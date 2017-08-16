@@ -87,9 +87,9 @@ public class JobRestController extends AbstractController {
     return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
   }
   
-  @Path("/updateCurrentBranch/{id}")   
-  public Response updateCurrentBranch(@PathParam("id") String branchId) { 
-   cronJob.fetchAndSaveBranchAndCommitDetailsOnline(branchId); 
+  @Path("/updateCurrentBranch/{repoid}/{id}")   
+  public Response updateCurrentBranch(@PathParam("repoid") String reponame,@PathParam("id") String branchId) { 
+   cronJob.fetchAndSaveBranchAndCommitDetailsOnline(reponame,branchId); 
    String output = "Branch and Commit Details has been updated sucessfully"; 
    return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build(); 
  } 
