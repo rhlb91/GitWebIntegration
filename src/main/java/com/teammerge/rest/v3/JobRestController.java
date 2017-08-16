@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
@@ -85,4 +86,13 @@ public class JobRestController extends AbstractController {
     result.put("failedEntries", failedEntries);
     return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
   }
+  
+  @Path("/updateCurrentBranch/{id}")   
+  public Response updateCurrentBranch(@PathParam("id") String branchId) { 
+   cronJob.fetchAndSaveBranchAndCommitDetailsOnline(branchId); 
+   String output = "Branch and Commit Details has been updated sucessfully"; 
+   return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build(); 
+ } 
+  
+  
 }
