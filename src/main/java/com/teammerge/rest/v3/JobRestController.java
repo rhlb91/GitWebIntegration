@@ -87,24 +87,19 @@ public class JobRestController extends AbstractController {
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
-  @Path("/updateCurrentBranch/{repoid}/{id}")
-  public Response updateCurrentBranch(@PathParam("repoid") String repoName,
+  @Path("/updateCurrentBranch/{repoId}/{id}")
+  public Response updateCurrentBranch(@PathParam("repoId") String repoName,
       @PathParam("id") String branchId) {
-
     Map<String, Object> result = new HashMap<>();
-
-    if ((StringUtils.isEmpty(repoName)) && (StringUtils.isEmpty(branchId))) {
-
-      String output = "Project Id and Ticket is should not be empty";
+    if ((StringUtils.isEmpty(repoName)) || (StringUtils.isEmpty(branchId))) {
+      String output = "Project id and Ticket id should not be empty";
       result.put("result", output);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
     } else {
       cronJob.fetchAndSaveBranchAndCommitDetailsOnline(repoName, branchId);
       String output = "Branch and Commit Details has been updated sucessfully";
       result.put("result", output);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
     }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 }

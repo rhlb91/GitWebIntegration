@@ -51,6 +51,10 @@ public abstract class AbstractCustomJob {
     branchPopulator.populate(branch, branchModel.getNumOfCommits() + commits.size(), branchModel);
     branchService.saveOrUpdateBranchInSeparateSession(branchModel);
   }
+  
+  protected String getUniqueName(CustomRefModel customRef) {
+    return customRef.getRepositoryName() + "_" + customRef.getRefModel().getName();
+  }
 
   public static class JobStatus {
     public JobStatusEnum currentStatus;

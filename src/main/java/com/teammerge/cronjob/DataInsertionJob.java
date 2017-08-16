@@ -174,9 +174,7 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
     return lastChange;
   }
 
-  private String getUniqueName(CustomRefModel customRef) {
-    return customRef.getRepositoryName() + "_" + customRef.getRefModel().getName();
-  }
+
 
   private void updateJobStatusInCache(JobStatus currentJobStatus, JobStatusEnum jobStatus) {
     currentJobStatus.currentStatus = jobStatus;
