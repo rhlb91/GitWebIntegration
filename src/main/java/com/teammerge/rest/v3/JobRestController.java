@@ -3,6 +3,7 @@ package com.teammerge.rest.v3;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.teammerge.utils.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
@@ -23,76 +24,90 @@ import com.teammerge.rest.AbstractController;
 @Component
 @Path("/v3")
 public class JobRestController extends AbstractController {
-  @Resource(name = "mannualDataInsertionCronJob")
-  private MannualDataInsertionCronJob cronJob;
+	@Resource(name = "mannualDataInsertionCronJob")
+	private MannualDataInsertionCronJob cronJob;
 
-  @GET
-  @Path("/")
-  public Response hello() {
-    return Response.status(200).entity("Hi Rest Cron Job working fine!!").build();
-  }
+	@GET
+	@Path("/")
+	public Response hello() {
+		return Response.status(200).entity("Hi Rest Cron Job working fine!!").build();
+	}
 
-  @GET
-  @Path("/updateAllBranchs")
-  @Consumes("application/json")
-  @Produces({"application/json"})
-  public Response runCronJobForBranch() {
+	@GET
+	@Path("/updateAllBranchs")
+	@Consumes("application/json")
+	@Produces({ "application/json" })
+	public Response runCronJobForBranch() {
 
-    Map<String, Object> result = new HashMap<>();
-    List<RefModel> failedBranches = cronJob.runJobSavingForBranchDetails();
+		Map<String, Object> result = new HashMap<>();
+		List<RefModel> failedBranches = cronJob.runJobSavingForBranchDetails();
 
-    String output = "Branch details has been saved sucessfully";
-    if (CollectionUtils.isNotEmpty(failedBranches)) {
-      output += "However, there are some failed entries!! Try to add them mannually!!";
-    }
+		String output = "Branch details has been saved sucessfully";
+		if (CollectionUtils.isNotEmpty(failedBranches)) {
+			output += "However, there are some failed entries!! Try to add them mannually!!";
+		}
 
-    result.put("result", output);
-    result.put("failedEntries", failedBranches);
-    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
-  }
+		result.put("result", output);
+		result.put("failedEntries", failedBranches);
+		return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*")
+				.build();
+	}
 
-  @GET
-  @Path("/updateAllCommits")
-  @Consumes("application/json")
-  @Produces({"application/json"})
-  public Response runCronJobForCommit() {
-    Map<String, Object> result = new HashMap<>();
+	@GET
+	@Path("/updateAllCommits")
+	@Consumes("application/json")
+	@Produces({ "application/json" })
+	public Response runCronJobForCommit() {
+		Map<String, Object> result = new HashMap<>();
 
-    List<RepositoryCommit> failedCommits = cronJob.runJobSavingForCommitDetails();
-    String output = "Commit Details has been saved sucessfully";
+		List<RepositoryCommit> failedCommits = cronJob.runJobSavingForCommitDetails();
+		String output = "Commit Details has been saved sucessfully";
 
-    if (CollectionUtils.isNotEmpty(failedCommits)) {
-      output += "However, there are some failed entries!! Try to add them mannually!!";
-    }
-    result.put("result", output);
-    result.put("failedEntries", failedCommits);
-    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
-  }
-  
-  @GET
-  @Path("/updateAllDetails")
-  @Consumes("application/json")
-  @Produces({"application/json"})
-  public Response runSaveAllDetails() {
-    Map<String, Object> result = new HashMap<>();
+		if (CollectionUtils.isNotEmpty(failedCommits)) {
+			output += "However, there are some failed entries!! Try to add them mannually!!";
+		}
+		result.put("result", output);
+		result.put("failedEntries", failedCommits);
+		return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*")
+				.build();
+	}
 
-    List<Object> failedEntries = cronJob.runSaveAllDetails();
-    String output = "Branches and Commit Details has been saved sucessfully";
+	@GET
+	@Path("/updateAllDetails")
+	@Consumes("application/json")
+	@Produces({ "application/json" })
+	public Response runSaveAllDetails() {
+		Map<String, Object> result = new HashMap<>();
 
-    if (CollectionUtils.isNotEmpty(failedEntries)) {
-      output += "However, there are some failed entries!! Try to add them mannually!!";
-    }
-    result.put("result", output);
-    result.put("failedEntries", failedEntries);
-    return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*").build();
-  }
-  
-  @Path("/updateCurrentBranch/{repoid}/{id}")   
-  public Response updateCurrentBranch(@PathParam("repoid") String reponame,@PathParam("id") String branchId) { 
-   cronJob.fetchAndSaveBranchAndCommitDetailsOnline(reponame,branchId); 
-   String output = "Branch and Commit Details has been updated sucessfully"; 
-   return Response.status(200).entity(output).header("Access-Control-Allow-Origin", "*").build(); 
- } 
-  
-  
+		List<Object> failedEntries = cronJob.runSaveAllDetails();
+		String output = "Branches and Commit Details has been saved sucessfully";
+
+		if (CollectionUtils.isNotEmpty(failedEntries)) {
+			output += "However, there are some failed entries!! Try to add them mannually!!";
+		}
+		result.put("result", output);
+		result.put("failedEntries", failedEntries);
+		return Response.status(200).type("application/json").entity(result).header("Access-Control-Allow-Origin", "*")
+				.build();
+	}
+
+	@Path("/updateCurrentBranch/{repoid}/{id}")
+	public Response updateCurrentBranch(@PathParam("repoid") String repoName, @PathParam("id") String branchId) {
+
+		Map<String, Object> result = new HashMap<>();
+
+		if ((StringUtils.isEmpty(repoName)) && (StringUtils.isEmpty(branchId))) {
+
+			String output = "Project Id and Ticket is should not be empty";
+			result.put("result", output);
+			return Response.status(200).type("application/json").entity(result)
+					.header("Access-Control-Allow-Origin", "*").build();
+		} else {
+			cronJob.fetchAndSaveBranchAndCommitDetailsOnline(repoName, branchId);
+			String output = "Branch and Commit Details has been updated sucessfully";
+			result.put("result", output);
+			return Response.status(200).type("application/json").entity(result)
+					.header("Access-Control-Allow-Origin", "*").build();
+		}
+	}
 }
