@@ -1,10 +1,12 @@
 package com.teammerge.cronjob;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Required;
 
 import com.teammerge.GitWebException.InvalidArgumentsException;
+import com.teammerge.cache.CommitLastChangeCache;
 import com.teammerge.entity.BranchModel;
 import com.teammerge.entity.CommitModel;
 import com.teammerge.model.CustomRefModel;
@@ -55,7 +57,7 @@ public abstract class AbstractCustomJob {
   protected String getUniqueName(CustomRefModel customRef) {
     return customRef.getRepositoryName() + "_" + customRef.getRefModel().getName();
   }
-
+  
   public static class JobStatus {
     public JobStatusEnum currentStatus;
 
