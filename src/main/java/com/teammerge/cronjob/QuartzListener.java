@@ -1,5 +1,6 @@
 package com.teammerge.cronjob;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -16,14 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teammerge.model.ScheduleJobModel;
-import com.teammerge.services.ScheduleService;
+import com.teammerge.services.SchedulerService;
 
 public class QuartzListener implements ServletContextListener {
   private static final String JOB_NUMBER = "jobNumber";
 
   private final static Logger LOG = LoggerFactory.getLogger(QuartzListener.class);
 
-  private ScheduleService scheduleService;
+  private SchedulerService scheduleService;
 
   Scheduler scheduler = null;
 
@@ -32,11 +33,12 @@ public class QuartzListener implements ServletContextListener {
     System.out.println("Context Initialized");
 
     try {
-      scheduleService = ApplicationContextUtils.getBean(ScheduleService.class);
+      scheduleService = ApplicationContextUtils.getBean(SchedulerService.class);
       ScheduleJobModel scheduleJobModel = scheduleService.getSchedule("JobGetCommitDetails");
 
       if (scheduleJobModel == null) {
-        LOG.error("No schedule found for DataInsertionJob in DB. Insert a schedule in DB to run this cronjob!! ");
+        LOG.error(
+            "No schedule found for DataInsertionJob in DB. Insert a schedule in DB to run this cronjob!! ");
         return;
       }
 
@@ -44,14 +46,12 @@ public class QuartzListener implements ServletContextListener {
 
       // Setup the Job class and the Job group
       JobKey jobKey = new JobKey("dataInsertionJob", "defaultcronJobGroup");
-      JobDetail job =
-          JobBuilder.newJob(DataInsertionJob.class).withIdentity(jobKey)
-              .usingJobData(JOB_NUMBER, 1).build();
+      JobDetail job = JobBuilder.newJob(DataInsertionJob.class).withIdentity(jobKey)
+          .usingJobData(JOB_NUMBER, 1).build();
 
       Trigger trigger =
-          TriggerBuilder.newTrigger()
-              .withIdentity("dataInsertionJobTrigger", "defaultcronJobGroup").startNow()
-              .withSchedule(CronScheduleBuilder.cronSchedule(scheduleInterval)).build();
+          TriggerBuilder.newTrigger().withIdentity("dataInsertionJobTrigger", "defaultcronJobGroup")
+              .startNow().withSchedule(CronScheduleBuilder.cronSchedule(scheduleInterval)).build();
 
       // Setup the Job and Trigger with Scheduler & schedule jobs
       scheduler = new StdSchedulerFactory().getScheduler();
@@ -72,5 +72,6 @@ public class QuartzListener implements ServletContextListener {
       e.printStackTrace();
     }
   }
+
 
 }

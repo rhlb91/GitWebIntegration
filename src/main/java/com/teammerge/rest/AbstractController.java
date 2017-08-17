@@ -10,7 +10,7 @@ import com.teammerge.services.CompanyService;
 import com.teammerge.services.DashBoardService;
 import com.teammerge.services.RepoCredentialService;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.services.ScheduleService;
+import com.teammerge.services.SchedulerService;
 
 public abstract class AbstractController {
   @Value("${app.debug}")
@@ -29,7 +29,7 @@ public abstract class AbstractController {
   private BranchService branchService;
 
   @Resource(name = "scheduleService")
-  private ScheduleService scheduleService;
+  private SchedulerService scheduleService;
 
   @Resource(name = "companyService")
   private CompanyService companyService;
@@ -45,11 +45,11 @@ public abstract class AbstractController {
     this.repoCredentialService = repoCredentialService;
   }
 
-  public ScheduleService getScheduleService() {
+  public SchedulerService getScheduleService() {
     return scheduleService;
   }
 
-  public void setScheduleService(ScheduleService scheduleService) {
+  public void setScheduleService(SchedulerService scheduleService) {
     this.scheduleService = scheduleService;
   }
 

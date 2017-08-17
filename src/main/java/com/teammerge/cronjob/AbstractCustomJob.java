@@ -16,7 +16,7 @@ import com.teammerge.populator.CommitPopulator;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
-import com.teammerge.services.ScheduleService;
+import com.teammerge.services.SchedulerService;
 
 public abstract class AbstractCustomJob {
 
@@ -30,7 +30,7 @@ public abstract class AbstractCustomJob {
 
   protected static RepositoryService repositoryService;
 
-  protected static ScheduleService scheduleService;
+  protected static SchedulerService scheduleService;
 
   public AbstractCustomJob() {
 
@@ -114,7 +114,7 @@ public abstract class AbstractCustomJob {
   }
 
   @Required
-  public void setScheduleService(ScheduleService scheduleService1) {
+  public void setScheduleService(SchedulerService scheduleService1) {
     scheduleService = scheduleService1;
   }
 
