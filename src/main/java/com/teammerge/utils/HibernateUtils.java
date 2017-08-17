@@ -9,8 +9,6 @@ import org.hibernate.stat.Statistics;
 
 public class HibernateUtils {
 
-
-
   private static Session currentSession;
 
   private static Transaction currentTransaction;
@@ -44,7 +42,9 @@ public class HibernateUtils {
 
   public static void closeCurrentSession() {
     // printStats(stats);
-    currentSession.close();
+    if (currentSession.isOpen()) {
+      currentSession.close();
+    }
     stats = null;
   }
 

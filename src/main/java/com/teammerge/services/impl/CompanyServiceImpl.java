@@ -30,8 +30,19 @@ public class CompanyServiceImpl implements CompanyService {
   }
 
   @Override
-  public int saveCompanyDetails(Company name) {
-    baseDao.saveEntity(name);
+  public int saveCompanyDetails(Company companyToSave) {
+    Company company = getCompanyDetails(companyToSave.getName());
+
+    if (company == null) {
+      company = companyToSave;
+    } else {
+      // company already exists then just add the remmote repo url and save
+      Map<String, String> remoteUrls = company.getRemoteRepoUrls();
+
+      remoteUrls.putAll(companyToSave.getRemoteRepoUrls());
+      company.setRemoteRepoUrls(remoteUrls);
+    }
+    baseDao.saveOrUpdateEntity(company);
     return 0;
   }
 

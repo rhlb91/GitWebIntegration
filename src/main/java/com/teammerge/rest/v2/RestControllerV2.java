@@ -255,7 +255,8 @@ public class RestControllerV2 extends AbstractController {
       getCompanyService().saveOrUpdateCompanyDetails(repoForm);
       getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
 
-      result.put("result", "Saved successfully!!");
+      result.put("result", "success");
+      result.put("output", "Saved successfully!!");
     } catch (RevisionSyntaxException e) {
       result.put("result", "error");
       result.put("reason", e.getMessage());
@@ -263,16 +264,6 @@ public class RestControllerV2 extends AbstractController {
     }
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
-  }
-
-  @GET
-  @Path("/allRepos/")
-  public Response getAllRepoModels() {
-    List<RepositoryModel> repos = getRepositoryService().getRepositoryModelsFromDB();
-    String jsonOutput = JacksonUtils.toJson(repos);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
   }
 
   @POST
