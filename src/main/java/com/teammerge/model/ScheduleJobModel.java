@@ -17,21 +17,19 @@ public class ScheduleJobModel implements Serializable {
   @Id
   @Column(name = "job_id")
   private String jobId;
-  
- 
+
   @Column(name = "job_status")
   private String jobstatus;
 
   @Column(name = "job_scheduleInterval")
   private String jobscheduleInterval;
- 
+
   @Column(name = "PreviousFireTime")
   private Date PreviousFireTime;
-  
- 
+
   @Column(name = "NextFireTime")
   private Date NextFireTime;
-    
+
   @Override
   public String toString() {
     StringBuilder str = new StringBuilder();
@@ -51,33 +49,34 @@ public class ScheduleJobModel implements Serializable {
   }
 
   public String getjobscheduleInterval() {
-	    return jobscheduleInterval;
-	  }
-
-	  public void setjobscheduleInterval(String jobscheduleInterval) {
-	    this.jobscheduleInterval = jobscheduleInterval;
-	  }
-  
-	  public String getJobStatus() {
-		    return jobstatus;
-		  }
-
-		  public void setJobStatus(String jobstatus) {
-		    this.jobstatus = jobstatus;
-		  }  
-	 	  
-  public Date getPreviousFireTime() {
-	    return PreviousFireTime;
-	  }
-
- public void setPreviousFireTime(Date PreviousFireTime) {
-	 this.PreviousFireTime = PreviousFireTime;
-}
-  public Date getNextFireTime() {
-	return NextFireTime;
- }
-
- public void setNextFireTime(Date NextFireTime) {
-		this.NextFireTime = NextFireTime;
-	 }
+    return jobscheduleInterval;
   }
+
+  public void setjobscheduleInterval(String jobscheduleInterval) {
+    this.jobscheduleInterval = jobscheduleInterval;
+  }
+
+  public String getJobStatus() {
+    return jobstatus;
+  }
+
+  public void setJobStatus(String jobstatus) {
+    this.jobstatus = jobstatus;
+  }
+
+  public Date getPreviousFireTime() {
+    return PreviousFireTime;
+  }
+
+  public void setPreviousFireTime(Date PreviousFireTime) {
+    this.PreviousFireTime = PreviousFireTime;
+  }
+
+  public Date getNextFireTime() {
+    return NextFireTime;
+  }
+
+  public void setNextFireTime(Date NextFireTime) {
+    this.NextFireTime = NextFireTime;
+  }
+}
