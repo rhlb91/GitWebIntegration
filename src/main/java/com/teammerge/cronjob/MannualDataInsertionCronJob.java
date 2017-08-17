@@ -97,8 +97,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
             LOG.error(
                 "Cannot create new commit model for repo " + customRefModel.getRepositoryName()
                     + ", branch " + customRefModel.getRefModel().getName() + ", commit name: "
-                    + commit.getName() + " from cronjob " + getClass().getSimpleName(),
-                e);
+                    + commit.getName() + " from cronjob " + getClass().getSimpleName(), e);
           }
         }
       }
@@ -111,9 +110,8 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
    * this method is responsible for saving branches and commit details in DB.
    * </p>
    * 
-   * <pThis method returns the List of type object, thus the caller method should type cast the
-   * respective object in particular classes before use.
-   * </p>
+   * <pThis method returns the List of type Object, thus the caller method should type cast the
+   * respective object in particular classes before use. </p>
    * 
    * @return list of failed entries not saved in DB
    */
@@ -155,8 +153,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
     return failedEntries;
   }
 
-  public synchronized void fetchAndSaveBranchAndCommitDetailsOnline(String repoName,
-      String branchId) {
+  public synchronized void fetchAndSaveBranchAndCommitDetailsOnline(String repoName, String branchId) {
     List<CustomRefModel> customRefModels = repositoryService.getCustomRefModels(true);
 
     if (CollectionUtils.isNotEmpty(customRefModels)) {
@@ -165,8 +162,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
         String branchName = customRef.getRefModel().getName();
         boolean branchValidation = branchName.contains(branchId);
 
-        if (repoName.equalsIgnoreCase(customRef.getRepositoryName())
-            && (branchValidation == true)) {
+        if (repoName.equalsIgnoreCase(customRef.getRepositoryName()) && (branchValidation == true)) {
 
           Date sinceDate =
               CommitLastChangeCache.instance().getLastChangeDate(getUniqueName(customRef));
@@ -177,8 +173,8 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
           try {
             saveOrUpdateBranch(customRef, commits);
           } catch (InvalidArgumentsException e) {
-            LOG.error("Cannot create new branch model from cronjob !!" + getClass().getSimpleName(),
-                e);
+            LOG.error(
+                "Cannot create new branch model from cronjob !!" + getClass().getSimpleName(), e);
           }
 
           if (CollectionUtils.isNotEmpty(commits)) {
@@ -192,9 +188,8 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
                 }
                 saveCommit(commit, customRef);
               } catch (InvalidArgumentsException e) {
-                LOG.error(
-                    "Cannot create new commit model from cronjob!!" + getClass().getSimpleName(),
-                    e);
+                LOG.error("Cannot create new commit model from cronjob!!"
+                    + getClass().getSimpleName(), e);
               }
             }
             updateLastCommitInDB(getUniqueName(customRef), mostRecentCommitDate);

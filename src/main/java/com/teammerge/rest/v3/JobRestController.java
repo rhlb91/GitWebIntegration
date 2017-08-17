@@ -91,14 +91,14 @@ public class JobRestController extends AbstractController {
   public Response updateCurrentBranch(@PathParam("repoId") String repoName,
       @PathParam("id") String branchId) {
     Map<String, Object> result = new HashMap<>();
+    String output = null;
     if ((StringUtils.isEmpty(repoName)) || (StringUtils.isEmpty(branchId))) {
-      String output = "Project id and Ticket id should not be empty";
-      result.put("result", output);
+      output = "Project id and Ticket id should not be empty";
     } else {
       cronJob.fetchAndSaveBranchAndCommitDetailsOnline(repoName, branchId);
-      String output = "Branch and Commit Details has been updated sucessfully";
-      result.put("result", output);
+      output = "Branch and Commit Details has been updated sucessfully";
     }
+    result.put("result", output);
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
