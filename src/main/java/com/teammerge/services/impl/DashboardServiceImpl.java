@@ -286,8 +286,9 @@ public class DashboardServiceImpl implements DashBoardService {
     activityModel.setRepositoryName(repoName);
     activityModel.setWhenChanged(getWhenChanged(change.date));
     activityModel.setCommits(populateCommits(commits));
-    activityModel.setRemoteRepoBaseUrl(StringUtils.stripDotGit(repo.getOrigin()));
-
+    if (!StringUtils.isEmpty(repo.getOrigin())) {
+      activityModel.setRemoteRepoBaseUrl(StringUtils.stripDotGit(repo.getOrigin()));
+    }
     return activityModel;
   }
 
