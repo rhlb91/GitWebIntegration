@@ -28,8 +28,8 @@ public abstract class AbstractController {
   @Resource(name = "branchService")
   private BranchService branchService;
 
-  @Resource(name = "scheduleService")
-  private SchedulerService scheduleService;
+  @Resource(name = "schedulerService")
+  private SchedulerService schedulerService;
 
   @Resource(name = "companyService")
   private CompanyService companyService;
@@ -45,12 +45,12 @@ public abstract class AbstractController {
     this.repoCredentialService = repoCredentialService;
   }
 
-  public SchedulerService getScheduleService() {
-    return scheduleService;
+  public SchedulerService getSchedulerService() {
+    return schedulerService;
   }
 
-  public void setScheduleService(SchedulerService scheduleService) {
-    this.scheduleService = scheduleService;
+  public void setSchedulerService(SchedulerService schedulerService) {
+    this.schedulerService = schedulerService;
   }
 
   protected boolean isDebugOn() {

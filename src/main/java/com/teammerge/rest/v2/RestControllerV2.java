@@ -136,7 +136,7 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getScheduleDetails(@PathParam("id") String jobId) {
 
-    ScheduleJobModel scheduleJobModel = getScheduleService().getSchedule(jobId);
+    ScheduleJobModel scheduleJobModel = getSchedulerService().getSchedule(jobId);
 
     String jsonOutput = JacksonUtils.toJson(scheduleJobModel);
 

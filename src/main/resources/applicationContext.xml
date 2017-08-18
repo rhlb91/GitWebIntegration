@@ -65,7 +65,7 @@
 		<property name="commitService" ref="commitService" />
 		<property name="branchService" ref="branchService" />
 		<property name="repositoryService" ref="repositoryService" />
-		<property name="scheduleService" ref="scheduleService" />
+		<property name="schedulerService" ref="schedulerService" />
 		<property name="commitPopulator" ref="commitPopulator" />
 		<property name="branchPopulator" ref="branchPopulator" />
 	</bean>
@@ -74,7 +74,7 @@
 		<property name="commitService" ref="commitService" />
 		<property name="branchService" ref="branchService" />
 		<property name="repositoryService" ref="repositoryService" />
-		<property name="scheduleService" ref="scheduleService" />
+		<property name="schedulerService" ref="schedulerService" />
 		<property name="commitPopulator" ref="commitPopulator" />
 		<property name="branchPopulator" ref="branchPopulator" />
 	</bean>

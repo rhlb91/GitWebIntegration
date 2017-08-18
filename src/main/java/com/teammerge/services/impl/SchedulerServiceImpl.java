@@ -1,5 +1,6 @@
 package com.teammerge.services.impl;
 
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -9,9 +10,11 @@ import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
@@ -24,7 +27,7 @@ import com.teammerge.dao.BaseDao;
 import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.services.SchedulerService;
 
-@Service("scheduleService")
+@Service("schedulerService")
 public class SchedulerServiceImpl implements SchedulerService {
 
   private static final Logger LOG = LoggerFactory.getLogger(SchedulerServiceImpl.class);
@@ -82,9 +85,8 @@ public class SchedulerServiceImpl implements SchedulerService {
       JobDetail jobDetail =
           JobBuilder.newJob(jobClass).withIdentity(jobKey).usingJobData(JOB_NUMBER, 1).build();
 
-      CronTrigger cronTrigger =
-          TriggerBuilder.newTrigger().withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP)
-              .withSchedule(cronScheduleBuilder).build();
+      CronTrigger cronTrigger = TriggerBuilder.newTrigger()
+          .withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP).withSchedule(cronScheduleBuilder).build();
 
       scheduler.scheduleJob(jobDetail, cronTrigger);
     } catch (Exception e) {
@@ -97,19 +99,18 @@ public class SchedulerServiceImpl implements SchedulerService {
   public void reschedule(Class<? extends Job> jobClass, String cronExpression) {
     try {
       String name = jobClass.getSimpleName();
-      if (!name.equals(JOB_NAME)) {
+      if (!name.equalsIgnoreCase(JOB_NAME)) {
         LOG.warn("Not rescheduling job. Invalid Job class specified!!");
         return;
       }
 
       CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpression);
 
-      CronTrigger newCronTrigger =
-          TriggerBuilder.newTrigger().withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP)
-              .withSchedule(cronScheduleBuilder).build();
+      CronTrigger newCronTrigger = TriggerBuilder.newTrigger()
+          .withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP).withSchedule(cronScheduleBuilder).build();
 
-      scheduler
-          .rescheduleJob(TriggerKey.triggerKey(CRONJOB_TRIGGER, CRONJOB_GROUP), newCronTrigger);
+      scheduler.rescheduleJob(TriggerKey.triggerKey(CRONJOB_TRIGGER, CRONJOB_GROUP),
+          newCronTrigger);
 
       // updating the scheduler in DB
       updateScheduleInDB(cronExpression);
@@ -123,7 +124,7 @@ public class SchedulerServiceImpl implements SchedulerService {
   public void startSchedule(Class<? extends Job> jobClass) {
     try {
       String name = jobClass.getSimpleName();
-      if (!name.equals(JOB_NAME)) {
+      if (!name.equalsIgnoreCase(JOB_NAME)) {
         LOG.warn("Cannot start scheduler job. Invalid Job class specified!!");
         return;
       }
@@ -163,8 +164,36 @@ public class SchedulerServiceImpl implements SchedulerService {
   }
 
   public int saveSchedule(ScheduleJobModel scheduleJobModel) {
-    baseDao.saveEntity(scheduleJobModel);
+    baseDao.saveOrUpdateEntity(scheduleJobModel);
     return 0;
   }
 
+  @Override
+  public void getpauseJob(String jobName) {
+    try {
+      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+      Scheduler scheduler = schedulerFactory.getScheduler();
+      List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
+      for (JobExecutionContext jobExecutionContext : currentlyExecuting) {
+        if (jobName.equalsIgnoreCase(jobExecutionContext.getJobDetail().getKey().getName())) {
+          scheduler.pauseJob(jobExecutionContext.getJobDetail().getKey());
+          LOG.info(jobName + " has been pause sucessfully");
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Error pause cron job scheduler!!", e);
+    }
+  }
+
+  @Override
+  public void getresumeJob(String jobName, String jobGroup) {
+    try {
+      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+      Scheduler scheduler = schedulerFactory.getScheduler();
+      scheduler.resumeJob(new JobKey(jobName, jobGroup));
+      LOG.info(jobName + " has been resume sucessfully");
+    } catch (Exception e) {
+      LOG.error("Error resume cron job scheduler!!", e);
+    }
+  }
 }
