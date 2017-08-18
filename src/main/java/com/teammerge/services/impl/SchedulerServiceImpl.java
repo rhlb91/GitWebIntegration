@@ -169,31 +169,27 @@ public class SchedulerServiceImpl implements SchedulerService {
   }
 
   @Override
-  public void getpauseJob(String jobName) {
+  public void pauseJob(String jobName) {
     try {
-      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-      Scheduler scheduler = schedulerFactory.getScheduler();
       List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
       for (JobExecutionContext jobExecutionContext : currentlyExecuting) {
         if (jobName.equalsIgnoreCase(jobExecutionContext.getJobDetail().getKey().getName())) {
           scheduler.pauseJob(jobExecutionContext.getJobDetail().getKey());
-          LOG.info(jobName + " has been pause sucessfully");
+          LOG.info(jobName + " has been paused sucessfully");
         }
       }
     } catch (Exception e) {
-      LOG.error("Error pause cron job scheduler!!", e);
+      LOG.error("Error in pausing cron job scheduler!!", e);
     }
   }
 
   @Override
-  public void getresumeJob(String jobName, String jobGroup) {
+  public void resumeJob(String jobName, String jobGroup) {
     try {
-      SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-      Scheduler scheduler = schedulerFactory.getScheduler();
       scheduler.resumeJob(new JobKey(jobName, jobGroup));
-      LOG.info(jobName + " has been resume sucessfully");
+      LOG.info(jobName + " has been resumed sucessfully");
     } catch (Exception e) {
-      LOG.error("Error resume cron job scheduler!!", e);
+      LOG.error("Error in resuming cron job scheduler!!", e);
     }
   }
 }
