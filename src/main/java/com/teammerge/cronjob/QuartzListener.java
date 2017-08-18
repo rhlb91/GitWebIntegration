@@ -11,20 +11,20 @@ import com.teammerge.services.SchedulerService;
 public class QuartzListener implements ServletContextListener {
   private final static Logger LOG = LoggerFactory.getLogger(QuartzListener.class);
 
-  private SchedulerService scheduleService;
+  private SchedulerService schedulerService;
 
   @Override
   public void contextInitialized(ServletContextEvent servletContext) {
     System.out.println("Context Initialized");
 
-    scheduleService = ApplicationContextUtils.getBean(SchedulerService.class);
-    scheduleService.register(DataInsertionJob.class, null);
-    scheduleService.startSchedule(DataInsertionJob.class);
+    schedulerService = ApplicationContextUtils.getBean(SchedulerService.class);
+    schedulerService.register(DataInsertionJob.class, null);
+    schedulerService.startSchedule(DataInsertionJob.class);
   }
 
   @Override
   public void contextDestroyed(ServletContextEvent servletContext) {
-    scheduleService.destroyScheduler();
+    schedulerService.destroyScheduler();
   }
 
 }
