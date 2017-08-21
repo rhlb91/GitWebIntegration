@@ -43,7 +43,6 @@ public class JobRestController extends AbstractController {
   @Consumes("application/json")
   @Produces({"application/json"})
   public Response runCronJobForBranch() {
-
     Map<String, Object> result = new HashMap<>();
     List<RefModel> failedBranches = cronJob.runJobSavingForBranchDetails();
 
@@ -63,7 +62,6 @@ public class JobRestController extends AbstractController {
   @Produces({"application/json"})
   public Response runCronJobForCommit() {
     Map<String, Object> result = new HashMap<>();
-
     List<RepositoryCommit> failedCommits = cronJob.runJobSavingForCommitDetails();
     String output = "Commit Details has been saved sucessfully";
 
@@ -82,10 +80,8 @@ public class JobRestController extends AbstractController {
   @Produces({"application/json"})
   public Response runSaveAllDetails() {
     Map<String, Object> result = new HashMap<>();
-
     List<Object> failedEntries = cronJob.runSaveAllDetails();
     String output = "Branches and Commit Details has been saved sucessfully";
-
     if (CollectionUtils.isNotEmpty(failedEntries)) {
       output += "However, there are some failed entries!! Try to add them mannually!!";
     }
@@ -95,67 +91,81 @@ public class JobRestController extends AbstractController {
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
+  @GET
   @Path("/updateCurrentBranch/{repoId}/{id}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response updateCurrentBranch(@PathParam("repoId") String repoName,
       @PathParam("id") String branchId) {
     Map<String, Object> result = new HashMap<>();
-    String output = null;
     if ((StringUtils.isEmpty(repoName)) || (StringUtils.isEmpty(branchId))) {
-      output = "Project id and Ticket id should not be empty";
+      result.put("result", "error");
+      result.put("reason", "Project id and Ticket id should not be empty");
     } else {
       cronJob.fetchAndSaveBranchAndCommitDetailsOnline(repoName, branchId);
-      output = "Branch and Commit Details has been updated sucessfully";
+      result.put("result", "success");
+      result.put("output", "Branch and Commit Details has been updated sucessfully");
     }
-    result.put("result", output);
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
+  @GET
   @Path("/reschedule/{jobName}/{cronExpression}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
   public Response reschedule(@PathParam("jobName") String jobName,
       @PathParam("cronExpression") String cronExpression) {
     Map<String, Object> result = new HashMap<>();
-    String output = null;
     String dataJobName = DataInsertionJob.class.getSimpleName();
-    if (((StringUtils.isEmpty(jobName)) || (StringUtils.isEmpty(cronExpression)))
-        && (!dataJobName.equalsIgnoreCase(jobName))) {
-      output = "Job Name and CronExpression should not be empty";
+    if ((StringUtils.isEmpty(jobName)) || (StringUtils.isEmpty(cronExpression))) {
+      result.put("result", "error");
+      result.put("reason", "Job Name and CronExpression should not be empty");
+    } else if ((!dataJobName.equalsIgnoreCase(jobName))) {
+      result.put("result", "error");
+      result.put("reason", "Job Name is not matching with Existing job");
     } else {
       schedulerService.reschedule(DataInsertionJob.class, cronExpression);
-      output = jobName + " has been rescheduled sucessfully";
+      result.put("result", "success");
+      result.put("output", jobName + " has been rescheduled sucessfully");
     }
-    result.put("result", output);
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
-  @Path("/getpauseJob/{jobName}")
-  public Response getpauseJob(@PathParam("jobName") String jobName) {
+  @GET
+  @Path("/pauseJob/{jobName}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
+  public Response pauseJob(@PathParam("jobName") String jobName) {
     Map<String, Object> result = new HashMap<>();
-    String output = null;
     if (StringUtils.isEmpty(jobName)) {
-      output = "Job id should not be empty";
+      result.put("result", "error");
+      result.put("reason", "Job id should not be empty");
     } else {
-      schedulerService.getpauseJob(jobName);
-      output = jobName + "has been pause sucessfully";
+      schedulerService.pauseJob(jobName);
+      result.put("result", "success");
+      result.put("output", jobName + " has been paused sucessfully");
     }
-    result.put("result", output);
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
-  @Path("/getresumeJob/{jobName}/{jobGroup}")
-  public Response getresumeJob(@PathParam("jobName") String jobName,
+  @GET
+  @Path("/resumeJob/{jobName}/{jobGroup}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
+  public Response resumeJob(@PathParam("jobName") String jobName,
       @PathParam("jobGroup") String jobGroup) {
     Map<String, Object> result = new HashMap<>();
-    String output = null;
     if ((StringUtils.isEmpty(jobName)) || (StringUtils.isEmpty(jobGroup))) {
-      output = "Job Name and job Group should not be empty";
+      result.put("result", "error");
+      result.put("reason", "Job Name and job Group should not be empty");
     } else {
-      schedulerService.getresumeJob(jobName, jobGroup);
-      output = jobName + "has been resume sucessfully";
+      schedulerService.resumeJob(jobName, jobGroup);
+      result.put("result", "success");
+      result.put("output", jobName + " has been resumed sucessfully");
     }
-    result.put("result", output);
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }

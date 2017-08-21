@@ -33,7 +33,7 @@ public interface SchedulerService {
 
   void destroyScheduler();
 
-  void getpauseJob(String jobName);
+  void pauseJob(String jobName);
 
-  void getresumeJob(String jobName, String jobGroup);
+  void resumeJob(String jobName, String jobGroup);
 }
