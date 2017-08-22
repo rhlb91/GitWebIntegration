@@ -8,14 +8,6 @@ public class CommitFormValidator extends AbstractValidator<CommitForm> {
 
 
   @Override
-  public ValidationResult validate(CommitForm form) {
-
-    ValidationResult e = new ValidationResult();
-    validate(form, e);
-    return e;
-  }
-
-  @Override
   public void validate(CommitForm form, ValidationResult e) {
 
     if (StringUtils.isEmpty(form.getBranchName())) {
