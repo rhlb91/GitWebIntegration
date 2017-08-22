@@ -24,5 +24,14 @@ public class RepoFormValidator extends AbstractValidator<RepoForm> {
     if (StringUtils.isEmpty(form.getProjectName())) {
       e.addError("{ProjectName", "ProjectName cannot be null or empty");
     }
+    if (StringUtils.isEmpty(form.getRepoRemoteURL())) {
+      e.addError("{repoRemoteURL", "Repository Remote URL cannot be null or empty");
+    }
+    if (StringUtils.isEmpty(form.getUsername())) {
+      e.addError("{userName", "User name cannot be null or empty");
+    }
+    if (StringUtils.isEmpty(form.getPassword())) {
+      e.addError("{password", "Password cannot be null or empty");
+    }
   }
 }

@@ -351,4 +351,23 @@ public class Constants {
       return name().toLowerCase();
     }
   }
+
+
+  public static enum WebServiceResult {
+    SUCCESS, FAILURE, VALIDATION_ERROR;
+
+    public static WebServiceResult forName(String name) {
+      for (WebServiceResult type : values()) {
+        if (type.name().equalsIgnoreCase(name)) {
+          return type;
+        }
+      }
+      return FAILURE;
+    }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
 }

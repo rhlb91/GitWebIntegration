@@ -19,7 +19,9 @@ import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.BranchDao;
 import com.teammerge.entity.BranchLastCommitAdded;
 import com.teammerge.entity.BranchModel;
+import com.teammerge.form.BranchForm;
 import com.teammerge.model.CustomRefModel;
+import com.teammerge.populator.BranchPopulator;
 import com.teammerge.services.BranchService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.utils.HibernateUtils;
@@ -36,6 +38,9 @@ public class BranchServiceImpl implements BranchService {
   private BranchDao branchDao;
 
   private BaseDao<BranchLastCommitAdded> baseDao;
+
+  @Resource(name = "branchPopulator")
+  private BranchPopulator branchPopulator;
 
   @Override
   public List<BranchModel> getBranchesWithMinimumDetails(String branchName) {
@@ -68,10 +73,18 @@ public class BranchServiceImpl implements BranchService {
   }
 
   @Override
+  public void saveBranch(BranchForm branchForm) {
+    BranchModel branchModel = new BranchModel();
+    branchPopulator.populate(branchForm, branchModel);
+    branchDao.saveOrUpdateEntity(branchModel);
+  }
+
+  @Override
   public int saveBranch(BranchModel branch) {
     branchDao.saveEntity(branch);
     return 0;
   }
+
 
   @Override
   public int saveOrUpdateBranch(BranchModel branch) {

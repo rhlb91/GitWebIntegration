@@ -2,11 +2,10 @@ package com.teammerge.validator.impl;
 
 
 import com.teammerge.form.CommitForm;
-import com.teammerge.form.CreateNewBranchForm;
 import com.teammerge.utils.StringUtils;
 
-
 public class CommitFormValidator extends AbstractValidator<CommitForm> {
+
 
   @Override
   public ValidationResult validate(CommitForm form) {
@@ -25,5 +24,15 @@ public class CommitFormValidator extends AbstractValidator<CommitForm> {
     if (StringUtils.isEmpty(form.getCommitId())) {
       e.addError("commitId", "commitId cannot be null or empty");
     }
+    if (StringUtils.isEmpty(form.getWhen())) {
+      e.addError("when", "commit Date cannot be null or empty");
+    }
+    if (StringUtils.isEmpty(form.getAuthorName())) {
+      e.addError("authorName", "Author name cannot be null or empty");
+    }
+    if (StringUtils.isEmpty(form.getShortMsg())) {
+      e.addError("shortMsg", "Commit message cannot be null or empty");
+    }
+
   }
 }
