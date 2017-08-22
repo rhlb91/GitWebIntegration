@@ -8,14 +8,6 @@ import com.teammerge.utils.StringUtils;
 public class RepoFormValidator extends AbstractValidator<RepoForm> {
 
   @Override
-  public ValidationResult validate(RepoForm form) {
-
-    ValidationResult e = new ValidationResult();
-    validate(form, e);
-    return e;
-  }
-
-  @Override
   public void validate(RepoForm form, ValidationResult e) {
 
     if (StringUtils.isEmpty(form.getCompanyName())) {

@@ -14,12 +14,4 @@ public class CommitTreeRequestValidator extends AbstractValidator<CommitTreeRequ
       e.addError("ProjectName", "Project Name cannot be null or empty");
     }
   }
-
-  @Override
-  public ValidationResult validate(CommitTreeRequestForm form) {
-    ValidationResult e = new ValidationResult();
-    validate(form, e);
-    return e;
-  }
-
 }

@@ -8,14 +8,6 @@ import com.teammerge.utils.StringUtils;
 public class CredentialFormValidator extends AbstractValidator<CredentialRequestForm> {
 
   @Override
-  public ValidationResult validate(CredentialRequestForm form) {
-
-    ValidationResult e = new ValidationResult();
-    validate(form, e);
-    return e;
-  }
-
-  @Override
   public void validate(CredentialRequestForm form, ValidationResult e) {
 
     if (StringUtils.isEmpty(form.getCompanyId())) {

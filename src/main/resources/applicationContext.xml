@@ -61,6 +61,7 @@
 	<bean id="commitFormValidator" class="com.teammerge.validator.impl.CommitFormValidator" />
 	<bean id="branchValidator" class="com.teammerge.validator.impl.BranchValidator" />
 	<bean id="companyFormValidator" class="com.teammerge.validator.impl.CompanyFormValidator" />
+	<bean id="credentialValidator" class="com.teammerge.validator.impl.CredentialFormValidator" />
 	<!-- Validators End -->
 
 	<bean id="dataInsertionJob" class="com.teammerge.cronjob.DataInsertionJob">

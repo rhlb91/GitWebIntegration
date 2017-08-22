@@ -76,14 +76,14 @@ public class RestControllerV2 extends AbstractController {
   @Resource(name = "repoFormValidator")
   private RepoFormValidator repoFormValidator;
 
-  @Resource(name = "commitValidator")
-  private CommitFormValidator commitValidator;
+  @Resource(name = "commitFormValidator")
+  private CommitFormValidator commitFormValidator;
 
   @Resource(name = "branchValidator")
   private BranchValidator branchValidator;
 
-  @Resource(name = "companyValidator")
-  private CompanyFormValidator companyValidator;
+  @Resource(name = "companyFormValidator")
+  private CompanyFormValidator companyFormValidator;
 
   @Resource(name = "treeValidator")
   private CommitTreeRequestValidator treeValidator;
@@ -181,10 +181,10 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCompanyDetails(final CompanyForm company) {
     Map<String, Object> result = new HashMap<>();
-    ValidationResult vr = companyValidator.validate(company);
+    ValidationResult vr = companyFormValidator.validate(company);
 
     if (vr.hasErrors()) {
-      companyValidator.putErrorsInMap(result, vr);
+      companyFormValidator.putErrorsInMap(result, vr);
       return Response.status(200).type("application/json").entity(result)
           .header("Access-Control-Allow-Origin", "*").build();
     }
@@ -226,10 +226,10 @@ public class RestControllerV2 extends AbstractController {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCommitDetails(final CommitForm commit) {
     Map<String, Object> result = new HashMap<>();
-    ValidationResult vr = commitValidator.validate(commit);
+    ValidationResult vr = commitFormValidator.validate(commit);
 
     if (vr.hasErrors()) {
-      commitValidator.putErrorsInMap(result, vr);
+      commitFormValidator.putErrorsInMap(result, vr);
       return Response.status(200).type("application/json").entity(result)
           .header("Access-Control-Allow-Origin", "*").build();
     }

@@ -8,14 +8,6 @@ import com.teammerge.utils.StringUtils;
 public class BranchValidator extends AbstractValidator<BranchForm> {
 
   @Override
-  public ValidationResult validate(BranchForm form) {
-
-    ValidationResult e = new ValidationResult();
-    validate(form, e);
-    return e;
-  }
-
-  @Override
   public void validate(BranchForm form, ValidationResult e) {
 
     if (StringUtils.isEmpty(form.getBranchId())) {
