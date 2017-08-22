@@ -1,5 +1,6 @@
 package com.teammerge.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,9 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.teammerge.Constants.CloneStatus;
+import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.entity.Company;
 import com.teammerge.form.RepoForm;
+import com.teammerge.model.RepoCloneStatusModel;
+import com.teammerge.model.RepositoryModel;
 import com.teammerge.services.CompanyService;
 import com.teammerge.utils.StringUtils;
 
@@ -38,9 +43,10 @@ public class CompanyServiceImpl implements CompanyService {
     } else {
       // company already exists then just add the remmote repo url and save
       Map<String, String> remoteUrls = company.getRemoteRepoUrls();
-
+      String companyStatus=company.getStatus().toString();
       remoteUrls.putAll(companyToSave.getRemoteRepoUrls());
       company.setRemoteRepoUrls(remoteUrls);
+      company.setStatus(companyStatus);
     }
     baseDao.saveOrUpdateEntity(company);
     return 0;
@@ -48,12 +54,21 @@ public class CompanyServiceImpl implements CompanyService {
 
   public void saveOrUpdateCompanyDetails(final RepoForm repoForm) {
     Company company = getCompanyDetails(repoForm.getCompanyName());
-
+    
     if (company == null) {
       company = new Company();
       company.setName(repoForm.getCompanyName());
     }
 
+    List<Company> companies = new ArrayList<Company>();
+    if (company != null
+        && CloneStatus.forName(company.getStatus()).equals(RepoActiveStatus.ACTIVE)) {
+      Company model = getCompanyDetails(repoForm.getCompanyName());
+      if (model != null) {
+        companies.add(model);
+      }
+    }
+  
     Map<String, String> remoteRepo = company.getRemoteRepoUrls();
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
@@ -61,6 +76,33 @@ public class CompanyServiceImpl implements CompanyService {
     saveCompanyDetails(company);
   }
 
+  private boolean checkIsCompanyRepoActiveStatus(String repoName) {
+    List<Company> companies = baseDao.fetchAll();
+
+    if (CollectionUtils.isEmpty(companies)) {
+      // if there is no entry then probably this is the first time when application has ran,
+      // thus created a initial status model and saving
+      Company newRepoStatusModel = new Company(repoName);
+      baseDao.saveEntity(newRepoStatusModel);
+
+      LOG.error("No Repo status entry found in DB!! Added one for " + repoName);
+      return false;
+    }
+
+    for (Company company : companies) {
+      if (repoName.equals(company.getName())) {
+        if (company != null
+            && CloneStatus.forName(company.getStatus())
+                .equals(RepoActiveStatus.IN_ACTIVE)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+  
+  
   public String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId) {
     if (StringUtils.isEmpty(companyId) || StringUtils.isEmpty(projectId)) {
       LOG.error("Cannot get remoteUrl companyId and projectId are null!!");
@@ -98,6 +140,7 @@ public class CompanyServiceImpl implements CompanyService {
       return null;
     }
 
+    
     for (Company c : companies) {
       if (MapUtils.isNotEmpty(c.getRemoteRepoUrls())) {
 
