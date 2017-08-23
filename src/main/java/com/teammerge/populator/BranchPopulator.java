@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.teammerge.GitWebException;
 import com.teammerge.entity.BranchModel;
+import com.teammerge.form.BranchForm;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.utils.TimeUtils;
 
@@ -33,6 +34,19 @@ public class BranchPopulator {
 
     // Not used as of now, but can be used in future
     target.setNumOfPull(0);
+
+  }
+  
+
+  public void populate(BranchForm source, BranchModel target) {
+
+    target.setBranchId(source.getBranchId());
+    target.setNumOfCommits(source.getNumOfCommits());
+    target.setRepositoryId(source.getRepositoryId());
+    target.setLastModifiedDate(source.getLastModifiedDate());
+    target.setShortName(source.getShortName());
+    // Not used as of now, but can be used in future
+    target.setNumOfPull(source.getNumOfPull());
 
   }
 }

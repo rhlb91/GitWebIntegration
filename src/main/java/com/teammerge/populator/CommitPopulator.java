@@ -6,11 +6,12 @@ import org.springframework.stereotype.Component;
 import com.teammerge.Constants;
 import com.teammerge.GitWebException;
 import com.teammerge.entity.CommitModel;
+import com.teammerge.form.CommitForm;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RepositoryCommit;
 import com.teammerge.utils.StringUtils;
 import com.teammerge.utils.TimeUtils;
-
+import org.eclipse.jgit.lib.PersonIdent;
 @Component
 public class CommitPopulator {
 
@@ -54,6 +55,19 @@ public class CommitPopulator {
 
     target.setBranchName(source2.getRefModel().getName());
     target.setRepositoryName(source2.getRepositoryName());
-
   }
-}
+  
+  public void populate(CommitForm source, CommitModel target) {
+    target.setCommitId(source.getCommitId());
+    target.setCommitAuthor(new PersonIdent(source.getAuthorName(), source.getAuthorEmail(),
+      Long.valueOf(source.getWhen()), Integer.valueOf(source.getTimezone())));
+    target.setBranchName(source.getBranchName());
+    target.setCommitDate(TimeUtils.convertToDateFormat(Long.valueOf(source.getCommitDate())));
+    target.setCommitHash(source.getCommitHash());
+    target.setCommitTimeFormatted(source.getFormattedTime());
+    target.setIsMergeCommit(Boolean.valueOf(source.getIsMergeCommit()));
+    target.setRepositoryName(source.getRepoName());
+    target.setShortMessage(source.getShortMsg());
+    target.setTrimmedMessage(source.getTrimmedMsg());
+    }
+ }

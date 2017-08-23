@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -15,9 +17,9 @@ import com.teammerge.Constants.CloneStatus;
 import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.entity.Company;
+import com.teammerge.form.CompanyForm;
 import com.teammerge.form.RepoForm;
-import com.teammerge.model.RepoCloneStatusModel;
-import com.teammerge.model.RepositoryModel;
+import com.teammerge.populator.CompanyPopulator;
 import com.teammerge.services.CompanyService;
 import com.teammerge.utils.StringUtils;
 
@@ -28,6 +30,9 @@ public class CompanyServiceImpl implements CompanyService {
 
   private BaseDao<Company> baseDao;
 
+  @Resource(name = "companyPopulator")
+  private CompanyPopulator companyPopulator;
+
   @Override
   public Company getCompanyDetails(String name) {
     Company company = baseDao.fetchEntity(name);
@@ -35,21 +40,24 @@ public class CompanyServiceImpl implements CompanyService {
   }
 
   @Override
-  public int saveCompanyDetails(Company companyToSave) {
-    Company company = getCompanyDetails(companyToSave.getName());
+  public void saveCompanyDetails(Company company) {
+    Company existingCompany = getCompanyDetails(company.getName());
 
-    if (company == null) {
-      company = companyToSave;
+    if (existingCompany == null) {
+      existingCompany = company;
     } else {
-      // company already exists then just add the remmote repo url and save
-      Map<String, String> remoteUrls = company.getRemoteRepoUrls();
-      String companyStatus=company.getStatus().toString();
-      remoteUrls.putAll(companyToSave.getRemoteRepoUrls());
-      company.setRemoteRepoUrls(remoteUrls);
-      company.setStatus(companyStatus);
+      Map<String, String> remoteRepo = existingCompany.getRemoteRepoUrls();
+      remoteRepo.putAll(company.getRemoteRepoUrls());
+      existingCompany.setRemoteRepoUrls(remoteRepo);
     }
-    baseDao.saveOrUpdateEntity(company);
-    return 0;
+    baseDao.saveEntity(existingCompany);
+  }
+
+  @Override
+  public void saveCompanyDetails(CompanyForm companyForm) {
+    Company company = new Company();
+    companyPopulator.populate(companyForm, company);
+    saveCompanyDetails(company);
   }
 
   public void saveOrUpdateCompanyDetails(final RepoForm repoForm) {
@@ -73,7 +81,7 @@ public class CompanyServiceImpl implements CompanyService {
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
 
-    saveCompanyDetails(company);
+    baseDao.saveEntity(company);
   }
 
   private boolean checkIsCompanyRepoActiveStatus(String repoName) {

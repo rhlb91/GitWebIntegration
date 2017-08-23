@@ -13,7 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.HibernateException;
@@ -34,6 +33,7 @@ import com.teammerge.form.CommitForm;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.RefModel;
 import com.teammerge.model.RepositoryCommit;
+import com.teammerge.populator.CommitPopulator;
 import com.teammerge.services.CommitService;
 import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.CommitDiffStrategy;
@@ -63,6 +63,9 @@ public class CommitServiceImpl implements CommitService {
 
   @Value("${app.debug}")
   private String debug;
+  
+  @Resource(name = "commitPopulator")
+  private CommitPopulator commitPopulator;
 
   public boolean isDebugOn() {
     return Boolean.parseBoolean(debug);
@@ -216,21 +219,8 @@ public class CommitServiceImpl implements CommitService {
   @Override
   public void saveOrUpdateCommitDetails(CommitForm commitForm) {
     CommitModel model = new CommitModel();
-
-    model.setCommitId(commitForm.getCommitId());
-    model.setCommitAuthor(new PersonIdent(commitForm.getAuthorName(), commitForm.getAuthorEmail(),
-        Long.valueOf(commitForm.getWhen()), Integer.valueOf(commitForm.getTimezone())));
-    model.setBranchName(commitForm.getBranchName());
-    model.setCommitDate(TimeUtils.convertToDateFormat(Long.valueOf(commitForm.getCommitDate())));
-    model.setCommitHash(commitForm.getCommitHash());
-    model.setCommitTimeFormatted(commitForm.getFormattedTime());
-    model.setIsMergeCommit(Boolean.valueOf(commitForm.getIsMergeCommit()));
-    model.setRepositoryName(commitForm.getRepoName());
-    model.setShortMessage(commitForm.getShortMsg());
-    model.setTrimmedMessage(commitForm.getTrimmedMsg());
-
+    commitPopulator.populate(commitForm, model);
     getBaseDao().saveOrUpdateEntity(model);
-
   }
 
   public List<String> getCommitDiff(String repoName, String branch, String commitId)
