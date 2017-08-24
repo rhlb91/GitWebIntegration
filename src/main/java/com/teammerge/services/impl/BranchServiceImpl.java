@@ -112,7 +112,25 @@ public class BranchServiceImpl implements BranchService {
   @Override
   public List<BranchModel> getBranchDetailsForBranchLike(String branchId) {
     List<BranchModel> branchdetails = branchDao.fetchEntityLike(branchId);
-    return branchdetails;
+    List<BranchModel> validBranches = new ArrayList<>();
+
+    String[] strArr = {branchId + "_", branchId + "-", branchId + " "};
+    boolean isValidTicket = false;
+
+    for (BranchModel b : branchdetails) {
+      String bName = b.getShortName().substring(b.getShortName().lastIndexOf("/") + 1);
+      isValidTicket = false;
+      for (int i = 0; i < strArr.length; i++) {
+        if (bName.equals(branchId) || bName.contains(strArr[i])) {
+          isValidTicket = true;
+          break;
+        }
+      }
+      if (isValidTicket) {
+        validBranches.add(b);
+      }
+    }
+    return validBranches;
   }
 
   @Override

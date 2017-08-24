@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -186,10 +185,10 @@ public class CommitCache {
             ObjectId sinceCommit = commits.get(0).getId();
             List<RepositoryCommit> incremental =
                 get(repositoryName, repository, branch, sinceCommit);
-            logger.info(
-                MessageFormat.format("incrementally added {0} commits to cache for {1}:{2} in {3}",
-                    incremental.size(), repositoryName, branch,
-                    LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));
+            logger.info(MessageFormat.format(
+                "incrementally added {0} commits to cache for {1}:{2} in {3}", incremental.size(),
+                repositoryName, branch,
+                LoggerUtils.getTimeInMilliSecs(start, System.currentTimeMillis())));
             incremental.addAll(commits);
             repoCache.updateObject(branchKey, tipDate, incremental);
             commits = incremental;
@@ -213,19 +212,19 @@ public class CommitCache {
       }
       if (list.size() > 0) {
         logger.debug(MessageFormat.format(
-            "retrieved {0} commits from cache of {1}:{2} since {3,date,yyyy-MM-dd} in {4} msecs",
+            "retrieved {0} commits from cache of {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
             list.size(), repositoryName, branch, sinceDate,
-            TimeUnit.NANOSECONDS.toMillis(System.currentTimeMillis() - start)));
+            LoggerUtils.getTimeInMilliSecs(start, System.currentTimeMillis())));
       }
     } else {
       // not caching or request outside cache window
       list = get(repositoryName, repository, branch, sinceDate);
-      
-      if(list.size() > 0){
+
+      if (list.size() > 0) {
         logger.debug(MessageFormat.format(
             "(non cached)parsed {0} commits from {1}:{2} since {3,date,yyyy-MM-dd} in {4}",
             list.size(), repositoryName, branch, sinceDate,
-            LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())));  
+            LoggerUtils.getTimeInMilliSecs(start, System.currentTimeMillis())));
       }
     }
     return list;

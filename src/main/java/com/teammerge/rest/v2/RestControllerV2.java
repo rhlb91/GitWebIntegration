@@ -40,6 +40,7 @@ import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.ScheduleJobModel;
 import com.teammerge.rest.AbstractController;
 import com.teammerge.services.GitService;
+import com.teammerge.services.RepositoryService;
 import com.teammerge.strategy.BlobConversionStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
@@ -289,8 +290,9 @@ public class RestControllerV2 extends AbstractController {
           numOfCommits += model.getNumOfCommits();
         }
       }
-      finalOutput = convertToFinalOutput(
-          "{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": " + numOfCommits + "}");
+      finalOutput =
+          convertToFinalOutput("{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": "
+              + numOfCommits + "}");
       populateSucess(result, finalOutput);
     }
     return Response.status(200).type("application/json").entity(result)
@@ -388,18 +390,20 @@ public class RestControllerV2 extends AbstractController {
     }
     try {
       Map<String, Object> results = null;
-      results = getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
-          form.getBranchName(), form.getStartingPoint());
+      results =
+          getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
+              form.getBranchName(), form.getStartingPoint());
 
-      String resultStatus = (String) results.get(WEBSERVICE_KEY_RESULT);
-      result.put(WEBSERVICE_KEY_RESULT, resultStatus);
+      RepositoryService.Result resultStatus =
+          (RepositoryService.Result) results.get(WEBSERVICE_KEY_RESULT);
+      result.put(WEBSERVICE_KEY_RESULT, resultStatus.toString());
 
-      if (resultStatus.equalsIgnoreCase("success")) {
+      if (resultStatus.equals(RepositoryService.Result.SUCCESS)) {
         Object createdBranchObj = results.get("branch");
         if (createdBranchObj != null) {
           Ref createdBranch = (Ref) createdBranchObj;
-          result.put(WEBSERVICE_KEY_OUTPUT,
-              "Branch " + createdBranch.getName() + " created successfully!!");
+          result.put(WEBSERVICE_KEY_OUTPUT, "Branch " + createdBranch.getName()
+              + " created successfully!!");
         }
       } else {
         result.put(WEBSERVICE_KEY_REASON, results.get(WEBSERVICE_KEY_REASON));
@@ -534,13 +538,13 @@ public class RestControllerV2 extends AbstractController {
               RepoActiveStatus.IN_ACTIVE.toString());
 
           getRepositoryService().removeRepositoryFolder(f, repoName);
-          
+
           result.put("result", "success");
           result.put("output", repoName + " has been removed sucessfully");
         } catch (RevisionSyntaxException e) {
           result.put("result", "error");
-          result.put("reason",
-              "The Repository with name" + "'" + repoName + "'" + "does not exist");
+          result
+              .put("reason", "The Repository with name" + "'" + repoName + "'" + "does not exist");
           result.put("detailedReason", e);
         }
 
@@ -549,7 +553,7 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
   }
-  
+
   public void populateSucess(Map<String, Object> result, String output) {
     result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
     result.put(WEBSERVICE_KEY_OUTPUT, output);
@@ -565,5 +569,5 @@ public class RestControllerV2 extends AbstractController {
     result.put(WEBSERVICE_KEY_REASON, e.getMessage());
     result.put(WEBSERVICE_KEY_DETAILED_REASON, e);
   }
-  
+
 }
