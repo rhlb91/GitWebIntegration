@@ -52,19 +52,27 @@ public class CompanyServiceImpl implements CompanyService {
       existingCompany.setRemoteRepoUrls(remoteRepo);
 
       // saving repo status
-      Map<String, String> repoStatuses = existingCompany.getRepoStatuses();
-      if (MapUtils.isEmpty(repoStatuses)) {
-        repoStatuses = new HashMap<>();
+      Map<String, String> existingRepoStatuses = existingCompany.getRepoStatuses();
+      if (MapUtils.isEmpty(existingRepoStatuses)) {
+        existingRepoStatuses = new HashMap<>();
       }
-      repoStatuses.putAll(company.getRepoStatuses());
 
       // setting to status: Active for repositories whose status does not exists
-      for (String project : repoStatuses.keySet()) {
-        if (repoStatuses.get(project) == null) {
-          repoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
+      for (String project : existingRepoStatuses.keySet()) {
+        if (StringUtils.isEmpty(existingRepoStatuses.get(project))) {
+          existingRepoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
         }
       }
-      existingCompany.setRepoStatuses(repoStatuses);
+
+      Map<String, String> newRepoStatuses = company.getRepoStatuses();
+      if (!MapUtils.isEmpty(newRepoStatuses)) {
+        for (String project : newRepoStatuses.keySet()) {
+          if (StringUtils.isEmpty(existingRepoStatuses.get(project))) {
+            existingRepoStatuses.put(project, newRepoStatuses.get(project));
+          }
+        }
+      }
+      existingCompany.setRepoStatuses(existingRepoStatuses);
     }
     baseDao.saveOrUpdateEntity(existingCompany);
   }
