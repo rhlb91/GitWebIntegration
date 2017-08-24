@@ -69,7 +69,7 @@ public class CompanyServiceImpl implements CompanyService {
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
 
-    baseDao.saveEntity(company);
+    baseDao.saveOrUpdateEntity(company);
   }
 
   public String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId) {

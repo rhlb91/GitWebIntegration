@@ -461,8 +461,6 @@ public interface RepositoryService extends IManager {
    */
   boolean isIdle(Repository repository);
 
-  List<RepositoryModel> getRepositoryModelsFromDB();
-
   Map<String, Object> createBranch(final String companyId, final String projectId,
       final String branchName, final String startingPoint) throws Exception;
 
