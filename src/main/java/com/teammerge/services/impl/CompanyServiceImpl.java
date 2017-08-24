@@ -81,7 +81,7 @@ public class CompanyServiceImpl implements CompanyService {
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
 
-    baseDao.saveEntity(company);
+    baseDao.saveOrUpdateEntity(company);
   }
 
   private boolean checkIsCompanyRepoActiveStatus(String repoName) {

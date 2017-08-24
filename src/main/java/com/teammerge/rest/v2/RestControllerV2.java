@@ -355,7 +355,7 @@ public class RestControllerV2 extends AbstractController {
     String finalOutput = null;
 
     try {
-      List<RepositoryModel> repos = getRepositoryService().getRepositoryModelsFromDB();
+      List<RepositoryModel> repos = getRepositoryService().getRepositoryModels();
 
       if (CollectionUtils.isNotEmpty(repos)) {
         String jsonOutput = JacksonUtils.toJson(repos);

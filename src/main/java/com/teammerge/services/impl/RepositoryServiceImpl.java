@@ -1224,11 +1224,6 @@ public class RepositoryServiceImpl implements RepositoryService {
     return true;
   }
 
-  @Override
-  public List<RepositoryModel> getRepositoryModelsFromDB() {
-    return repositoryDao.fetchAllRepositories();
-  }
-
   @Autowired
   public void setRepositoryDao(RepositoryDao repositoryDao) {
     repositoryDao.setClazz(RepositoryModel.class);
