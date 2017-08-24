@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.hibernate.cache.spi.access.RegionAccessStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,13 @@ public class CompanyServiceImpl implements CompanyService {
         repoStatuses = new HashMap<>();
       }
       repoStatuses.putAll(company.getRepoStatuses());
+
+      // setting to status: Active for repositories whose status does not exists
+      for (String project : repoStatuses.keySet()) {
+        if (repoStatuses.get(project) == null) {
+          repoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
+        }
+      }
       existingCompany.setRepoStatuses(repoStatuses);
     }
     baseDao.saveOrUpdateEntity(existingCompany);

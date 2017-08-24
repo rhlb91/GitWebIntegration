@@ -147,7 +147,7 @@ public class GitServiceImpl implements GitService {
       repoCloneStatus = new RepoCloneStatusModel(repositoryName);
     }
     repoCloneStatus.setCloneStatus(cloneStatus.name());
-    repoCloneStatusDao.saveEntity(repoCloneStatus);
+    repoCloneStatusDao.saveOrUpdateEntity(repoCloneStatus);
 
   }
 
