@@ -514,7 +514,7 @@ public class RestControllerV2 extends AbstractController {
   }
 
   @GET
-  @Path("/remove/{company}/{repository}")
+  @Path("/{company}/remove/{repository}")
   @Consumes("application/json")
   @Produces({"application/json"})
   public Response getRemoveRespository(@PathParam("repository") String repoName,

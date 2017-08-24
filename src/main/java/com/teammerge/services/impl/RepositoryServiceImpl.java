@@ -1338,6 +1338,7 @@ public class RepositoryServiceImpl implements RepositoryService {
           }
         }
       }
+      FileUtils.deleteDirectory(repoDir);
     } catch (IOException e) {
       LOG.error("Error occured reverting the repsositry folders " + repoDir, e);
     }
