@@ -39,13 +39,24 @@ public class Company implements java.io.Serializable {
 
 
   /**
-   * Map of ProjectId and Active/Inactive status<br>
+   * Map of ProjectId and Active/Inactive status  for repository<br>
    * <br>
-   * E.g. [Teamerge -> https://123.124.11.1/teamerge.git ]
+   * E.g. [Teamerge -> Active/Inactive ]
    */
 
-  @Column(name = "status")
-  private String status;
+  @Column(name = "repoActiveStatus")
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @MapKeyClass(String.class)
+  private Map<String, String> repoStatuses;
+
+  public Company() {
+    this.name = null;
+  }
+
+  public Company(String name) {
+    this.name = name;
+
+  }
   
   public String getName() {
     return name;
@@ -63,30 +74,14 @@ public class Company implements java.io.Serializable {
     this.remoteRepoUrls = remoteRepoUrls;
   }
 
- public Company() {
-    // TODO Auto-generated constructor stub
-     this.name = null;
-    this.status = RepoActiveStatus.IN_ACTIVE.toString();
+  public Map<String, String> getRepoStatuses() {
+    return repoStatuses;
   }
 
-  public Company(String name) {
-    this.name = name;
-    this.status = RepoActiveStatus.IN_ACTIVE.toString();
+  public void setRepoStatuses(Map<String, String> repoStatuses) {
+    this.repoStatuses = repoStatuses;
   }
 
-  public String getStatus() {
-    return status;
-  }
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public Company(String name, RepoActiveStatus status) {
-    this.name = name;
-    this.status = status.toString();
-
-    
-  }
 }
 

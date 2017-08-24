@@ -1,6 +1,6 @@
 package com.teammerge.services.impl;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.teammerge.Constants.CloneStatus;
 import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.entity.Company;
@@ -46,11 +45,20 @@ public class CompanyServiceImpl implements CompanyService {
     if (existingCompany == null) {
       existingCompany = company;
     } else {
+      // saving remote urls
       Map<String, String> remoteRepo = existingCompany.getRemoteRepoUrls();
       remoteRepo.putAll(company.getRemoteRepoUrls());
       existingCompany.setRemoteRepoUrls(remoteRepo);
+
+      // saving repo status
+      Map<String, String> repoStatuses = existingCompany.getRepoStatuses();
+      if (MapUtils.isEmpty(repoStatuses)) {
+        repoStatuses = new HashMap<>();
+      }
+      repoStatuses.putAll(company.getRepoStatuses());
+      existingCompany.setRepoStatuses(repoStatuses);
     }
-    baseDao.saveEntity(existingCompany);
+    baseDao.saveOrUpdateEntity(existingCompany);
   }
 
   @Override
@@ -62,21 +70,16 @@ public class CompanyServiceImpl implements CompanyService {
 
   public void saveOrUpdateCompanyDetails(final RepoForm repoForm) {
     Company company = getCompanyDetails(repoForm.getCompanyName());
-    
+
     if (company == null) {
       company = new Company();
       company.setName(repoForm.getCompanyName());
+
+      Map<String, String> repoStatus = new HashMap<>();
+      repoStatus.put(repoForm.getProjectName(), RepoActiveStatus.ACTIVE.toString());
+      company.setRepoStatuses(repoStatus);
     }
 
-    List<Company> companies = new ArrayList<Company>();
-    if (company != null
-        && CloneStatus.forName(company.getStatus()).equals(RepoActiveStatus.ACTIVE)) {
-      Company model = getCompanyDetails(repoForm.getCompanyName());
-      if (model != null) {
-        companies.add(model);
-      }
-    }
-  
     Map<String, String> remoteRepo = company.getRemoteRepoUrls();
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
@@ -96,21 +99,10 @@ public class CompanyServiceImpl implements CompanyService {
       LOG.error("No Repo status entry found in DB!! Added one for " + repoName);
       return false;
     }
-
-    for (Company company : companies) {
-      if (repoName.equals(company.getName())) {
-        if (company != null
-            && CloneStatus.forName(company.getStatus())
-                .equals(RepoActiveStatus.IN_ACTIVE)) {
-          return false;
-        }
-      }
-    }
-
     return true;
   }
-  
-  
+
+
   public String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId) {
     if (StringUtils.isEmpty(companyId) || StringUtils.isEmpty(projectId)) {
       LOG.error("Cannot get remoteUrl companyId and projectId are null!!");
@@ -148,7 +140,7 @@ public class CompanyServiceImpl implements CompanyService {
       return null;
     }
 
-    
+
     for (Company c : companies) {
       if (MapUtils.isNotEmpty(c.getRemoteRepoUrls())) {
 
@@ -182,6 +174,52 @@ public class CompanyServiceImpl implements CompanyService {
       }
     }
     return remoteUrl;
+  }
+
+  @Override
+  public RepoActiveStatus getStatusForRepo(final Company company, final String repositoryName) {
+    Map<String, String> repoStatuses = company.getRepoStatuses();
+
+    for (String projectId : repoStatuses.keySet()) {
+      if (projectId.equals(repositoryName)) {
+        return RepoActiveStatus.forName(repoStatuses.get(projectId));
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public void setRepoStatusButNoSave(final String companyId, final String repositoryName,
+      final String status) {
+    Company company = getCompanyDetails(companyId);
+    Map<String, String> repoStatuses = company.getRepoStatuses();
+
+    for (String projectId : repoStatuses.keySet()) {
+      if (projectId.equals(repositoryName)) {
+        repoStatuses.put(projectId, status);
+      }
+    }
+
+    company.setRepoStatuses(repoStatuses);
+    baseDao.saveOrUpdateEntity(company);
+  }
+
+  @Override
+  public boolean isRepoStatusValidForWorking(final String companyId, final String repositoryName) {
+    Company company = getCompanyDetails(companyId);
+    Map<String, String> repoStatuses = company.getRepoStatuses();
+
+    for (String projectId : repoStatuses.keySet()) {
+      if (projectId.equals(repositoryName)) {
+
+        RepoActiveStatus status = RepoActiveStatus.forName(repoStatuses.get(projectId));
+        if (RepoActiveStatus.ACTIVE.equals(status)) {
+          return true;
+        }
+      }
+    }
+    return false;
+
   }
 
   @Autowired

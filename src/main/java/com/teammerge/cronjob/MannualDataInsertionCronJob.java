@@ -1,7 +1,5 @@
 package com.teammerge.cronjob;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,8 +7,6 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +25,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
 
   @Resource(name = "repositoryService")
   private RepositoryService repositoryService;
-
+  
   public MannualDataInsertionCronJob() {
     super();
   }
@@ -212,27 +208,6 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
     }
   }
 
-  public synchronized void removeFileorFolder(File f, String repo) {
-    File repoDir = new File(f, repo);
-    try {
-      File[] files = repoDir.listFiles();
-      if (files != null) {
-        for (File fe : files) {
-          if (fe.isFile()) {
-            fe.delete();
-          } else {
-            
-            FileUtils.deleteDirectory(fe);
-            
-          }
-        }
-      }
-    } catch (IOException e) {
-      LOG.error("Error occured reverting the repsositry folders " + repoDir, e);
-    }
-  }
-
-  
   private void updateLastCommitInDB(String uniqueName, Date mostRecentCommitDate) {
     Date commitDateInDB = CommitLastChangeCache.instance().getLastChangeDate(uniqueName);
     if (commitDateInDB == null || commitDateInDB.before(mostRecentCommitDate)) {

@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -1323,7 +1324,24 @@ public class RepositoryServiceImpl implements RepositoryService {
     return getBlob(form.getProjectId(), form.getPath(), form.getCommitId());
   }
 
-
+  @Override
+  public synchronized void removeRepositoryFolder(File f, String repo) {
+    File repoDir = new File(f, repo);
+    try {
+      File[] files = repoDir.listFiles();
+      if (files != null) {
+        for (File fe : files) {
+          if (fe.isFile()) {
+            fe.delete();
+          } else {
+            FileUtils.deleteDirectory(fe);
+          }
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Error occured reverting the repsositry folders " + repoDir, e);
+    }
+  }
 
   @Autowired
   public void setRepoCloneStatusDao(BaseDao<RepoCloneStatusModel> baseDao) {

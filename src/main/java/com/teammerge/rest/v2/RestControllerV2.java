@@ -1,5 +1,6 @@
 package com.teammerge.rest.v2;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.springframework.stereotype.Component;
 
 import com.teammerge.Constants.WebServiceResult;
+import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.entity.BranchModel;
 import com.teammerge.entity.CommitModel;
 import com.teammerge.entity.Company;
@@ -108,7 +110,7 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/branch/{id}")
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response getBranchDetails(@PathParam("id") final String branchId) {
     Map<String, Object> result = new HashMap<>();
     String finalOutput = null;
@@ -129,7 +131,7 @@ public class RestControllerV2 extends AbstractController {
         populateSucess(result, finalOutput);
       }
     }
-    return Response.status(200).type("application/json").entity(result)
+    return Response.status(200).type("application/json").entity(finalOutput)
         .header("Access-Control-Allow-Origin", "*").build();
   }
 
@@ -511,6 +513,43 @@ public class RestControllerV2 extends AbstractController {
     return Response.status(200).entity(result).build();
   }
 
+  @GET
+  @Path("/remove/{company}/{repository}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
+  public Response getRemoveRespository(@PathParam("repository") String repoName,
+      @PathParam("company") String companyName) throws IOException {
+    Map<String, Object> result = new HashMap<>();
+    List<String> repoList = getRepositoryService().getRepositoryList();
+
+    // TODO : check for parameters validation
+
+    for (String repoListItem : repoList) {
+      if (repoListItem.equals(repoName)) {
+        File f = getRepositoryService().getRepositoriesFolder();
+
+        try {
+
+          getCompanyService().setRepoStatusButNoSave(companyName, repoName,
+              RepoActiveStatus.IN_ACTIVE.toString());
+
+          getRepositoryService().removeRepositoryFolder(f, repoName);
+          
+          result.put("result", "success");
+          result.put("output", repoName + " has been removed sucessfully");
+        } catch (RevisionSyntaxException e) {
+          result.put("result", "error");
+          result.put("reason",
+              "The Repository with name" + "'" + repoName + "'" + "does not exist");
+          result.put("detailedReason", e);
+        }
+
+      }
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
+  
   public void populateSucess(Map<String, Object> result, String output) {
     result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
     result.put(WEBSERVICE_KEY_OUTPUT, output);
@@ -526,5 +565,5 @@ public class RestControllerV2 extends AbstractController {
     result.put(WEBSERVICE_KEY_REASON, e.getMessage());
     result.put(WEBSERVICE_KEY_DETAILED_REASON, e);
   }
-
+  
 }

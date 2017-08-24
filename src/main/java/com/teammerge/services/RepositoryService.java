@@ -529,4 +529,12 @@ public interface RepositoryService extends IManager {
       return name().toLowerCase();
     }
   }
+
+  /**
+   * Removes the repository folder provided
+   * 
+   * @param f path of the repo
+   * @param repo repository name
+   */
+  void removeRepositoryFolder(File f, String repo);
 }
