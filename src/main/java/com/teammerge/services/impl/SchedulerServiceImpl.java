@@ -123,7 +123,7 @@ public class SchedulerServiceImpl implements SchedulerService {
   public void startSchedule(Class<? extends Job> jobClass) {
     try {
       String name = jobClass.getSimpleName();
-      if (!name.equals(JOB_NAME)) {
+      if (!name.equalsIgnoreCase(JOB_NAME)) {
         LOG.warn("Cannot start scheduler job. Invalid Job class specified!!");
         return;
       }
