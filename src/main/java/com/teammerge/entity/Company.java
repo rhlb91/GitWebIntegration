@@ -13,6 +13,9 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.teammerge.Constants.CloneStatus;
+import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
+
 @Entity
 @Table(name = "company")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
@@ -34,6 +37,27 @@ public class Company implements java.io.Serializable {
   @MapKeyClass(String.class)
   private Map<String, String> remoteRepoUrls;
 
+
+  /**
+   * Map of ProjectId and Active/Inactive status  for repository<br>
+   * <br>
+   * E.g. [Teamerge -> Active/Inactive ]
+   */
+
+  @Column(name = "repoActiveStatus")
+  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+  @MapKeyClass(String.class)
+  private Map<String, String> repoStatuses;
+
+  public Company() {
+    this.name = null;
+  }
+
+  public Company(String name) {
+    this.name = name;
+
+  }
+  
   public String getName() {
     return name;
   }
@@ -50,4 +74,14 @@ public class Company implements java.io.Serializable {
     this.remoteRepoUrls = remoteRepoUrls;
   }
 
+  public Map<String, String> getRepoStatuses() {
+    return repoStatuses;
+  }
+
+  public void setRepoStatuses(Map<String, String> repoStatuses) {
+    this.repoStatuses = repoStatuses;
+  }
+
+
 }
+

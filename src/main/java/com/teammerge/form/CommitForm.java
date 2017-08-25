@@ -9,9 +9,9 @@ public class CommitForm implements Serializable {
   private String commitId;
   private String authorName;
   private String when;
+  private String shortMsg;
   private String timezone;
   private String authorEmail;
-  private String shortMsg;
   private String trimmedMsg;
   private String commitHash;
   private String isMergeCommit;

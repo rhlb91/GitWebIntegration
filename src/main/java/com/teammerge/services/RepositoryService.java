@@ -13,6 +13,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Repository;
 
+import com.teammerge.form.CommitTreeRequestForm;
 import com.teammerge.manager.IManager;
 import com.teammerge.model.CustomRefModel;
 import com.teammerge.model.ForkModel;
@@ -450,7 +451,7 @@ public interface RepositoryService extends IManager {
    * @since 1.4.0
    */
   void close(String repository);
-  
+
   /**
    * Returns true if the repository is idle (not being accessed).
    *
@@ -459,8 +460,6 @@ public interface RepositoryService extends IManager {
    * @since 1.4.0
    */
   boolean isIdle(Repository repository);
-
-  List<RepositoryModel> getRepositoryModelsFromDB();
 
   Map<String, Object> createBranch(final String companyId, final String projectId,
       final String branchName, final String startingPoint) throws Exception;
@@ -476,12 +475,8 @@ public interface RepositoryService extends IManager {
    */
   List<CustomRefModel> getCustomRefModels(final boolean updated);
 
-  public static enum Result {
-    SUCCESS, FAILURE;
-  }
-
-  List<String> getTree(String commitId) throws MissingObjectException,
-      IncorrectObjectTypeException, IOException;
+  List<String> getTree(String commitId)
+      throws MissingObjectException, IncorrectObjectTypeException, IOException;
 
   List<PathModel> getTree2(String repositoryName, String path, String commitId)
       throws MissingObjectException, IncorrectObjectTypeException, IOException;
@@ -502,4 +497,44 @@ public interface RepositoryService extends IManager {
       throws RevisionSyntaxException, MissingObjectException, IncorrectObjectTypeException,
       AmbiguousObjectException, IOException;
 
+  /**
+   * Responsible to get the content of the files.
+   * 
+   * @param repositoryName name of the text file / image repository
+   * @param commitId commit id
+   * @return map of Objects containing content of string and status code
+   * @throws IOException
+   * @throws AmbiguousObjectException
+   * @throws IncorrectObjectTypeException
+   * @throws MissingObjectException
+   * @throws RevisionSyntaxException
+   */
+  Map<String, Object> getBlob(CommitTreeRequestForm form) throws RevisionSyntaxException,
+      MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, IOException;
+
+  public static enum Result {
+    SUCCESS, FAILURE;
+
+    public static Result forName(String name) {
+      for (Result type : values()) {
+        if (type.name().equalsIgnoreCase(name)) {
+          return type;
+        }
+      }
+      return FAILURE;
+    }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
+
+  /**
+   * Removes the repository folder provided
+   * 
+   * @param f path of the repo
+   * @param repo repository name
+   */
+  void removeRepositoryFolder(File f, String repo);
 }

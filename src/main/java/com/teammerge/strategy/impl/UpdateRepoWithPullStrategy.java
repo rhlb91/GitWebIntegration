@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.teammerge.Constants;
 import com.teammerge.Constants.CloneStatus;
+import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.entity.Company;
@@ -69,6 +70,14 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
     String remoteRepoPath =
         companyService.getRemoteUrlForCompanyAndProject(company, repositoryName);
 
+
+    if (!companyService.isRepoStatusValidForWorking(company.getName(), repositoryName)) {
+      LOG.error("Cannot clone Repository " + repositoryName + " for company " + company.getName()
+          + ", Status: " + companyService.getStatusForRepo(company, repositoryName));
+      return null;
+    }
+
+
     if (StringUtils.isEmpty(remoteRepoPath)) {
       LOG.error("Cannot clone or update repository, Reason: remoteRepoPath is null for repo "
           + repositoryName);
@@ -114,6 +123,7 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
       // check for updates
       repo = loadRepository(f, repositoryName);
 
+
       try (Git git = new Git(repo);) {
         PullCommand pc = git.pull();
         pc.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repoCreds.getUsername(),
@@ -122,8 +132,8 @@ public class UpdateRepoWithPullStrategy implements CloneStrategy {
         MergeResult mergeResult = pr.getMergeResult();
 
         if (isDebugOn()) {
-          LOG.debug("Result of repo pull of " + repositoryName + ": "
-              + mergeResult.getMergeStatus());
+          LOG.debug(
+              "Result of repo pull of " + repositoryName + ": " + mergeResult.getMergeStatus());
         }
       } catch (GitAPIException e) {
         LOG.error("Error in updating repository " + repositoryName, e);

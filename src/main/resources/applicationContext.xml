@@ -59,23 +59,26 @@
 	<bean id="newBranchValidator" class="com.teammerge.validator.impl.CreateNewBranchValidator" />
 	<bean id="repoFormValidator" class="com.teammerge.validator.impl.RepoFormValidator" />
 	<bean id="commitFormValidator" class="com.teammerge.validator.impl.CommitFormValidator" />
+	<bean id="branchValidator" class="com.teammerge.validator.impl.BranchValidator" />
+	<bean id="companyFormValidator" class="com.teammerge.validator.impl.CompanyFormValidator" />
+	<bean id="credentialValidator" class="com.teammerge.validator.impl.CredentialFormValidator" />
 	<!-- Validators End -->
 
 	<bean id="dataInsertionJob" class="com.teammerge.cronjob.DataInsertionJob">
 		<property name="commitService" ref="commitService" />
 		<property name="branchService" ref="branchService" />
 		<property name="repositoryService" ref="repositoryService" />
-		<property name="scheduleService" ref="scheduleService" />
+		<property name="schedulerService" ref="schedulerService" />
 		<property name="commitPopulator" ref="commitPopulator" />
 		<property name="branchPopulator" ref="branchPopulator" />
-	</bean>
+		</bean>
 
 	<bean id="mannualDataInsertionCronJob" class="com.teammerge.cronjob.MannualDataInsertionCronJob">
 		<property name="commitService" ref="commitService" />
 		<property name="branchService" ref="branchService" />
 		<property name="repositoryService" ref="repositoryService" />
-		<property name="scheduleService" ref="scheduleService" />
+		<property name="schedulerService" ref="schedulerService" />
 		<property name="commitPopulator" ref="commitPopulator" />
 		<property name="branchPopulator" ref="branchPopulator" />
-	</bean>
+		</bean>
 </beans>

@@ -25,7 +25,7 @@ public class MannualDataInsertionCronJob extends AbstractCustomJob {
 
   @Resource(name = "repositoryService")
   private RepositoryService repositoryService;
-
+  
   public MannualDataInsertionCronJob() {
     super();
   }

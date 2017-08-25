@@ -1,7 +1,7 @@
 package com.teammerge.rest.v2;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,16 +18,22 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.Ref;
 import org.springframework.stereotype.Component;
 
+import com.teammerge.Constants.WebServiceResult;
+import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.entity.BranchModel;
 import com.teammerge.entity.CommitModel;
 import com.teammerge.entity.Company;
 import com.teammerge.entity.RepoCredentials;
+import com.teammerge.form.BranchForm;
 import com.teammerge.form.CommitDiffRequestForm;
 import com.teammerge.form.CommitForm;
 import com.teammerge.form.CommitTreeRequestForm;
+import com.teammerge.form.CompanyForm;
 import com.teammerge.form.CreateNewBranchForm;
+import com.teammerge.form.CredentialRequestForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.model.PathModel;
 import com.teammerge.model.RepositoryModel;
@@ -39,17 +45,27 @@ import com.teammerge.strategy.BlobConversionStrategy;
 import com.teammerge.utils.ApplicationDirectoryUtils;
 import com.teammerge.utils.JacksonUtils;
 import com.teammerge.utils.StringUtils;
-import com.teammerge.validator.BaseValidator.FieldError;
 import com.teammerge.validator.BaseValidator.ValidationResult;
+import com.teammerge.validator.impl.BranchValidator;
 import com.teammerge.validator.impl.CommitDiffValidator;
 import com.teammerge.validator.impl.CommitFormValidator;
 import com.teammerge.validator.impl.CommitTreeRequestValidator;
+import com.teammerge.validator.impl.CompanyFormValidator;
 import com.teammerge.validator.impl.CreateNewBranchValidator;
+import com.teammerge.validator.impl.CredentialFormValidator;
 import com.teammerge.validator.impl.RepoFormValidator;
 
 @Component
 @Path("/v2")
 public class RestControllerV2 extends AbstractController {
+
+  private static final String WEBSERVICE_KEY_OUTPUT = "output";
+
+  private static final String WEBSERVICE_KEY_DETAILED_REASON = "detailedReason";
+
+  private static final String WEBSERVICE_KEY_REASON = "reason";
+
+  private static final String WEBSERVICE_KEY_RESULT = "result";
 
   @Resource(name = "gitService")
   private GitService gitService;
@@ -66,8 +82,17 @@ public class RestControllerV2 extends AbstractController {
   @Resource(name = "commitFormValidator")
   private CommitFormValidator commitFormValidator;
 
+  @Resource(name = "branchValidator")
+  private BranchValidator branchValidator;
+
+  @Resource(name = "companyFormValidator")
+  private CompanyFormValidator companyFormValidator;
+
   @Resource(name = "treeValidator")
   private CommitTreeRequestValidator treeValidator;
+
+  @Resource(name = "credentialValidator")
+  private CredentialFormValidator credentialValidator;
 
   @GET
   @Path("/")
@@ -86,70 +111,123 @@ public class RestControllerV2 extends AbstractController {
 
   @GET
   @Path("/branch/{id}")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response getBranchDetails(@PathParam("id") String branchId) {
-    List<BranchModel> branchDetailModel =
-        getBranchService().getBranchDetailsForBranchLike(branchId);
-    String jsonOutput = JacksonUtils.toJson(branchDetailModel);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getBranchDetails(@PathParam("id") final String branchId) {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
+
+    if ((StringUtils.isEmpty(branchId))) {
+      finalOutput = "Ticket id should not be empty!";
+      populateFailure(result, finalOutput);
+
+    } else {
+      List<BranchModel> branchDetailModel =
+          getBranchService().getBranchDetailsForBranchLike(branchId);
+      if (CollectionUtils.isNotEmpty(branchDetailModel)) {
+        String jsonOutput = JacksonUtils.toJson(branchDetailModel);
+        finalOutput = convertToFinalOutput(jsonOutput);
+        populateSucess(result, finalOutput);
+      } else {
+        finalOutput = "There is no data for this Branch!";
+        populateSucess(result, finalOutput);
+      }
+    }
+    return Response.status(200).type("application/json").entity(finalOutput)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @POST
   @Path("/branch")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveBranchDetails(BranchModel branch) {
-    getBranchService().saveBranch(branch);
-    String finalOutput = "Saved successfully!!";
+  public Response saveBranchDetails(final BranchForm branch) {
+    Map<String, Object> result = new HashMap<>();
+    ValidationResult vr = branchValidator.validate(branch);
 
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    if (vr.hasErrors()) {
+      branchValidator.putErrorsInMap(result, vr);
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
+    }
+    try {
+      getBranchService().saveBranch(branch);
+      result.put(WEBSERVICE_KEY_RESULT, "Saved Successfully");
+    } catch (RevisionSyntaxException e) {
+      populateFailure(result, e);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
   @Path("/company/{id}")
   @Produces(MediaType.TEXT_PLAIN)
-  public Response getCompanyDetails(@PathParam("id") String name) {
-    Company company = getCompanyService().getCompanyDetails(name);
-    String jsonOutput = JacksonUtils.toJson(company);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+  public Response getCompanyDetails(@PathParam("id") final String name) {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
+
+    if ((StringUtils.isEmpty(name))) {
+      finalOutput = "Company name should not be empty";
+      populateFailure(result, finalOutput);
+
+    } else {
+      Company company = getCompanyService().getCompanyDetails(name);
+      String jsonOutput = JacksonUtils.toJson(company);
+      finalOutput = convertToFinalOutput(jsonOutput);
+      populateSucess(result, finalOutput);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @POST
   @Path("/company")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveCompanyDetails(Company company) {
+  public Response saveCompanyDetails(final CompanyForm company) {
+    Map<String, Object> result = new HashMap<>();
+    ValidationResult vr = companyFormValidator.validate(company);
 
-    getCompanyService().saveCompanyDetails(company);
-    String finalOutput = "Saved successfully!!";
+    if (vr.hasErrors()) {
+      companyFormValidator.putErrorsInMap(result, vr);
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
+    }
 
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    try {
+      getCompanyService().saveCompanyDetails(company);
+      result.put(WEBSERVICE_KEY_RESULT, "Saved Successfully");
+    } catch (RevisionSyntaxException e) {
+      populateFailure(result, e);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
 
   @GET
   @Path("/schedule/{id}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response getScheduleDetails(@PathParam("id") String jobId) {
+  public Response getScheduleDetails(@PathParam("id") final String jobId) {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
 
-    ScheduleJobModel scheduleJobModel = getScheduleService().getSchedule(jobId);
+    if ((StringUtils.isEmpty(jobId))) {
+      finalOutput = "Job id should not be empty!";
+      populateFailure(result, finalOutput);
 
-    String jsonOutput = JacksonUtils.toJson(scheduleJobModel);
-
-    String finalOutput = convertToFinalOutput(jsonOutput);
-
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    } else {
+      ScheduleJobModel scheduleJobModel = getSchedulerService().getSchedule(jobId);
+      String jsonOutput = JacksonUtils.toJson(scheduleJobModel);
+      finalOutput = convertToFinalOutput(jsonOutput);
+      populateSucess(result, finalOutput);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @POST
   @Path("/addCommit")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response saveCommitDetails(CommitForm commit) {
+  public Response saveCommitDetails(final CommitForm commit) {
     Map<String, Object> result = new HashMap<>();
     ValidationResult vr = commitFormValidator.validate(commit);
 
@@ -159,14 +237,10 @@ public class RestControllerV2 extends AbstractController {
           .header("Access-Control-Allow-Origin", "*").build();
     }
     try {
-
       getCommitService().saveOrUpdateCommitDetails(commit);
-
-      result.put("result", "Saved Successfully");
+      result.put(WEBSERVICE_KEY_RESULT, "Saved Successfully");
     } catch (RevisionSyntaxException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      populateFailure(result, e);
     }
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
@@ -175,73 +249,87 @@ public class RestControllerV2 extends AbstractController {
   @GET
   @Path("/commit/{id}")
   @Produces(MediaType.TEXT_PLAIN)
-  public Response getTicketCommitDetails(@PathParam("id") String branchName) {
-    List<CommitModel> commitModel = getCommitService().getCommitDetails(branchName);
-    String jsonOutput = JacksonUtils.toJson(commitModel);
-    String finalOutput = convertToFinalOutput(jsonOutput);
+  public Response getTicketCommitDetails(@PathParam("id") final String ticketId) {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
 
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
-  }
+    if ((StringUtils.isEmpty(ticketId))) {
+      finalOutput = "Ticket id should not be empty";
+      populateFailure(result, finalOutput);
 
-  /**
-   * This method is used get all commits Detail list from Dao layer
-   * 
-   * @return list of commits list in Json format
-   */
-
-  @GET
-  @Path("/commitDetails")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response getAllTicketCommitDetails() {
-    List<CommitModel> commitModel = getCommitService().getCommitDetailsAll();
-    String jsonOutput = JacksonUtils.toJson(commitModel);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    } else {
+      List<CommitModel> commitModel = getCommitService().getCommitDetails(ticketId);
+      String jsonOutput = JacksonUtils.toJson(commitModel);
+      finalOutput = convertToFinalOutput(jsonOutput);
+      populateSucess(result, finalOutput);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
   @Path("/count/{ticketId}")
-  public Response getCommitAndBranchCount(@PathParam("ticketId") String ticketId) {
-    String finalOutput = "";
+  public Response getCommitAndBranchCount(@PathParam("ticketId") final String ticketId) {
     int numOfBranches = 0;
     int numOfCommits = 0;
 
-    List<BranchModel> branchDetailModel =
-        getBranchService().getBranchDetailsForBranchLike(ticketId);
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
 
-    if (CollectionUtils.isNotEmpty(branchDetailModel)) {
-      numOfBranches = branchDetailModel.size();
-      for (BranchModel model : branchDetailModel) {
-        numOfCommits += model.getNumOfCommits();
+    if ((StringUtils.isEmpty(ticketId))) {
+      finalOutput = "Ticket id should not be empty";
+      populateFailure(result, finalOutput);
+
+    } else {
+      List<BranchModel> branchDetailModel =
+          getBranchService().getBranchDetailsForBranchLike(ticketId);
+
+      if (CollectionUtils.isNotEmpty(branchDetailModel)) {
+        numOfBranches = branchDetailModel.size();
+        for (BranchModel model : branchDetailModel) {
+          numOfCommits += model.getNumOfCommits();
+        }
       }
+      finalOutput =
+          convertToFinalOutput("{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": "
+              + numOfCommits + "}");
+      populateSucess(result, finalOutput);
     }
-
-    finalOutput = convertToFinalOutput(
-        "{\"numOfPull\": " + numOfBranches + "," + "\"numOfCommits\": " + numOfCommits + "}");
-
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @GET
-  @Path("/credentials/{user}")
+  @Path("/credentials/{company}/{project}")
   @Produces(MediaType.TEXT_PLAIN)
-  public Response getCredentialsDetails(@PathParam("user") String name) {
-    RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(name);
+  public Response getCredentialsDetails(@PathParam("company") final String company,
+      @PathParam("project") final String project) {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
+
+    CredentialRequestForm crf = new CredentialRequestForm(company, project);
+    ValidationResult vr = credentialValidator.validate(crf);
+
+    if (vr.hasErrors()) {
+      credentialValidator.putErrorsInMap(result, vr);
+      return Response.status(200).type("application/json").entity(result)
+          .header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(crf);
     String jsonOutput = JacksonUtils.toJson(repoCredentials);
-    String finalOutput = convertToFinalOutput(jsonOutput);
-    return Response.status(200).entity(finalOutput).header("Access-Control-Allow-Origin", "*")
-        .build();
+    finalOutput = convertToFinalOutput(jsonOutput);
+    populateSucess(result, finalOutput);
+
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
   @POST
-  @Path("/addRepo")
+  @Path("/addProject")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces({"application/json"})
-  public Response addRepo(RepoForm repoForm) {
+  public Response addRepository(final RepoForm repoForm) {
 
     Map<String, Object> result = new HashMap<>();
     ValidationResult vr = repoFormValidator.validate(repoForm);
@@ -255,12 +343,34 @@ public class RestControllerV2 extends AbstractController {
       getCompanyService().saveOrUpdateCompanyDetails(repoForm);
       getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
 
-      result.put("result", "success");
-      result.put("output", "Saved successfully!!");
+      String finalOutput = "Project details saved successfully!!";
+      populateSucess(result, finalOutput);
     } catch (RevisionSyntaxException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      populateFailure(result, e);
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
+
+  @GET
+  @Path("/allRepos/")
+  public Response getAllRepoModels() {
+    Map<String, Object> result = new HashMap<>();
+    String finalOutput = null;
+
+    try {
+      List<RepositoryModel> repos = getRepositoryService().getRepositoryModels();
+
+      if (CollectionUtils.isNotEmpty(repos)) {
+        String jsonOutput = JacksonUtils.toJson(repos);
+        finalOutput = convertToFinalOutput(jsonOutput);
+      } else {
+        finalOutput = "There are no repositories!";
+      }
+
+      populateSucess(result, finalOutput);
+    } catch (Exception e) {
+      populateFailure(result, e);
     }
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
@@ -280,23 +390,31 @@ public class RestControllerV2 extends AbstractController {
     }
     try {
       Map<String, Object> results = null;
-      try {
-        results = getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
-            form.getBranchName(), form.getStartingPoint());
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      results =
+          getRepositoryService().createBranch(form.getCompanyId(), form.getProjectId(),
+              form.getBranchName(), form.getStartingPoint());
 
-      result.put("result", "success");
-      result.put("output", results);
-    } catch (RevisionSyntaxException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      RepositoryService.Result resultStatus =
+          (RepositoryService.Result) results.get(WEBSERVICE_KEY_RESULT);
+      result.put(WEBSERVICE_KEY_RESULT, resultStatus.toString());
+
+      if (resultStatus.equals(RepositoryService.Result.SUCCESS)) {
+        Object createdBranchObj = results.get("branch");
+        if (createdBranchObj != null) {
+          Ref createdBranch = (Ref) createdBranchObj;
+          result.put(WEBSERVICE_KEY_OUTPUT, "Branch " + createdBranch.getName()
+              + " created successfully!!");
+        }
+      } else {
+        result.put(WEBSERVICE_KEY_REASON, results.get(WEBSERVICE_KEY_REASON));
+        result.put(WEBSERVICE_KEY_DETAILED_REASON, results.get(WEBSERVICE_KEY_DETAILED_REASON));
+      }
+    } catch (Exception e) {
+      populateFailure(result, e);
     }
     return Response.status(200).type("application/json").entity(result)
         .header("Access-Control-Allow-Origin", "*").build();
+
   }
 
   @POST
@@ -317,12 +435,10 @@ public class RestControllerV2 extends AbstractController {
       List<String> diffResult =
           getCommitService().getCommitDiff(form.getRepositoryName(), null, form.getCommitId());
 
-      result.put("result", "success");
-      result.put("output", diffResult);
+      result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
+      result.put(WEBSERVICE_KEY_OUTPUT, diffResult);
     } catch (RevisionSyntaxException | IOException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      populateFailure(result, e);
     }
 
     return Response.status(200).type("application/json").entity(result)
@@ -332,19 +448,19 @@ public class RestControllerV2 extends AbstractController {
   @GET
   @Path("{repo}/tree/{commitId}/{path}")
   @Produces({"application/json"})
-  public Response getFilesInACommit(@PathParam("repo") String repo,
-      @PathParam("commitId") String commitId, @PathParam("path") String path) {
+  public Response getFilesInACommit(@PathParam("repo") final String repo,
+      @PathParam("commitId") final String commitId, @PathParam("path") final String path) {
     Map<String, Object> result = new HashMap<>();
 
+    String finalPath = path;
     if (path != null)
-      path = path.equals("null") ? null : path;
+      finalPath = path.equals("null") ? null : path;
 
-    if (!StringUtils.isEmpty(path)) {
-      path = path.replace("!", "/");
+    if (!StringUtils.isEmpty(finalPath)) {
+      finalPath = finalPath.replace("!", "/");
     }
 
-    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, path);
-
+    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, finalPath);
     ValidationResult vr = treeValidator.validate(form);
 
     if (vr.hasErrors()) {
@@ -353,15 +469,13 @@ public class RestControllerV2 extends AbstractController {
     }
 
     try {
-      List<PathModel> treeResult = getRepositoryService().getTree2(repo, path, commitId);
+      List<PathModel> treeResult = getRepositoryService().getTree2(repo, finalPath, commitId);
 
-      result.put("result", "success");
-      result.put("output", treeResult);
+      result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
+      result.put(WEBSERVICE_KEY_OUTPUT, treeResult);
 
     } catch (IOException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      populateFailure(result, e);
     }
 
     return Response.status(200).entity(result).build();
@@ -370,18 +484,19 @@ public class RestControllerV2 extends AbstractController {
   @GET
   @Path("{repo}/blob/{commitId}/{path}")
   @Produces({"application/json"})
-  public Response getSourceCodeOfAFile(@PathParam("repo") String repo,
-      @PathParam("commitId") String commitId, @PathParam("path") String path) {
+  public Response getBlob(@PathParam("repo") final String repo,
+      @PathParam("commitId") final String commitId, @PathParam("path") final String path) {
     Map<String, Object> result = new HashMap<>();
 
+    String finalPath = path;
     if (path != null)
-      path = path.equals("null") ? null : path;
+      finalPath = path.equals("null") ? null : path;
 
-    if (!StringUtils.isEmpty(path)) {
-      path = path.replace("!", "/");
+    if (!StringUtils.isEmpty(finalPath)) {
+      finalPath = finalPath.replace("!", "/");
     }
 
-    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, path);
+    CommitTreeRequestForm form = new CommitTreeRequestForm(repo, commitId, finalPath);
 
     ValidationResult vr = treeValidator.validate(form);
 
@@ -391,16 +506,68 @@ public class RestControllerV2 extends AbstractController {
     }
 
     try {
-      Map<String, Object> blobResult = getRepositoryService().getBlob(repo, path, commitId);
+      Map<String, Object> blobResult = getRepositoryService().getBlob(form);
 
-      result.put("result", "success");
-      result.put("output", blobResult.get(BlobConversionStrategy.Key.SOURCE.name()));
+      result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
+      result.put(WEBSERVICE_KEY_OUTPUT, blobResult.get(BlobConversionStrategy.Key.SOURCE.name()));
     } catch (RevisionSyntaxException | IOException e) {
-      result.put("result", "error");
-      result.put("reason", e.getMessage());
-      result.put("detailedReason", e);
+      populateFailure(result, e);
     }
 
     return Response.status(200).entity(result).build();
   }
+
+  @GET
+  @Path("/{company}/remove/{repository}")
+  @Consumes("application/json")
+  @Produces({"application/json"})
+  public Response getRemoveRespository(@PathParam("repository") String repoName,
+      @PathParam("company") String companyName) throws IOException {
+    Map<String, Object> result = new HashMap<>();
+    List<String> repoList = getRepositoryService().getRepositoryList();
+
+    // TODO : check for parameters validation
+
+    for (String repoListItem : repoList) {
+      if (repoListItem.equals(repoName)) {
+        File f = getRepositoryService().getRepositoriesFolder();
+
+        try {
+
+          getCompanyService().setRepoStatusButNoSave(companyName, repoName,
+              RepoActiveStatus.IN_ACTIVE.toString());
+
+          getRepositoryService().removeRepositoryFolder(f, repoName);
+
+          result.put("result", "success");
+          result.put("output", repoName + " has been removed sucessfully");
+        } catch (RevisionSyntaxException e) {
+          result.put("result", "error");
+          result
+              .put("reason", "The Repository with name" + "'" + repoName + "'" + "does not exist");
+          result.put("detailedReason", e);
+        }
+
+      }
+    }
+    return Response.status(200).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
+  }
+
+  public void populateSucess(Map<String, Object> result, String output) {
+    result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
+    result.put(WEBSERVICE_KEY_OUTPUT, output);
+  }
+
+  public void populateFailure(Map<String, Object> result, String output) {
+    result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.FAILURE);
+    result.put(WEBSERVICE_KEY_OUTPUT, output);
+  }
+
+  public void populateFailure(Map<String, Object> result, Exception e) {
+    result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.FAILURE);
+    result.put(WEBSERVICE_KEY_REASON, e.getMessage());
+    result.put(WEBSERVICE_KEY_DETAILED_REASON, e);
+  }
+
 }

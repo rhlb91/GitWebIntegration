@@ -345,6 +345,37 @@ public class Constants {
       }
       return NOT_STARTED;
     }
+    
+    public static enum RepoActiveStatus {
+      ACTIVE, IN_ACTIVE;
+
+      public static RepoActiveStatus forName(String name) {
+        for (RepoActiveStatus type : values()) {
+          if (type.name().equalsIgnoreCase(name)) {
+            return type;
+          }
+        }
+        return IN_ACTIVE;
+      }
+    }
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
+
+
+  public static enum WebServiceResult {
+    SUCCESS, FAILURE, VALIDATION_ERROR;
+
+    public static WebServiceResult forName(String name) {
+      for (WebServiceResult type : values()) {
+        if (type.name().equalsIgnoreCase(name)) {
+          return type;
+        }
+      }
+      return FAILURE;
+    }
 
     @Override
     public String toString() {

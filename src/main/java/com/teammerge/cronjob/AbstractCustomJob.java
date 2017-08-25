@@ -30,7 +30,7 @@ public abstract class AbstractCustomJob {
 
   protected static RepositoryService repositoryService;
 
-  protected static SchedulerService scheduleService;
+  protected static SchedulerService schedulerService;
 
   public AbstractCustomJob() {
 
@@ -114,8 +114,8 @@ public abstract class AbstractCustomJob {
   }
 
   @Required
-  public void setScheduleService(SchedulerService scheduleService1) {
-    scheduleService = scheduleService1;
+  public void setSchedulerService(SchedulerService schedulerService1) {
+    schedulerService = schedulerService1;
   }
 
 }

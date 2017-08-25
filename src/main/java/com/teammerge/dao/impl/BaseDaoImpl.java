@@ -34,6 +34,13 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   }
 
   @Override
+  public synchronized void deleteEntity(T entity) {
+    HibernateUtils.openCurrentSessionwithTransaction();
+    HibernateUtils.getCurrentSession().delete(entity);
+    HibernateUtils.closeCurrentSessionwithTransaction();
+  }
+  
+  @Override
   public synchronized void saveOrUpdateEntity(T entity) {
     HibernateUtils.openCurrentSessionwithTransaction();
     HibernateUtils.getCurrentSession().saveOrUpdate(entity);

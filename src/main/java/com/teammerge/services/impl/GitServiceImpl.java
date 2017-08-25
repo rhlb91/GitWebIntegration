@@ -41,8 +41,8 @@ public class GitServiceImpl implements GitService {
   }
 
   @Override
-  public Git cloneRepository(GitOptions options) throws InvalidRemoteException, TransportException,
-      GitAPIException {
+  public Git cloneRepository(GitOptions options)
+      throws InvalidRemoteException, TransportException, GitAPIException {
 
     // create a thread for every new cloning
     GitServiceRunnable runnable = new GitServiceRunnable(options);
@@ -65,26 +65,25 @@ public class GitServiceImpl implements GitService {
       if (StringUtils.isEmpty(startingPoint)) {
         startingPoint = JGitUtils.getHEADRef(branchOptions.getRepo());
       }
-      ref = git.branchCreate().setName(branchOptions.getBranchName()).call();
+      ref = git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint(startingPoint)
+          .call();
       if (ref == null) {
         LOG.debug("Trying to create a branch with starting point as master");
-        ref =
-            git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint("master")
-                .call();
+        ref = git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint("master")
+            .call();
       }
       if (ref == null) {
         LOG.debug("Trying to create a branch with starting point as origin/master");
-        ref =
-            git.branchCreate().setName(branchOptions.getBranchName())
-                .setStartPoint("origin/master").call();
+        ref = git.branchCreate().setName(branchOptions.getBranchName())
+            .setStartPoint("origin/master").call();
       }
 
       if (ref != null) {
         // push the newly created branch to remote origin
         PushCommand pushCommand = git.push();
         pushCommand.setRemote(branchOptions.getRemoteURL());
-        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(branchOptions
-            .getUserName(), branchOptions.getPassword()));
+        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(
+            branchOptions.getUserName(), branchOptions.getPassword()));
         pushCommand.add(ref);
         pushCommand.call();
       }
@@ -120,8 +119,8 @@ public class GitServiceImpl implements GitService {
       cmd.setDirectory(destinationFolder);
 
       if (isCredentialsProvided(options.getUsername(), options.getPassword())) {
-        cmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(options.getUsername(),
-            options.getPassword()));
+        cmd.setCredentialsProvider(
+            new UsernamePasswordCredentialsProvider(options.getUsername(), options.getPassword()));
       }
 
       try {
@@ -148,7 +147,7 @@ public class GitServiceImpl implements GitService {
       repoCloneStatus = new RepoCloneStatusModel(repositoryName);
     }
     repoCloneStatus.setCloneStatus(cloneStatus.name());
-    repoCloneStatusDao.saveEntity(repoCloneStatus);
+    repoCloneStatusDao.saveOrUpdateEntity(repoCloneStatus);
 
   }
 

@@ -131,8 +131,8 @@ public class DataInsertionJob extends AbstractCustomJob implements Job {
               }
               saveCommit(commit, customRef);
             } catch (InvalidArgumentsException e) {
-              LOG.error("Cannot create new commit model from cronjob!!"
-                  + getClass().getSimpleName(), e);
+              LOG.error(
+                  "Cannot create new commit model from cronjob!!" + getClass().getSimpleName(), e);
             }
           }
 

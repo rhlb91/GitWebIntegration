@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.teammerge.entity.BranchModel;
+import com.teammerge.form.BranchForm;
 
 public interface BranchService {
 
@@ -22,5 +23,7 @@ public interface BranchService {
   int saveOrUpdateBranch(BranchModel branch);
 
   void saveOrUpdateBranchInSeparateSession(BranchModel commit);
+  
+  void saveBranch(final BranchForm branchForm);
 
 }

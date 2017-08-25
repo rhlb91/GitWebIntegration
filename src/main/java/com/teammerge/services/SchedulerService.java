@@ -1,9 +1,7 @@
 package com.teammerge.services;
 
 
-import org.quartz.CronExpression;
 import org.quartz.Job;
-import org.quartz.SchedulerException;
 
 import com.teammerge.model.ScheduleJobModel;
 
@@ -34,4 +32,8 @@ public interface SchedulerService {
   void reschedule(Class<? extends Job> jobClass, String cronExpression);
 
   void destroyScheduler();
+
+  void pauseJob(String jobName);
+
+  void resumeJob(String jobName, String jobGroup);
 }

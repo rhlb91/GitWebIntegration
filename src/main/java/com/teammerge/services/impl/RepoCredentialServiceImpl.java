@@ -3,10 +3,10 @@ package com.teammerge.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.entity.RepoCredentials;
 import com.teammerge.entity.RepoCredentialsKey;
+import com.teammerge.form.CredentialRequestForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.services.RepoCredentialService;
 
@@ -17,8 +17,9 @@ public class RepoCredentialServiceImpl implements RepoCredentialService {
   private RepoCredentialDao repoCredentialDao;
 
   @Override
-  public RepoCredentials getCredentialDetails(String name) {
-    RepoCredentials repoCredentials = repoCredentialDao.fetchEntity(name);
+  public RepoCredentials getCredentialDetails(CredentialRequestForm crf) {
+    RepoCredentials repoCredentials = repoCredentialDao
+        .fetchEntity(new RepoCredentialsKey(crf.getCompanyId(), crf.getProjectId()));
     return repoCredentials;
   }
 
