@@ -72,6 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
           }
         }
       }
+
       existingCompany.setRepoStatuses(existingRepoStatuses);
     }
     baseDao.saveOrUpdateEntity(existingCompany);
@@ -81,11 +82,22 @@ public class CompanyServiceImpl implements CompanyService {
   public void saveCompanyDetails(CompanyForm companyForm) {
     Company company = new Company();
     companyPopulator.populate(companyForm, company);
+
+    // populating repo status for the first time, setting to Active
+    Map<String, String> newRepoStatuses = new HashMap<>();
+    if (company.getRemoteRepoUrls() != null) {
+      for (String project : company.getRemoteRepoUrls().keySet()) {
+        newRepoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
+      }
+    }
+    company.setRepoStatuses(newRepoStatuses);
+
     saveCompanyDetails(company);
   }
 
   public void saveOrUpdateCompanyDetails(final RepoForm repoForm) {
     Company company = getCompanyDetails(repoForm.getCompanyName());
+
 
     if (company == null) {
       company = new Company();
@@ -94,12 +106,20 @@ public class CompanyServiceImpl implements CompanyService {
       Map<String, String> repoStatus = new HashMap<>();
       repoStatus.put(repoForm.getProjectName(), RepoActiveStatus.ACTIVE.toString());
       company.setRepoStatuses(repoStatus);
+
     }
 
     Map<String, String> remoteRepo = company.getRemoteRepoUrls();
     remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
     company.setRemoteRepoUrls(remoteRepo);
 
+    Map<String, String> existrepoStatus = company.getRepoStatuses();
+    for (String project : company.getRemoteRepoUrls().keySet()) {
+      if (!StringUtils.isEmpty(project) && company.getRepoStatuses().containsValue(RepoActiveStatus.IN_ACTIVE.toString())) {
+        existrepoStatus.put(project, RepoActiveStatus.ACTIVE.toString());
+      }
+      company.setRepoStatuses(existrepoStatus);
+    }
     baseDao.saveOrUpdateEntity(company);
   }
 

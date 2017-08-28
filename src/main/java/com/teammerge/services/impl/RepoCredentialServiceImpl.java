@@ -25,7 +25,7 @@ public class RepoCredentialServiceImpl implements RepoCredentialService {
 
   @Override
   public int saveCredential(RepoCredentials repoCredential) {
-    repoCredentialDao.saveEntity(repoCredential);
+    repoCredentialDao.saveOrUpdateEntity(repoCredential);
     return 0;
   }
 
