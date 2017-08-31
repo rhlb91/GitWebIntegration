@@ -1200,7 +1200,8 @@ public class RepositoryServiceImpl implements RepositoryService {
     List<RepoCloneStatusModel> repoStatusModels = repoCloneStatusDao.fetchAll();
 
     boolean isValid = false;
-
+    repoName = repoName.toLowerCase();
+    
     if (CollectionUtils.isEmpty(repoStatusModels)) {
       // if there is no entry then probably this is the first time when application has ran or the
       // repository has been save from outside the application,

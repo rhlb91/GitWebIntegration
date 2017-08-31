@@ -41,8 +41,8 @@ public class GitServiceImpl implements GitService {
   }
 
   @Override
-  public Git cloneRepository(GitOptions options)
-      throws InvalidRemoteException, TransportException, GitAPIException {
+  public Git cloneRepository(GitOptions options) throws InvalidRemoteException, TransportException,
+      GitAPIException {
 
     // create a thread for every new cloning
     GitServiceRunnable runnable = new GitServiceRunnable(options);
@@ -65,25 +65,28 @@ public class GitServiceImpl implements GitService {
       if (StringUtils.isEmpty(startingPoint)) {
         startingPoint = JGitUtils.getHEADRef(branchOptions.getRepo());
       }
-      ref = git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint(startingPoint)
-          .call();
+      ref =
+          git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint(startingPoint)
+              .call();
       if (ref == null) {
         LOG.debug("Trying to create a branch with starting point as master");
-        ref = git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint("master")
-            .call();
+        ref =
+            git.branchCreate().setName(branchOptions.getBranchName()).setStartPoint("master")
+                .call();
       }
       if (ref == null) {
         LOG.debug("Trying to create a branch with starting point as origin/master");
-        ref = git.branchCreate().setName(branchOptions.getBranchName())
-            .setStartPoint("origin/master").call();
+        ref =
+            git.branchCreate().setName(branchOptions.getBranchName())
+                .setStartPoint("origin/master").call();
       }
 
       if (ref != null) {
         // push the newly created branch to remote origin
         PushCommand pushCommand = git.push();
         pushCommand.setRemote(branchOptions.getRemoteURL());
-        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(
-            branchOptions.getUserName(), branchOptions.getPassword()));
+        pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(branchOptions
+            .getUserName(), branchOptions.getPassword()));
         pushCommand.add(ref);
         pushCommand.call();
       }
@@ -106,6 +109,11 @@ public class GitServiceImpl implements GitService {
       LOG.info("Cloning repository " + options.getURI() + ", in a thread "
           + Thread.currentThread().getName());
 
+      if (checkIfAlreadyRunning(options.getRepositoryName())) {
+        LOG.info("Cloning already running fro this repo!! New clone request Skipped.");
+        return;
+      }
+
       updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.IN_PROGRESS);
 
       Git git = null;
@@ -119,8 +127,8 @@ public class GitServiceImpl implements GitService {
       cmd.setDirectory(destinationFolder);
 
       if (isCredentialsProvided(options.getUsername(), options.getPassword())) {
-        cmd.setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider(options.getUsername(), options.getPassword()));
+        cmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(options.getUsername(),
+            options.getPassword()));
       }
 
       try {
@@ -129,15 +137,15 @@ public class GitServiceImpl implements GitService {
         if (git != null && git.getRepository() != null) {
           updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.COMPLETED);
         }
+        LOG.info("Repo " + options.getURI() + " cloned to " + options.getDestinationDirectory()
+            + " in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis())
+            + " with thread:" + Thread.currentThread().getName());
+
       } catch (GitAPIException e) {
         updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.FAILURE);
-        System.out.println("Error from Thread!!" + e.getMessage());
-        e.printStackTrace();
+        LOG.error(
+            "Error from Thread - " + Thread.currentThread().getName() + " !!" + e.getMessage(), e);
       }
-
-      LOG.info("Repo " + options.getURI() + " cloned to " + options.getDestinationDirectory()
-          + " in " + LoggerUtils.getTimeInSecs(start, System.currentTimeMillis()) + " with thread:"
-          + Thread.currentThread().getName());
     }
   }
 
@@ -149,6 +157,11 @@ public class GitServiceImpl implements GitService {
     repoCloneStatus.setCloneStatus(cloneStatus.name());
     repoCloneStatusDao.saveOrUpdateEntity(repoCloneStatus);
 
+  }
+
+  public boolean checkIfAlreadyRunning(String repositoryName) {
+    RepoCloneStatusModel repoCloneStatus = repoCloneStatusDao.fetchEntity(repositoryName);
+    return CloneStatus.IN_PROGRESS.equals(CloneStatus.forName(repoCloneStatus.getCloneStatus()));
   }
 
   @Autowired

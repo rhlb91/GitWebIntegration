@@ -1,6 +1,9 @@
 package com.teammerge.rest;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
+import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -99,6 +102,11 @@ public abstract class AbstractController {
 
   protected String convertToFinalOutput(final String output) {
     return "{ \"data\":" + output + "}";
+  }
+
+  protected Response createResponse(int status, Map<String, Object> result) {
+    return Response.status(status).type("application/json").entity(result)
+        .header("Access-Control-Allow-Origin", "*").build();
   }
 
 }

@@ -52,8 +52,7 @@ public class JobRestController extends AbstractController {
     }
     result.put("result", output);
     result.put("failedEntries", failedBranches);
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -70,8 +69,7 @@ public class JobRestController extends AbstractController {
     }
     result.put("result", output);
     result.put("failedEntries", failedCommits);
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -87,8 +85,7 @@ public class JobRestController extends AbstractController {
     }
     result.put("result", output);
     result.put("failedEntries", failedEntries);
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -106,8 +103,7 @@ public class JobRestController extends AbstractController {
       result.put("result", "success");
       result.put("output", "Branch and Commit Details has been updated sucessfully");
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -129,8 +125,7 @@ public class JobRestController extends AbstractController {
       result.put("result", "success");
       result.put("output", jobName + " has been rescheduled sucessfully");
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -147,8 +142,7 @@ public class JobRestController extends AbstractController {
       result.put("result", "success");
       result.put("output", jobName + " has been paused sucessfully");
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -166,8 +160,7 @@ public class JobRestController extends AbstractController {
       result.put("result", "success");
       result.put("output", jobName + " has been resumed sucessfully");
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
- 
+
 }

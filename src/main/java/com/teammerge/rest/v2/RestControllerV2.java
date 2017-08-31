@@ -1,6 +1,5 @@
 package com.teammerge.rest.v2;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +20,9 @@ import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Ref;
 import org.springframework.stereotype.Component;
 
-import com.teammerge.Constants.WebServiceResult;
+import com.teammerge.Constants.CloneStatus;
 import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
+import com.teammerge.Constants.WebServiceResult;
 import com.teammerge.entity.BranchModel;
 import com.teammerge.entity.CommitModel;
 import com.teammerge.entity.Company;
@@ -145,8 +145,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       branchValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
     try {
       getBranchService().saveBranch(branch);
@@ -154,8 +153,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (RevisionSyntaxException e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -175,8 +173,7 @@ public class RestControllerV2 extends AbstractController {
       finalOutput = convertToFinalOutput(jsonOutput);
       populateSucess(result, finalOutput);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @POST
@@ -188,8 +185,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       companyFormValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
 
     try {
@@ -200,8 +196,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (RevisionSyntaxException e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
 
@@ -222,8 +217,7 @@ public class RestControllerV2 extends AbstractController {
       finalOutput = convertToFinalOutput(jsonOutput);
       populateSucess(result, finalOutput);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @POST
@@ -235,8 +229,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       commitFormValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
     try {
       getCommitService().saveOrUpdateCommitDetails(commit);
@@ -244,8 +237,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (RevisionSyntaxException e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -265,8 +257,7 @@ public class RestControllerV2 extends AbstractController {
       finalOutput = convertToFinalOutput(jsonOutput);
       populateSucess(result, finalOutput);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -297,8 +288,7 @@ public class RestControllerV2 extends AbstractController {
               + numOfCommits + "}");
       populateSucess(result, finalOutput);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -314,8 +304,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       credentialValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
 
     RepoCredentials repoCredentials = getRepoCredentialService().getCredentialDetails(crf);
@@ -323,8 +312,7 @@ public class RestControllerV2 extends AbstractController {
     finalOutput = convertToFinalOutput(jsonOutput);
     populateSucess(result, finalOutput);
 
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @POST
@@ -338,8 +326,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       repoFormValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
     try {
       getCompanyService().saveOrUpdateCompanyDetails(repoForm);
@@ -351,8 +338,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (RevisionSyntaxException e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -375,8 +361,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (Exception e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @POST
@@ -388,8 +373,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       newBranchValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
     try {
       Map<String, Object> results = null;
@@ -415,8 +399,7 @@ public class RestControllerV2 extends AbstractController {
     } catch (Exception e) {
       populateFailure(result, e);
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
 
   }
 
@@ -430,8 +413,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       diffValidator.putErrorsInMap(result, vr);
-      return Response.status(200).type("application/json").entity(result)
-          .header("Access-Control-Allow-Origin", "*").build();
+      return createResponse(200, result);
     }
 
     try {
@@ -444,8 +426,7 @@ public class RestControllerV2 extends AbstractController {
       populateFailure(result, e);
     }
 
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -468,7 +449,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       treeValidator.putErrorsInMap(result, vr);
-      return Response.status(200).entity(result).build();
+      return createResponse(200, result);
     }
 
     try {
@@ -481,7 +462,7 @@ public class RestControllerV2 extends AbstractController {
       populateFailure(result, e);
     }
 
-    return Response.status(200).entity(result).build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -505,7 +486,7 @@ public class RestControllerV2 extends AbstractController {
 
     if (vr.hasErrors()) {
       treeValidator.putErrorsInMap(result, vr);
-      return Response.status(200).entity(result).build();
+      return createResponse(200, result);
     }
 
     try {
@@ -517,7 +498,7 @@ public class RestControllerV2 extends AbstractController {
       populateFailure(result, e);
     }
 
-    return Response.status(200).entity(result).build();
+    return createResponse(200, result);
   }
 
   @GET
@@ -529,7 +510,12 @@ public class RestControllerV2 extends AbstractController {
     Map<String, Object> result = new HashMap<>();
     List<String> repoList = getRepositoryService().getRepositoryList();
 
-    // TODO : check for parameters validation
+    if (StringUtils.isEmpty(repoName) || StringUtils.isEmpty(companyName)) {
+      result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.VALIDATION_ERROR);
+      result.put(WEBSERVICE_KEY_OUTPUT, "Either project name or company name is blank!!");
+
+      createResponse(200, result);
+    }
 
     for (String repoListItem : repoList) {
       if (repoListItem.equals(repoName)) {
@@ -537,22 +523,22 @@ public class RestControllerV2 extends AbstractController {
 
           getCompanyService().setRepoStatus(companyName, repoName,
               RepoActiveStatus.IN_ACTIVE.toString());
+          getRepositoryService().saveRepoCloneStatus(CloneStatus.NOT_STARTED.toString());
 
           getRepositoryService().removeRepositoryFolder(repoName);
 
-          result.put("result", "success");
-          result.put("output", repoName + " has been removed sucessfully");
+          result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);
+          result.put(WEBSERVICE_KEY_OUTPUT, repoName + " has been removed sucessfully");
         } catch (RevisionSyntaxException e) {
-          result.put("result", "error");
-          result
-              .put("reason", "The Repository with name" + "'" + repoName + "'" + "does not exist");
+          result.put(WEBSERVICE_KEY_RESULT, "error");
+          result.put(WEBSERVICE_KEY_REASON, "The Repository with name" + "'" + repoName + "'"
+              + "does not exist");
           result.put("detailedReason", e);
         }
 
       }
     }
-    return Response.status(200).type("application/json").entity(result)
-        .header("Access-Control-Allow-Origin", "*").build();
+    return createResponse(200, result);
   }
 
   public void populateSucess(Map<String, Object> result, String output) {
@@ -570,5 +556,6 @@ public class RestControllerV2 extends AbstractController {
     result.put(WEBSERVICE_KEY_REASON, e.getMessage());
     result.put(WEBSERVICE_KEY_DETAILED_REASON, e);
   }
+
 
 }
