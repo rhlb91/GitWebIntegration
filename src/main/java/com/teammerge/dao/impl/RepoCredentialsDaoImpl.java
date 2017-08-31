@@ -31,6 +31,4 @@ public class RepoCredentialsDaoImpl extends BaseDaoImpl<RepoCredentials> impleme
     super.setClazz(RepoCredentials.class);
   }
 
-
-
 }

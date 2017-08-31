@@ -1,22 +1,19 @@
 package com.teammerge.services.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.hibernate.cache.spi.access.RegionAccessStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
-import com.teammerge.dao.BaseDao;
+import com.teammerge.dao.CompanyDao;
 import com.teammerge.entity.Company;
+import com.teammerge.entity.CompanyKey;
 import com.teammerge.form.CompanyForm;
 import com.teammerge.form.RepoForm;
 import com.teammerge.populator.CompanyPopulator;
@@ -28,115 +25,70 @@ public class CompanyServiceImpl implements CompanyService {
 
   private final static Logger LOG = LoggerFactory.getLogger(CompanyServiceImpl.class);
 
-  private BaseDao<Company> baseDao;
+  private CompanyDao companyDao;
 
   @Resource(name = "companyPopulator")
   private CompanyPopulator companyPopulator;
 
+
   @Override
-  public Company getCompanyDetails(String name) {
-    Company company = baseDao.fetchEntity(name);
+  public Company getCompanyDetails(String cName, String pName) {
+    CompanyKey key = new CompanyKey(cName, pName);
+    Company company = companyDao.fetchEntity(key);
     return company;
   }
 
   @Override
+  public List<Company> getCompanyDetailsForName(String cName) {
+    return companyDao.fetchEntityForName(cName);
+  }
+
+  @Override
   public void saveCompanyDetails(Company company) {
-    Company existingCompany = getCompanyDetails(company.getName());
+    Company existingCompany = getCompanyDetails(company.getName(), company.getProjectName());
 
     if (existingCompany == null) {
       existingCompany = company;
-    } else {
-      // saving remote urls
-      Map<String, String> remoteRepo = existingCompany.getRemoteRepoUrls();
-      remoteRepo.putAll(company.getRemoteRepoUrls());
-      existingCompany.setRemoteRepoUrls(remoteRepo);
-
-      // saving repo status
-      Map<String, String> existingRepoStatuses = existingCompany.getRepoStatuses();
-      if (MapUtils.isEmpty(existingRepoStatuses)) {
-        existingRepoStatuses = new HashMap<>();
-      }
-
-      // setting to status: Active for repositories whose status does not exists
-      for (String project : existingRepoStatuses.keySet()) {
-        if (StringUtils.isEmpty(existingRepoStatuses.get(project))) {
-          existingRepoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
-        }
-      }
-
-      Map<String, String> newRepoStatuses = company.getRepoStatuses();
-      if (!MapUtils.isEmpty(newRepoStatuses)) {
-        for (String project : newRepoStatuses.keySet()) {
-          if (StringUtils.isEmpty(existingRepoStatuses.get(project))) {
-            existingRepoStatuses.put(project, newRepoStatuses.get(project));
-          }
-        }
-      }
-
-      existingCompany.setRepoStatuses(existingRepoStatuses);
     }
-    baseDao.saveOrUpdateEntity(existingCompany);
+    companyDao.saveOrUpdateEntity(existingCompany);
   }
 
   @Override
   public void saveCompanyDetails(CompanyForm companyForm) {
     Company company = new Company();
     companyPopulator.populate(companyForm, company);
-
-    // populating repo status for the first time, setting to Active
-    Map<String, String> newRepoStatuses = new HashMap<>();
-    if (company.getRemoteRepoUrls() != null) {
-      for (String project : company.getRemoteRepoUrls().keySet()) {
-        newRepoStatuses.put(project, RepoActiveStatus.ACTIVE.toString());
-      }
-    }
-    company.setRepoStatuses(newRepoStatuses);
-
     saveCompanyDetails(company);
   }
 
   public void saveOrUpdateCompanyDetails(final RepoForm repoForm) {
-    Company company = getCompanyDetails(repoForm.getCompanyName());
+    Company company = getCompanyDetails(repoForm.getCompanyName(), repoForm.getProjectName());
 
 
     if (company == null) {
       company = new Company();
-      company.setName(repoForm.getCompanyName());
-
-      Map<String, String> repoStatus = new HashMap<>();
-      repoStatus.put(repoForm.getProjectName(), RepoActiveStatus.ACTIVE.toString());
-      company.setRepoStatuses(repoStatus);
-
+      companyPopulator.populate(repoForm, company);
+    } else {
+      company.setRemoteURL(repoForm.getRepoRemoteURL());
+      company.setStatus(RepoActiveStatus.ACTIVE.toString());
     }
 
-    Map<String, String> remoteRepo = company.getRemoteRepoUrls();
-    remoteRepo.put(repoForm.getProjectName(), repoForm.getRepoRemoteURL());
-    company.setRemoteRepoUrls(remoteRepo);
-
-    Map<String, String> existrepoStatus = company.getRepoStatuses();
-    for (String project : company.getRemoteRepoUrls().keySet()) {
-      if (!StringUtils.isEmpty(project) && company.getRepoStatuses().containsValue(RepoActiveStatus.IN_ACTIVE.toString())) {
-        existrepoStatus.put(project, RepoActiveStatus.ACTIVE.toString());
-      }
-      company.setRepoStatuses(existrepoStatus);
-    }
-    baseDao.saveOrUpdateEntity(company);
+    companyDao.saveOrUpdateEntity(company);
   }
 
-  private boolean checkIsCompanyRepoActiveStatus(String repoName) {
-    List<Company> companies = baseDao.fetchAll();
-
-    if (CollectionUtils.isEmpty(companies)) {
-      // if there is no entry then probably this is the first time when application has ran,
-      // thus created a initial status model and saving
-      Company newRepoStatusModel = new Company(repoName);
-      baseDao.saveEntity(newRepoStatusModel);
-
-      LOG.error("No Repo status entry found in DB!! Added one for " + repoName);
-      return false;
-    }
-    return true;
-  }
+  // private boolean checkIsCompanyRepoActiveStatus(String cName,String repoName) {
+  // List<Company> companies = companyDao.fetchAll();
+  //
+  // if (CollectionUtils.isEmpty(companies)) {
+  // // if there is no entry then probably this is the first time when application has ran,
+  // // thus created a initial status model and saving
+  // Company newRepoStatusModel = new Company(repoName);
+  // companyDao.saveEntity(newRepoStatusModel);
+  //
+  // LOG.error("No Repo status entry found in DB!! Added one for " + repoName);
+  // return false;
+  // }
+  // return true;
+  // }
 
 
   public String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId) {
@@ -145,7 +97,7 @@ public class CompanyServiceImpl implements CompanyService {
       return null;
     }
 
-    Company c = baseDao.fetchEntity(companyId);
+    Company c = companyDao.fetchEntity(companyId);
     return getRemoteUrlForCompanyAndProject(c, projectId);
   }
 
@@ -158,109 +110,59 @@ public class CompanyServiceImpl implements CompanyService {
       return null;
     }
 
-    for (String s : c.getRemoteRepoUrls().keySet()) {
-      if (projectId.equals(s)) {
-        return c.getRemoteRepoUrls().get(s);
-      }
-    }
-
-    return null;
+    return c.getRemoteURL();
   }
 
   @Override
   public Company getCompanyForProject(String projectId) {
     Company resultCompany = null;
-    List<Company> companies = baseDao.fetchAll();
+    List<Company> companies = companyDao.fetchAll();
 
     if (CollectionUtils.isEmpty(companies)) {
       return null;
     }
 
-
     for (Company c : companies) {
-      if (MapUtils.isNotEmpty(c.getRemoteRepoUrls())) {
-
-        for (String pId : c.getRemoteRepoUrls().keySet()) {
-          if (projectId.equals(pId)) {
-            resultCompany = c;
-            break;
-          }
-        }
-
+      if (projectId.equalsIgnoreCase(c.getProjectName())) {
+        resultCompany = c;
+        break;
       }
     }
     return resultCompany;
   }
 
-  @Override
-  public String getRemoteUrlForProject(String projectId) {
-    String remoteUrl = null;
-    List<Company> companies = baseDao.fetchAll();
-
-    if (CollectionUtils.isEmpty(companies)) {
-      return null;
-    }
-
-    for (Company c : companies) {
-      if (MapUtils.isNotEmpty(c.getRemoteRepoUrls())) {
-        remoteUrl = c.getRemoteRepoUrls().get(projectId);
-        if (!StringUtils.isEmpty(remoteUrl)) {
-          break;
-        }
-      }
-    }
-    return remoteUrl;
-  }
 
   @Override
   public RepoActiveStatus getStatusForRepo(final Company company, final String repositoryName) {
-    Map<String, String> repoStatuses = company.getRepoStatuses();
+    String repoStatus = company.getStatus();
 
-    for (String projectId : repoStatuses.keySet()) {
-      if (projectId.equals(repositoryName)) {
-        return RepoActiveStatus.forName(repoStatuses.get(projectId));
-      }
+    if (repositoryName.equals(company.getProjectName())) {
+      return RepoActiveStatus.forName(repoStatus);
     }
     return null;
   }
 
   @Override
-  public void setRepoStatusButNoSave(final String companyId, final String repositoryName,
-      final String status) {
-    Company company = getCompanyDetails(companyId);
-    Map<String, String> repoStatuses = company.getRepoStatuses();
-
-    for (String projectId : repoStatuses.keySet()) {
-      if (projectId.equals(repositoryName)) {
-        repoStatuses.put(projectId, status);
-      }
-    }
-
-    company.setRepoStatuses(repoStatuses);
-    baseDao.saveOrUpdateEntity(company);
+  public void setRepoStatus(final String companyId, final String repositoryName, final String status) {
+    Company company = getCompanyDetails(companyId, repositoryName);
+    company.setStatus(status);
+    companyDao.saveOrUpdateEntity(company);
   }
 
   @Override
-  public boolean isRepoStatusValidForWorking(final String companyId, final String repositoryName) {
-    Company company = getCompanyDetails(companyId);
-    Map<String, String> repoStatuses = company.getRepoStatuses();
+  public boolean isRepoStatusValidForWorking(final String companyId, final String repoName) {
+    Company company = getCompanyDetails(companyId, repoName);
 
-    for (String projectId : repoStatuses.keySet()) {
-      if (projectId.equals(repositoryName)) {
-
-        RepoActiveStatus status = RepoActiveStatus.forName(repoStatuses.get(projectId));
-        if (RepoActiveStatus.ACTIVE.equals(status)) {
-          return true;
-        }
-      }
+    RepoActiveStatus status = RepoActiveStatus.forName(company.getStatus());
+    if (RepoActiveStatus.ACTIVE.equals(status)) {
+      return true;
     }
     return false;
-
   }
 
   @Autowired
-  public void setBaseDao(BaseDao<Company> baseDao) {
-    baseDao.setClazz(Company.class);
-    this.baseDao = baseDao;
+  public void setCompanyDao(CompanyDao companyDao) {
+    companyDao.setClazz(Company.class);
+    this.companyDao = companyDao;
   }
 }

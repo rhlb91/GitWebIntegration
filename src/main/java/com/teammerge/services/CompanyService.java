@@ -1,5 +1,7 @@
 package com.teammerge.services;
 
+import java.util.List;
+
 import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.entity.Company;
 import com.teammerge.form.CompanyForm;
@@ -8,28 +10,24 @@ import com.teammerge.form.RepoForm;
 
 public interface CompanyService {
 
-  Company getCompanyDetails(String name);
-
   void saveCompanyDetails(Company name);
 
   void saveOrUpdateCompanyDetails(final RepoForm repoForm);
 
   String getRemoteUrlForCompanyAndProject(final String companyId, final String projectId);
 
-  Company getCompanyForProject(String projectId);
-
   /**
-   * returns the remote url for the specified project Id.
+   * <p>
+   * As in this project, we are treating project Name to be unique.
+   * </p>
+   * <p>
+   * If there are more than 1 company with same project, the first one will be returned
+   * </p>
    * 
-   * <br>
-   * <br>
-   * Since we are not passing companyId in this function, thus the first non empty remoteUrl will be
-   * returned
-   * 
-   * @param projectId projectId/projectName
-   * @return remoteUrl
+   * @param projectId
+   * @return company
    */
-  String getRemoteUrlForProject(String projectId);
+  Company getCompanyForProject(String projectId);
 
   String getRemoteUrlForCompanyAndProject(final Company company, final String projectId);
 
@@ -55,7 +53,7 @@ public interface CompanyService {
    * @param projectId
    * @return
    */
-  void setRepoStatusButNoSave(String companyId, String projectId, String status);
+  void setRepoStatus(String companyId, String projectId, String status);
 
   /**
    * checks is the repository status of the provided repository and company valid or not.
@@ -68,6 +66,16 @@ public interface CompanyService {
    * @return true iff repository status is ACTIVE in DB, else false
    */
   boolean isRepoStatusValidForWorking(String companyId, String repositoryName);
+
+  Company getCompanyDetails(String cName, String pName);
+
+  /**
+   * gets all the companies with the same name
+   * 
+   * @param cName
+   * @return
+   */
+  List<Company> getCompanyDetailsForName(String cName);
 
 
 }

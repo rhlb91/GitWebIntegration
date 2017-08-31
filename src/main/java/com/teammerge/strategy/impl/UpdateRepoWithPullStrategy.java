@@ -20,9 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.teammerge.Constants;
-import com.teammerge.Constants.CloneStatus;
-import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 import com.teammerge.dao.BaseDao;
 import com.teammerge.dao.RepoCredentialDao;
 import com.teammerge.entity.Company;

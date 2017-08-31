@@ -1,87 +1,71 @@
 package com.teammerge.entity;
 
-import java.util.Map;
-
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.MapKeyClass;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import com.teammerge.Constants.CloneStatus;
-import com.teammerge.Constants.CloneStatus.RepoActiveStatus;
 
 @Entity
 @Table(name = "company")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ReadWriteRegion")
 public class Company implements java.io.Serializable {
 
-  private static final long serialVersionUID = 6705919882734212383L;
+  private static final long serialVersionUID = 7713761242982086415L;
 
-  @Id
-  @Column(name = "name", unique = true, nullable = false)
-  public String name;
+  @EmbeddedId
+  private CompanyKey companyKey;
 
-  /**
-   * Map of ProjectId and Remote repo url<br>
-   * <br>
-   * E.g. [Teamerge -> https://123.124.11.1/teamerge.git ]
-   */
-  @Column(name = "remoteRepoUrls")
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-  @MapKeyClass(String.class)
-  private Map<String, String> remoteRepoUrls;
+  @Column(name = "remoteURL", nullable = false)
+  private String remoteURL;
 
+  @Column(name = "status")
+  private String status;
 
-  /**
-   * Map of ProjectId and Active/Inactive status  for repository<br>
-   * <br>
-   * E.g. [Teamerge -> Active/Inactive ]
-   */
-
-  @Column(name = "repoActiveStatus")
-  @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-  @MapKeyClass(String.class)
-  private Map<String, String> repoStatuses;
-
-  public Company() {
-    this.name = null;
-  }
-
-  public Company(String name) {
-    this.name = name;
-
-  }
-  
   public String getName() {
-    return name;
+    if (this.companyKey != null) {
+      return this.companyKey.getName();
+    }
+    return null;
   }
 
   public void setName(String name) {
-    this.name = name;
+    if (this.companyKey == null) {
+      this.companyKey = new CompanyKey();
+    }
+    this.companyKey.setName(name);
   }
 
-  public Map<String, String> getRemoteRepoUrls() {
-    return remoteRepoUrls;
+  public String getProjectName() {
+    if (this.companyKey != null) {
+      return this.companyKey.getProjectName();
+    }
+    return null;
   }
 
-  public void setRemoteRepoUrls(Map<String, String> remoteRepoUrls) {
-    this.remoteRepoUrls = remoteRepoUrls;
+  public void setProjectName(String projectName) {
+    if (this.companyKey == null) {
+      this.companyKey = new CompanyKey();
+    }
+    this.companyKey.setProjectName(projectName);
   }
 
-  public Map<String, String> getRepoStatuses() {
-    return repoStatuses;
+  public String getRemoteURL() {
+    return remoteURL;
   }
 
-  public void setRepoStatuses(Map<String, String> repoStatuses) {
-    this.repoStatuses = repoStatuses;
+  public void setRemoteURL(String remoteURL) {
+    this.remoteURL = remoteURL;
   }
 
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
 }
-

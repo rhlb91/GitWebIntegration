@@ -170,8 +170,8 @@ public class RestControllerV2 extends AbstractController {
       populateFailure(result, finalOutput);
 
     } else {
-      Company company = getCompanyService().getCompanyDetails(name);
-      String jsonOutput = JacksonUtils.toJson(company);
+      List<Company> companies = getCompanyService().getCompanyDetailsForName(name);
+      String jsonOutput = JacksonUtils.toJson(companies);
       finalOutput = convertToFinalOutput(jsonOutput);
       populateSucess(result, finalOutput);
     }
@@ -194,6 +194,8 @@ public class RestControllerV2 extends AbstractController {
 
     try {
       getCompanyService().saveCompanyDetails(company);
+      getRepositoryService().saveRepoCloneStatus(company.getProjectName());
+
       result.put(WEBSERVICE_KEY_RESULT, "Saved Successfully");
     } catch (RevisionSyntaxException e) {
       populateFailure(result, e);
@@ -342,6 +344,7 @@ public class RestControllerV2 extends AbstractController {
     try {
       getCompanyService().saveOrUpdateCompanyDetails(repoForm);
       getRepoCredentialService().saveOrUpdateRepoCredentials(repoForm);
+      getRepositoryService().saveRepoCloneStatus(repoForm.getProjectName());
 
       String finalOutput = "Project details saved successfully!!";
       populateSucess(result, finalOutput);
@@ -530,14 +533,12 @@ public class RestControllerV2 extends AbstractController {
 
     for (String repoListItem : repoList) {
       if (repoListItem.equals(repoName)) {
-        File f = getRepositoryService().getRepositoriesFolder();
-
         try {
 
-          getCompanyService().setRepoStatusButNoSave(companyName, repoName,
+          getCompanyService().setRepoStatus(companyName, repoName,
               RepoActiveStatus.IN_ACTIVE.toString());
 
-          getRepositoryService().removeRepositoryFolder(f, repoName);
+          getRepositoryService().removeRepositoryFolder(repoName);
 
           result.put("result", "success");
           result.put("output", repoName + " has been removed sucessfully");

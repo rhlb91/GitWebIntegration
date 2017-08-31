@@ -475,8 +475,8 @@ public interface RepositoryService extends IManager {
    */
   List<CustomRefModel> getCustomRefModels(final boolean updated);
 
-  List<String> getTree(String commitId)
-      throws MissingObjectException, IncorrectObjectTypeException, IOException;
+  List<String> getTree(String commitId) throws MissingObjectException,
+      IncorrectObjectTypeException, IOException;
 
   List<PathModel> getTree2(String repositoryName, String path, String commitId)
       throws MissingObjectException, IncorrectObjectTypeException, IOException;
@@ -536,5 +536,13 @@ public interface RepositoryService extends IManager {
    * @param f path of the repo
    * @param repo repository name
    */
-  void removeRepositoryFolder(File f, String repo);
+  void removeRepositoryFolder(final String repo);
+
+  /**
+   * Saves the repo clone state in the DB
+   * 
+   * @param repoName
+   */
+  void saveRepoCloneStatus(String repoName);
+
 }

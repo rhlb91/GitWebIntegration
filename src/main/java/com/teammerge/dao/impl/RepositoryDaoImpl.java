@@ -33,16 +33,14 @@ public class RepositoryDaoImpl extends BaseDaoImpl<RepositoryModel> implements R
     HibernateUtils.openCurrentSessionwithTransaction();
     Query query = HibernateUtils.getCurrentSession().createQuery(FETCH_COMPANY);
     List<Company> companies = query.list();
-    
-     if (CollectionUtils.isEmpty(companies)) {
+
+    if (CollectionUtils.isEmpty(companies)) {
       return null;
     }
 
     List<String> repos = new ArrayList<>();
     for (Company company : companies) {
-      if (CollectionUtils.isNotEmpty(company.getRemoteRepoUrls().keySet())) {
-        repos.addAll(company.getRemoteRepoUrls().keySet());
-      }
+      repos.add(company.getProjectName());
     }
 
     HibernateUtils.closeCurrentSessionwithTransaction();

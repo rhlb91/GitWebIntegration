@@ -14,7 +14,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
@@ -37,7 +36,7 @@ public class SchedulerServiceImpl implements SchedulerService {
   private final String CRONJOB_GROUP = "defaultCronJobGroup";
 
   private final String CRONJOB_TRIGGER = "dataInsertionJobTrigger";
-  private final String DEFAULT_CRON_EXPRESSION = "0 0 0 0 0 0 0";
+  private final String DEFAULT_CRON_EXPRESSION = "0/10 * * * * ? *";
 
   private static final String JOB_NUMBER = "jobNumber";
 
@@ -71,7 +70,9 @@ public class SchedulerServiceImpl implements SchedulerService {
     try {
       if (cronExpression == null) {
         ScheduleJobModel scheduleJobModel = getSchedule(JOB_NAME);
-        cronExpression = scheduleJobModel.getjobscheduleInterval();
+        if (scheduleJobModel != null) {
+          cronExpression = scheduleJobModel.getjobscheduleInterval();
+        }
       }
 
       if (cronExpression == null) {
@@ -85,8 +86,9 @@ public class SchedulerServiceImpl implements SchedulerService {
       JobDetail jobDetail =
           JobBuilder.newJob(jobClass).withIdentity(jobKey).usingJobData(JOB_NUMBER, 1).build();
 
-      CronTrigger cronTrigger = TriggerBuilder.newTrigger()
-          .withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP).withSchedule(cronScheduleBuilder).build();
+      CronTrigger cronTrigger =
+          TriggerBuilder.newTrigger().withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP)
+              .withSchedule(cronScheduleBuilder).build();
 
       scheduler.scheduleJob(jobDetail, cronTrigger);
     } catch (Exception e) {
@@ -106,11 +108,12 @@ public class SchedulerServiceImpl implements SchedulerService {
 
       CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpression);
 
-      CronTrigger newCronTrigger = TriggerBuilder.newTrigger()
-          .withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP).withSchedule(cronScheduleBuilder).build();
+      CronTrigger newCronTrigger =
+          TriggerBuilder.newTrigger().withIdentity(CRONJOB_TRIGGER, CRONJOB_GROUP)
+              .withSchedule(cronScheduleBuilder).build();
 
-      scheduler.rescheduleJob(TriggerKey.triggerKey(CRONJOB_TRIGGER, CRONJOB_GROUP),
-          newCronTrigger);
+      scheduler
+          .rescheduleJob(TriggerKey.triggerKey(CRONJOB_TRIGGER, CRONJOB_GROUP), newCronTrigger);
 
       // updating the scheduler in DB
       updateScheduleInDB(cronExpression);
