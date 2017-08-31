@@ -285,8 +285,6 @@ public class RepositoryServiceImpl implements RepositoryService {
     List<String> repositories = null;
     if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
 
-      LOG.info("Repositories folder : {}", getRepositoriesFolder().getAbsolutePath());
-
       // we are not caching OR we have not yet cached OR the cached list
       // is invalid
       long startTime = System.currentTimeMillis();

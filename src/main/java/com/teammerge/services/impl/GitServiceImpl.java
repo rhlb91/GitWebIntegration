@@ -106,8 +106,7 @@ public class GitServiceImpl implements GitService {
     public void run() {
       long start = System.currentTimeMillis();
 
-      LOG.info("Cloning repository " + options.getURI() + ", in a thread "
-          + Thread.currentThread().getName());
+   
 
       if (checkIfAlreadyRunning(options.getRepositoryName())) {
         LOG.info("Cloning already running fro this repo!! New clone request Skipped.");
@@ -116,6 +115,9 @@ public class GitServiceImpl implements GitService {
 
       updateRepoCloneStatus(options.getRepositoryName(), Constants.CloneStatus.IN_PROGRESS);
 
+      LOG.info("Cloning repository " + options.getURI() + ", in a thread "
+          + Thread.currentThread().getName());
+      
       Git git = null;
       CloneCommand cmd = Git.cloneRepository();
       cmd.setCloneAllBranches(options.isCloneAllBranches());
