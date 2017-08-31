@@ -525,6 +525,9 @@ public class RestControllerV2 extends AbstractController {
               RepoActiveStatus.IN_ACTIVE.toString());
           getRepositoryService().saveRepoCloneStatus(repoName);
 
+          // remove branches and commits related to this repo
+          getRepositoryService().clearCompanyData(companyName, repoName);
+
           getRepositoryService().removeRepositoryFolder(repoName);
 
           result.put(WEBSERVICE_KEY_RESULT, WebServiceResult.SUCCESS);

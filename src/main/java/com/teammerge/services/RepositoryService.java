@@ -545,4 +545,12 @@ public interface RepositoryService extends IManager {
    */
   void saveRepoCloneStatus(String repoName);
 
+  /**
+   * deletes the data such as branches, commits, cached data related to the provided project
+   * 
+   * @param companyName
+   * @param repoName
+   */
+  void clearCompanyData(String companyName, String repoName);
+
 }

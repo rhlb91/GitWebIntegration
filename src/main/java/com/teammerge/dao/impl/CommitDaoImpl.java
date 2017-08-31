@@ -25,4 +25,17 @@ public class CommitDaoImpl extends BaseDaoImpl<CommitModel> implements CommitDao
     return result;
   }
 
+  @Override
+  public int deleteEntityForProject(String projectName) {
+    final String queryStr = "delete from  CommitModel as c where c.repositoryName = ?projectId";
+
+    HibernateUtils.openCurrentSessionwithTransaction();
+    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    qry.setParameter("projectId", projectName);
+    int result = qry.executeUpdate();
+    HibernateUtils.closeCurrentSessionwithTransaction();
+
+    return result;
   }
+
+}

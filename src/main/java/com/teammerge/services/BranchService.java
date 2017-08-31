@@ -26,4 +26,8 @@ public interface BranchService {
   
   void saveBranch(final BranchForm branchForm);
 
+  int removeBranchesForProject(String projectName);
+
+  int removeBranchLastCommitAddedForProjectStartsWith(String projectName);
+
 }

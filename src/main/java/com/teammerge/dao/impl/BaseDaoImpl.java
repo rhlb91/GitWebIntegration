@@ -39,7 +39,7 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
     HibernateUtils.getCurrentSession().delete(entity);
     HibernateUtils.closeCurrentSessionwithTransaction();
   }
-  
+
   @Override
   public synchronized void saveOrUpdateEntity(T entity) {
     HibernateUtils.openCurrentSessionwithTransaction();
@@ -71,6 +71,34 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   @Override
   public void saveInSeparateSession(Session s, T entity) {
     s.saveOrUpdate(entity);
+  }
+
+  @Override
+  public int deleteEntityForField(String fieldName, String fieldValue) {
+    final String queryStr =
+        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " = ?" + fieldName;
+
+    HibernateUtils.openCurrentSession();
+    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    qry.setString(fieldName, fieldValue);
+    int result = qry.executeUpdate();
+    HibernateUtils.closeCurrentSession();
+
+    return result;
+  }
+
+  @Override
+  public int deleteEntityForFieldStartsWith(String fieldName, String fieldValue) {
+    final String queryStr =
+        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " = ?" + fieldName;
+
+    HibernateUtils.openCurrentSession();
+    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    qry.setParameter(fieldName, fieldValue + "%");
+    int result = qry.executeUpdate();
+    HibernateUtils.closeCurrentSession();
+
+    return result;
   }
 
 }
