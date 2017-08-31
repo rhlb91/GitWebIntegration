@@ -523,7 +523,7 @@ public class RestControllerV2 extends AbstractController {
 
           getCompanyService().setRepoStatus(companyName, repoName,
               RepoActiveStatus.IN_ACTIVE.toString());
-          getRepositoryService().saveRepoCloneStatus(CloneStatus.NOT_STARTED.toString());
+          getRepositoryService().saveRepoCloneStatus(repoName);
 
           getRepositoryService().removeRepositoryFolder(repoName);
 
