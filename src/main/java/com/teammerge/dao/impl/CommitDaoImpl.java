@@ -25,4 +25,4 @@ public class CommitDaoImpl extends BaseDaoImpl<CommitModel> implements CommitDao
     return result;
   }
 
-  }
+}

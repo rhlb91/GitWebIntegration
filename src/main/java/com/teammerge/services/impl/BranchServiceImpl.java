@@ -148,6 +148,16 @@ public class BranchServiceImpl implements BranchService {
     baseDao.saveOrUpdateEntity(model);
   }
 
+  @Override
+  public int removeBranchesForProject(final String projectName) {
+    return branchDao.deleteEntityForField("repositoryId", projectName);
+  }
+
+  @Override
+  public int removeBranchLastCommitAddedForProjectStartsWith(final String projectName) {
+    return baseDao.deleteEntityForFieldStartsWith("branchId", projectName);
+  }
+
   @Autowired
   public void setBranchDao(BranchDao branchDao) {
     branchDao.setClazz(BranchModel.class);

@@ -42,4 +42,6 @@ public interface CommitService {
   void saveOrUpdateCommit(CommitModel commit);
 
   void saveOrUpdateCommitInSeparateSession(CommitModel commit);
+
+  int removeCommitDetailsForProject(String projectName);
 }

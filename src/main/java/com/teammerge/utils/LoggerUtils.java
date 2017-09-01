@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 public class LoggerUtils {
 
   public static String getTimeInMilliSecs(long start, long end) {
-    return TimeUnit.NANOSECONDS.toMillis(end - start) + " msecs";
+    return TimeUnit.MILLISECONDS.toMillis(end - start) + " msecs";
   }
 
   public static String getTimeInSecs(long start, long end) {

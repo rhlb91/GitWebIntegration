@@ -229,6 +229,11 @@ public class CommitServiceImpl implements CommitService {
     Repository r = repositoryService.getRepository(repoName);
     return commitDiffStrategy.getCommitDif(r, null, commitId);
   }
+  
+  @Override
+  public int removeCommitDetailsForProject(final String projectName){
+    return commitDao.deleteEntityForField("repositoryName", projectName);
+  }
 
   @Override
   public List<CommitModel> getCommitDetailsAll() {

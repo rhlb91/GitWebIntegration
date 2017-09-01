@@ -71,6 +71,8 @@ import com.teammerge.model.RegistrantAccessPermission;
 import com.teammerge.model.RepoCloneStatusModel;
 import com.teammerge.model.RepositoryModel;
 import com.teammerge.model.UserModel;
+import com.teammerge.services.BranchService;
+import com.teammerge.services.CommitService;
 import com.teammerge.services.CompanyService;
 import com.teammerge.services.GitService;
 import com.teammerge.services.RepositoryService;
@@ -118,6 +120,12 @@ public class RepositoryServiceImpl implements RepositoryService {
 
   @Resource(name = "companyService")
   private CompanyService companyService;
+
+  @Resource(name = "branchService")
+  private BranchService branchService;
+
+  @Resource(name = "commitService")
+  private CommitService commitService;
 
   @Resource(name = "repoCredentialDao")
   private RepoCredentialDao repoCredentialDao;
@@ -284,8 +292,6 @@ public class RepositoryServiceImpl implements RepositoryService {
   public List<String> getRepositoryList() {
     List<String> repositories = null;
     if (repositoryListCache.size() == 0 || !isValidRepositoryList()) {
-
-      LOG.info("Repositories folder : {}", getRepositoriesFolder().getAbsolutePath());
 
       // we are not caching OR we have not yet cached OR the cached list
       // is invalid
@@ -1201,7 +1207,7 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     boolean isValid = false;
     repoName = repoName.toLowerCase();
-    
+
     if (CollectionUtils.isEmpty(repoStatusModels)) {
       // if there is no entry then probably this is the first time when application has ran or the
       // repository has been save from outside the application,
@@ -1355,5 +1361,12 @@ public class RepositoryServiceImpl implements RepositoryService {
   public void setRepoCloneStatusDao(BaseDao<RepoCloneStatusModel> baseDao) {
     baseDao.setClazz(RepoCloneStatusModel.class);
     this.repoCloneStatusDao = baseDao;
+  }
+
+  @Override
+  public void clearProjectDataForCompany(String companyName, String repoName) {
+    branchService.removeBranchesForProject(repoName);
+    commitService.removeCommitDetailsForProject(repoName);
+    branchService.removeBranchLastCommitAddedForProjectStartsWith(repoName);
   }
 }

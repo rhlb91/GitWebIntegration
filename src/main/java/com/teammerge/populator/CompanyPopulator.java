@@ -34,4 +34,11 @@ public class CompanyPopulator {
     target.setRemoteURL(source.getRepoRemoteURL());
   }
 
+  public void populate(Company newCompany, Company existingCompany) {
+    existingCompany.setName(newCompany.getName());
+    existingCompany.setProjectName(newCompany.getProjectName());
+    existingCompany.setStatus(RepoActiveStatus.ACTIVE.toString());
+    existingCompany.setRemoteURL(newCompany.getRemoteURL());
+  }
+
 }

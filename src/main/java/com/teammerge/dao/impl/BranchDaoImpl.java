@@ -24,4 +24,5 @@ public class BranchDaoImpl extends BaseDaoImpl<BranchModel> implements BranchDao
     HibernateUtils.closeCurrentSession();
     return result;
   }
+
 }

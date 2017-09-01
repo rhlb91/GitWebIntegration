@@ -49,6 +49,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     if (existingCompany == null) {
       existingCompany = company;
+    } else {
+      companyPopulator.populate(company, existingCompany);
     }
     companyDao.saveOrUpdateEntity(existingCompany);
   }
