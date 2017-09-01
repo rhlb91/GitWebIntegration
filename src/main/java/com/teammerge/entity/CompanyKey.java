@@ -9,10 +9,10 @@ public class CompanyKey implements Serializable {
 
   private static final long serialVersionUID = 8909302378224004127L;
 
-  @Column(name = "companyName", unique = true, nullable = false)
+  @Column(name = "companyName",  nullable = false)
   public String name;
 
-  @Column(name = "projectName", unique = true, nullable = false)
+  @Column(name = "projectName", nullable = false)
   public String projectName;
 
   public CompanyKey() {
