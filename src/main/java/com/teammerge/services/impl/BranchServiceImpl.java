@@ -150,11 +150,11 @@ public class BranchServiceImpl implements BranchService {
 
   @Override
   public int removeBranchesForProject(final String projectName) {
-    return branchDao.deleteEntityForProject(projectName);
+    return branchDao.deleteEntityForField("repositoryId", projectName);
   }
-  
+
   @Override
-  public int removeBranchLastCommitAddedForProjectStartsWith(final String projectName){
+  public int removeBranchLastCommitAddedForProjectStartsWith(final String projectName) {
     return baseDao.deleteEntityForFieldStartsWith("branchId", projectName);
   }
 

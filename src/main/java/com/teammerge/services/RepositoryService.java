@@ -551,6 +551,6 @@ public interface RepositoryService extends IManager {
    * @param companyName
    * @param repoName
    */
-  void clearCompanyData(String companyName, String repoName);
+  void clearProjectDataForCompany(String companyName, String repoName);
 
 }

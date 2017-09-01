@@ -232,7 +232,7 @@ public class CommitServiceImpl implements CommitService {
   
   @Override
   public int removeCommitDetailsForProject(final String projectName){
-    return commitDao.deleteEntityForProject(projectName);
+    return commitDao.deleteEntityForField("repositoryName", projectName);
   }
 
   @Override

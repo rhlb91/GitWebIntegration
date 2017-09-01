@@ -3,8 +3,12 @@ package com.teammerge.dao.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
@@ -17,6 +21,7 @@ import com.teammerge.utils.HibernateUtils;
 public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   private Class<T> clazz;
 
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Override
   public T fetchEntity(String entityId) {
@@ -76,29 +81,53 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   @Override
   public int deleteEntityForField(String fieldName, String fieldValue) {
     final String queryStr =
-        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " = ?" + fieldName;
+        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " = :" + fieldName;
 
-    HibernateUtils.openCurrentSession();
-    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    int rowsRemoved = 0;
+
+    Query qry = session.createQuery(queryStr);
     qry.setString(fieldName, fieldValue);
-    int result = qry.executeUpdate();
-    HibernateUtils.closeCurrentSession();
 
-    return result;
+    try {
+      transaction = session.beginTransaction();
+      rowsRemoved = qry.executeUpdate();
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      LOG.error("Error removing entity for " + clazz.getSimpleName() + " for project - "
+          + fieldName + " for value " + fieldValue);
+    } finally {
+      session.close();
+    }
+    return rowsRemoved;
   }
 
   @Override
   public int deleteEntityForFieldStartsWith(String fieldName, String fieldValue) {
     final String queryStr =
-        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " = ?" + fieldName;
+        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " like :" + fieldName;
 
-    HibernateUtils.openCurrentSession();
-    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+    int rowsRemoved = 0;
+
+    Query qry = session.createQuery(queryStr);
     qry.setParameter(fieldName, fieldValue + "%");
-    int result = qry.executeUpdate();
-    HibernateUtils.closeCurrentSession();
 
-    return result;
+    try {
+      transaction = session.beginTransaction();
+      rowsRemoved = qry.executeUpdate();
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+      LOG.error("Error removing entity for " + clazz.getSimpleName() + " for project - "
+          + fieldName + "fieldValue starts with " + fieldValue);
+    } finally {
+      session.close();
+    }
+    return rowsRemoved;
   }
 
 }

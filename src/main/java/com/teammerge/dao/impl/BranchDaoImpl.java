@@ -25,15 +25,4 @@ public class BranchDaoImpl extends BaseDaoImpl<BranchModel> implements BranchDao
     return result;
   }
 
-  public int deleteEntityForProject(final String projectId) {
-    final String queryStr = "delete from  BranchModel as b where b.repositoryId = ?projectId";
-
-    HibernateUtils.openCurrentSession();
-    Query qry = HibernateUtils.getCurrentSession().createQuery(queryStr);
-    qry.setParameter("projectId", projectId);
-    int result = qry.executeUpdate();
-    HibernateUtils.closeCurrentSession();
-
-    return result;
-  }
 }

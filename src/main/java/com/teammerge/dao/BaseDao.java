@@ -21,7 +21,7 @@ public interface BaseDao<T extends Serializable> {
 
   void deleteEntity(T entity);
 
-  int deleteEntityForField(String fieldName, String fieldValue);
-
   int deleteEntityForFieldStartsWith(String fieldName, String fieldValue);
+
+  int deleteEntityForField(String fieldName, String fieldValue);
 }

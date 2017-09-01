@@ -1364,7 +1364,7 @@ public class RepositoryServiceImpl implements RepositoryService {
   }
 
   @Override
-  public void clearCompanyData(String companyName, String repoName) {
+  public void clearProjectDataForCompany(String companyName, String repoName) {
     branchService.removeBranchesForProject(repoName);
     commitService.removeCommitDetailsForProject(repoName);
     branchService.removeBranchLastCommitAddedForProjectStartsWith(repoName);

@@ -505,7 +505,7 @@ public class RestControllerV2 extends AbstractController {
   @Path("/{company}/remove/{repository}")
   @Consumes("application/json")
   @Produces({"application/json"})
-  public Response getRemoveRespository(@PathParam("repository") String repoName,
+  public Response removeRespository(@PathParam("repository") String repoName,
       @PathParam("company") String companyName) throws IOException {
     Map<String, Object> result = new HashMap<>();
     List<String> repoList = getRepositoryService().getRepositoryList();
@@ -526,7 +526,7 @@ public class RestControllerV2 extends AbstractController {
           getRepositoryService().saveRepoCloneStatus(repoName);
 
           // remove branches and commits related to this repo
-          getRepositoryService().clearCompanyData(companyName, repoName);
+          getRepositoryService().clearProjectDataForCompany(companyName, repoName);
 
           getRepositoryService().removeRepositoryFolder(repoName);
 

@@ -23,7 +23,7 @@ public class CompanyDaoImpl extends BaseDaoImpl<Company> implements CompanyDao {
 
   @Override
   public List<Company> fetchEntityForName(String cName) {
-    final String queryStr = "from Company where name = ?cName";
+    final String queryStr = "from Company where name = :cName";
 
     HibernateUtils.openCurrentSession();
     Query query = HibernateUtils.getCurrentSession().createQuery(queryStr);
