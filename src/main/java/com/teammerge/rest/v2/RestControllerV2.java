@@ -177,7 +177,7 @@ public class RestControllerV2 extends AbstractController {
   }
 
   @POST
-  @Path("/company")
+  @Path("/addCompany")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response saveCompanyDetails(final CompanyForm company) {
     Map<String, Object> result = new HashMap<>();
