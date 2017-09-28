@@ -99,7 +99,7 @@ public class CompanyServiceImpl implements CompanyService {
       return null;
     }
 
-    Company c = companyDao.fetchEntity(companyId);
+    Company c = companyDao.fetchEntity(new CompanyKey(companyId,projectId));
     return getRemoteUrlForCompanyAndProject(c, projectId);
   }
 
