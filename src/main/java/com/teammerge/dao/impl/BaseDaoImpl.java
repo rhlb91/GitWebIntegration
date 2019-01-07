@@ -23,19 +23,34 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
 
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
+  @SuppressWarnings("unchecked")
   @Override
   public T fetchEntity(String entityId) {
-    HibernateUtils.openCurrentSession();
-    T entity = (T) HibernateUtils.getCurrentSession().get(clazz, entityId);
-    HibernateUtils.closeCurrentSession();
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    T entity = null;
+    try {
+      entity = (T) session.get(clazz, entityId);
+
+    } finally {
+      session.close();
+    }
     return entity;
   }
 
   @Override
   public synchronized void saveEntity(T entity) {
-    HibernateUtils.openCurrentSessionwithTransaction();
-    HibernateUtils.getCurrentSession().save(entity);
-    HibernateUtils.closeCurrentSessionwithTransaction();
+    Session session = HibernateUtils.getSessionFactory().openSession();
+    Transaction transaction = null;
+
+    try {
+      transaction = session.beginTransaction();
+      session.save(entity);
+      transaction.commit();
+    } catch (HibernateException e) {
+      transaction.rollback();
+    } finally {
+      session.close();
+    }
   }
 
   @Override
@@ -56,6 +71,7 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
    * The below method is only used to fetch all list of Data, based on Model Class name using
    * HibernateUtils.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<T> fetchAll() {
     final String queryStr = "from " + clazz.getSimpleName();
@@ -107,7 +123,8 @@ public class BaseDaoImpl<T extends Serializable> implements BaseDao<T> {
   @Override
   public int deleteEntityForFieldStartsWith(String fieldName, String fieldValue) {
     final String queryStr =
-        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " like :" + fieldName;
+        "delete from  " + clazz.getSimpleName() + " as b where b." + fieldName + " like :"
+            + fieldName;
 
     Session session = HibernateUtils.getSessionFactory().openSession();
     Transaction transaction = null;
